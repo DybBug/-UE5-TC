@@ -2,6 +2,7 @@
 
 
 #include "TCGameMode.h"
+#include "GameFramework/HUD.h"
 
 ATCGameMode::ATCGameMode()
 {
@@ -15,5 +16,11 @@ ATCGameMode::ATCGameMode()
 	if (defaultPawnClassFinder.Succeeded())
 	{
 		DefaultPawnClass = defaultPawnClassFinder.Class;
+	}
+
+	static ConstructorHelpers::FClassFinder<AHUD> hudClassFinder(TEXT("/Script/TacticalCombat.TCHUD"));
+	if (hudClassFinder.Succeeded())
+	{
+		HUDClass = hudClassFinder.Class;
 	}
 }
