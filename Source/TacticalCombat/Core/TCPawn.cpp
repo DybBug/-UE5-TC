@@ -33,37 +33,37 @@ ATCPawn::ATCPawn()
 #pragma region Setup Assets
 	if (!m_DefaultInputMappingContext)
 	{
-		static ConstructorHelpers::FObjectFinder<UInputMappingContext> defaultInputMappingContextFinder(TEXT("/Game/Input/IMC_Default.IMC_Default"));
-		if (defaultInputMappingContextFinder.Succeeded())
+		static ConstructorHelpers::FObjectFinder<UInputMappingContext> defaultInputMappingContextObjectFinder(TEXT("/Game/Inputs/IMC_Default.IMC_Default"));
+		if (defaultInputMappingContextObjectFinder.Succeeded())
 		{
-			m_DefaultInputMappingContext = defaultInputMappingContextFinder.Object;
+			m_DefaultInputMappingContext = defaultInputMappingContextObjectFinder.Object;
 		}
 	}
 
 	if (!m_CameraMovingInputAction)
 	{
-		static ConstructorHelpers::FObjectFinder<UInputAction> cameraMovingInputActionFinder(TEXT("/Game/Input/IA_Camera_Moving.IA_Camera_Moving"));
-		if (cameraMovingInputActionFinder.Succeeded())
+		static ConstructorHelpers::FObjectFinder<UInputAction> cameraMovingInputActionObjectFinder(TEXT("/Game/Inputs/IA_Camera_Moving.IA_Camera_Moving"));
+		if (cameraMovingInputActionObjectFinder.Succeeded())
 		{
-			m_CameraMovingInputAction = cameraMovingInputActionFinder.Object;
+			m_CameraMovingInputAction = cameraMovingInputActionObjectFinder.Object;
 		}
 	}
 
 	if (!m_CameraRotationInputAction)
 	{
-		static ConstructorHelpers::FObjectFinder<UInputAction> cameraRotationInputActionFinder(TEXT("/Game/Input/IA_Camera_Rotation.IA_Camera_Rotation"));
-		if (cameraRotationInputActionFinder.Succeeded())
+		static ConstructorHelpers::FObjectFinder<UInputAction> cameraRotationInputActionObjectFinder(TEXT("/Game/Inputs/IA_Camera_Rotation.IA_Camera_Rotation"));
+		if (cameraRotationInputActionObjectFinder.Succeeded())
 		{
-			m_CameraRotationInputAction = cameraRotationInputActionFinder.Object;
+			m_CameraRotationInputAction = cameraRotationInputActionObjectFinder.Object;
 		}
 	}
 
 	if (!m_CameraZoomInputAction)
 	{
-		static ConstructorHelpers::FObjectFinder<UInputAction> cameraZoomInputActionFinder(TEXT("/Game/Input/IA_Camera_Zoom.IA_Camera_Zoom"));
-		if (cameraZoomInputActionFinder.Succeeded())
+		static ConstructorHelpers::FObjectFinder<UInputAction> cameraZoomInputActionObjectFinder(TEXT("/Game/Inputs/IA_Camera_Zoom.IA_Camera_Zoom"));
+		if (cameraZoomInputActionObjectFinder.Succeeded())
 		{
-			m_CameraZoomInputAction = cameraZoomInputActionFinder.Object;
+			m_CameraZoomInputAction = cameraZoomInputActionObjectFinder.Object;
 		}
 	}
 
