@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "TCPlayerController.generated.h"
 
+class UCameraComponent;
 /**
  * 
  */
@@ -16,4 +17,5 @@ class TACTICALCOMBAT_API ATCPlayerController : public APlayerController
 
 protected:
 	virtual void BeginPlay() override;
+
 };

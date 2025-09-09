@@ -3,9 +3,13 @@
 
 #include "TCPlayerController.h"
 
+#include "Camera/CameraComponent.h"
+
 void ATCPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
 	SetShowMouseCursor(true);
 }
+
+
