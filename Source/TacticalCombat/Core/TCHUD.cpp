@@ -4,11 +4,11 @@
 #include "TCHUD.h"
 
 #include "Blueprint/UserWidget.h"
-#include "../UI/DebugMenu.h"
+#include "../UI/DebugMenu/DebugMenu.h"
 
 ATCHUD::ATCHUD()
 {
-	static ConstructorHelpers::FClassFinder<UDebugMenu> debugMenuClassFinder(TEXT("/Game/Widgets/W_DebugMenu"));
+	static ConstructorHelpers::FClassFinder<UDebugMenu> debugMenuClassFinder(TEXT("/Game/Widgets/DebugMenu/W_DebugMenu"));
 	if (debugMenuClassFinder.Succeeded())
 	{
 		m_DebugMenuClass = debugMenuClassFinder.Class;

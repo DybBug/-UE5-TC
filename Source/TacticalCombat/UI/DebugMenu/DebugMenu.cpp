@@ -8,14 +8,14 @@
 
 bool UDebugMenu::Initialize()
 {
-	Super::Initialize();
+	bool result = Super::Initialize();
 
 	_UpdateAllButtonTabs();
 	
 	Button_Tab1->OnClicked.AddDynamic(this, &UDebugMenu::_OnClicked_Tab1);
 	Button_Tab2->OnClicked.AddDynamic(this, &UDebugMenu::_OnClicked_Tab2);
 	Button_Tab3->OnClicked.AddDynamic(this, &UDebugMenu::_OnClicked_Tab3);	
-	return true;
+	return result;
 }
 
 void UDebugMenu::_OnClicked_Tab1()
