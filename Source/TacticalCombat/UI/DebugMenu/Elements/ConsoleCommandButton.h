@@ -17,7 +17,7 @@ class TACTICALCOMBAT_API UConsoleCommandButton : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	virtual bool Initialize() override;
+	virtual void NativeConstruct() override;
 
 protected:
 	virtual void NativePreConstruct() override;

@@ -8,13 +8,10 @@
 #include "Kismet/KismetSystemLibrary.h"
 
 
-bool UConsoleCommandButton::Initialize()
+void UConsoleCommandButton::NativeConstruct()
 {
-	bool result = Super::Initialize();
-
+	Super::NativeConstruct();
 	Button->OnClicked.AddDynamic(this, &UConsoleCommandButton::_OnClickedButton);
-	
-	return result;
 }
 
 void UConsoleCommandButton::NativePreConstruct()

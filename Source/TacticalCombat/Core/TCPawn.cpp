@@ -112,35 +112,27 @@ void ATCPawn::SetupPlayerInputComponent(UInputComponent* _pInputComponent)
 
 void ATCPawn::Zoom(float _value)
 {
-	static constexpr float zoomSensitivity = 40.0f;
-	static constexpr float minZoom = 100.0f;
-	static constexpr float maxZoom = 5000.0f;
-	
-	m_TargetZoomLength = FMath::Clamp(m_TargetZoomLength + (zoomSensitivity *_value), minZoom, maxZoom);	
+	m_TargetZoomLength = FMath::Clamp(m_TargetZoomLength + (m_ZoomSensitivity *_value), m_MinZoom, m_MaxZoom);	
 }
 
 void ATCPawn::MoveToForward(float _value)
 {
-	static constexpr float movingSensitivity = 20.0f;
-	m_TargetLocation = m_TargetLocation + (_value * movingSensitivity * GetActorForwardVector());
+	m_TargetLocation = m_TargetLocation + (_value * m_MovingSensitivity * GetActorForwardVector());
 }
 
 void ATCPawn::MoveToRight(float _value)
 {
-	static constexpr float movingSensitivity = 20.0f;
-	m_TargetLocation = m_TargetLocation + (_value * movingSensitivity * GetActorRightVector());
+	m_TargetLocation = m_TargetLocation + (_value * m_MovingSensitivity * GetActorRightVector());
 }
 
 void ATCPawn::RotateRight()
 {
-	static constexpr float rotationSensitivity = 45.0f;
-	m_TargetRotation -= FRotator(0.0f, rotationSensitivity, 0.0f);
+	m_TargetRotation -= FRotator(0.0f, m_RotationSensitivity, 0.0f);
 }
 
 void ATCPawn::RotateLeft()
 {
-	static constexpr float rotationSensitivity = 45.0f;
-	m_TargetRotation += FRotator(0.0f, rotationSensitivity, 0.0f);
+	m_TargetRotation += FRotator(0.0f, m_RotationSensitivity, 0.0f);
 }
 
 void ATCPawn::_HandleZoom(const FInputActionInstance& _instance)
@@ -176,21 +168,18 @@ void ATCPawn::_HandleRotation(const FInputActionInstance& _instance)
 
 void ATCPawn::_TickZoom(float _dt)
 {
-	static constexpr float interpSpeed = 2.0f; 
-	float adjustedLength  = FMath::FInterpTo(m_SpringArmComp->TargetArmLength, m_TargetZoomLength, _dt, interpSpeed);
+	float adjustedLength  = FMath::FInterpTo(m_SpringArmComp->TargetArmLength, m_TargetZoomLength, _dt, m_ZoomInterpSpeed);
 	m_SpringArmComp->TargetArmLength = adjustedLength;;
 }
 
 void ATCPawn::_TickMoving(float _dt)
 {
-	static constexpr float interpSpeed = 5.0f; 
-	FVector adjustedLocation = FMath::VInterpTo(GetActorLocation(), m_TargetLocation, _dt, interpSpeed);
+	FVector adjustedLocation = FMath::VInterpTo(GetActorLocation(), m_TargetLocation, _dt, m_MovingInterpSpeed);
 	SetActorLocation(adjustedLocation);
 }
 
 void ATCPawn::_TickRotation(float _dt)
 {
-	static constexpr float interpSpeed = 50.0f;
-	FRotator adjustedRotation = FMath::RInterpTo(GetActorRotation(), m_TargetRotation, _dt, interpSpeed);
+	FRotator adjustedRotation = FMath::RInterpTo(GetActorRotation(), m_TargetRotation, _dt, m_RotationInterpSpeed);
 	SetActorRotation(adjustedRotation);
 }
