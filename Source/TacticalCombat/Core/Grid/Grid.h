@@ -24,8 +24,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	void CalculateCenterAndBottomLeft(FVector& _center, FVector& _bottomLeft);
-
 public:	
 	// Called every frame
 	virtual void Tick(float _deltaTime) override;
@@ -35,6 +33,13 @@ public:
 
 	UFUNCTION()
 	void DestroyGrid();
+
+#pragma region Getter
+	FORCEINLINE const FVector& GetCenterLocation() const { return m_CenterLocation; }
+	FORCEINLINE const FVector& GetTileSize() const { return m_TileSize; }
+	FORCEINLINE const FVector2D& GetTileCount() const { return m_TileCount; }
+	FORCEINLINE EGridShape GetGridShape() const { return m_Shape; }
+#pragma endregion
 	
 protected:
 #pragma region Component
@@ -64,8 +69,11 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UDataTable> m_GridShapeDataTable;
 
+protected:	
+	void CalculateCenterAndBottomLeft(FVector& _center, FVector& _bottomLeft);
+
 private:
-	FVector  GetTileLocationFromGridIndex(int _row, int _col);
-	FRotator GetTileRotationFromGridIndex(int _row, int _col);
+	FVector  _GetTileLocationFromGridIndex(int _row, int _col);
+	FRotator _GetTileRotationFromGridIndex(int _row, int _col);
 
 };

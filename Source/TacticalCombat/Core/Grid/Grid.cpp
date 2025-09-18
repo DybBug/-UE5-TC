@@ -40,6 +40,75 @@ void AGrid::BeginPlay()
 	
 }
 
+// Called every frame
+void AGrid::Tick(float _deltaTime)
+{
+	Super::Tick(_deltaTime);
+}
+
+void AGrid::SpawnGrid(const FVector& _centerLocation, const FVector& _tileSize, const FVector2D& _tileCount, EGridShape _shape)
+{
+	m_CenterLocation = _centerLocation;
+	m_TileSize = _tileSize;
+	m_Shape = _shape;
+	m_TileCount.X = FMath::RoundToInt32(_tileCount.X);
+	m_TileCount.Y = FMath::RoundToInt32(_tileCount.Y);
+	
+	DestroyGrid();
+	
+	if (m_GridShapeDataTable)
+	{
+		FName shapeName = *StaticEnum<EGridShape>()->GetNameStringByValue((uint8)m_Shape);
+		const FGridShapeData* const pGridShapeData = m_GridShapeDataTable->FindRow<FGridShapeData>(shapeName, TEXT("Data Table Lookup"));
+		if (pGridShapeData == nullptr)
+			return;
+		
+		m_InstancedStaticMeshComp->SetStaticMesh(pGridShapeData->FlatMesh);
+		m_InstancedStaticMeshComp->SetMaterial(0, pGridShapeData->FlatBoardMaterial);
+		
+		CalculateCenterAndBottomLeft(m_CenterLocation, m_GridBottomLeftCornerLocation);
+
+		// Make Tiles
+		int32 rowCount = FMath::RoundToInt(m_TileCount.X);
+		for (int32 row = 0; row < rowCount; ++row)
+		{
+			if (m_Shape == EGridShape::Hexagon)
+			{
+				int32 startCol = UUtilityLibrary::IsIntEven(row) ? 0 : 1;
+				int32 colCount = FMath::RoundToInt(m_TileCount.Y) * 2;
+				for (int32 col = startCol; col < colCount; col += 2)
+				{			
+					FTransform tileTransform;
+					tileTransform.SetLocation(_GetTileLocationFromGridIndex(row, col));
+					tileTransform.SetRotation(_GetTileRotationFromGridIndex(row, col).Quaternion());
+					tileTransform.SetScale3D(m_TileSize / pGridShapeData->MeshSize);
+
+					m_InstancedStaticMeshComp->AddInstance(tileTransform, true);
+				}
+			}
+			else
+			{
+				int32 colCount = FMath::RoundToInt(m_TileCount.Y);
+				for (int32 col = 0; col < colCount; ++col)
+				{			
+					FTransform tileTransform;
+					tileTransform.SetLocation(_GetTileLocationFromGridIndex(row, col));
+					tileTransform.SetRotation(_GetTileRotationFromGridIndex(row, col).Quaternion());
+					tileTransform.SetScale3D(m_TileSize / pGridShapeData->MeshSize);
+
+					m_InstancedStaticMeshComp->AddInstance(tileTransform, true);
+				}
+			}
+
+		}
+	}
+}
+
+void AGrid::DestroyGrid()
+{
+	m_InstancedStaticMeshComp->ClearInstances();
+}
+
 void AGrid::CalculateCenterAndBottomLeft(FVector& _center, FVector& _bottomLeft)
 {
 	switch (m_Shape)
@@ -89,79 +158,9 @@ void AGrid::CalculateCenterAndBottomLeft(FVector& _center, FVector& _bottomLeft)
 			break;
 		}
 	}	
-
 }
 
-// Called every frame
-void AGrid::Tick(float _deltaTime)
-{
-	Super::Tick(_deltaTime);
-}
-
-void AGrid::SpawnGrid(const FVector& _centerLocation, const FVector& _tileSize, const FVector2D& _tileCount, EGridShape _shape)
-{
-	m_CenterLocation = _centerLocation;
-	m_TileSize = _tileSize;
-	m_Shape = _shape;
-	m_TileCount.X = FMath::RoundToInt32(_tileCount.X);
-	m_TileCount.Y = FMath::RoundToInt32(_tileCount.Y);
-	
-	DestroyGrid();
-	
-	if (m_GridShapeDataTable)
-	{
-		FName shapeName = *StaticEnum<EGridShape>()->GetNameStringByValue((uint8)m_Shape);
-		const FGridShapeData* const pGridShapeData = m_GridShapeDataTable->FindRow<FGridShapeData>(shapeName, TEXT("Data Table Lookup"));
-		if (pGridShapeData == nullptr)
-			return;
-		
-		m_InstancedStaticMeshComp->SetStaticMesh(pGridShapeData->FlatMesh);
-		m_InstancedStaticMeshComp->SetMaterial(0, pGridShapeData->FlatBoardMaterial);
-		
-		CalculateCenterAndBottomLeft(m_CenterLocation, m_GridBottomLeftCornerLocation);
-
-		// Make Tiles
-		int32 rowCount = FMath::RoundToInt(m_TileCount.X);
-		for (int32 row = 0; row < rowCount; ++row)
-		{
-			if (m_Shape == EGridShape::Hexagon)
-			{
-				int32 startCol = UUtilityLibrary::IsIntEven(row) ? 0 : 1;
-				int32 colCount = FMath::RoundToInt(m_TileCount.Y) * 2;
-				for (int32 col = startCol; col < colCount; col += 2)
-				{			
-					FTransform tileTransform;
-					tileTransform.SetLocation(GetTileLocationFromGridIndex(row, col));
-					tileTransform.SetRotation(GetTileRotationFromGridIndex(row, col).Quaternion());
-					tileTransform.SetScale3D(m_TileSize / pGridShapeData->MeshSize);
-
-					m_InstancedStaticMeshComp->AddInstance(tileTransform, true);
-				}
-			}
-			else
-			{
-				int32 colCount = FMath::RoundToInt(m_TileCount.Y);
-				for (int32 col = 0; col < colCount; ++col)
-				{			
-					FTransform tileTransform;
-					tileTransform.SetLocation(GetTileLocationFromGridIndex(row, col));
-					tileTransform.SetRotation(GetTileRotationFromGridIndex(row, col).Quaternion());
-					tileTransform.SetScale3D(m_TileSize / pGridShapeData->MeshSize);
-
-					m_InstancedStaticMeshComp->AddInstance(tileTransform, true);
-				}
-			}
-
-		}
-	}
-}
-
-void AGrid::DestroyGrid()
-{
-	m_InstancedStaticMeshComp->ClearInstances();
-}
-
-FVector AGrid::GetTileLocationFromGridIndex(int _row, int _col)
+FVector AGrid::_GetTileLocationFromGridIndex(int _row, int _col)
 {
 	FVector sizeOffset = FVector::Zero();
 	switch (m_Shape)
@@ -189,11 +188,12 @@ FVector AGrid::GetTileLocationFromGridIndex(int _row, int _col)
 		}
 	}
 
+	static const float zOffset = 2.0f;
 	FVector adjustedTileSize =  m_TileSize * sizeOffset;
-	return m_GridBottomLeftCornerLocation + FVector(adjustedTileSize.X * _row, adjustedTileSize.Y * _col, 0.0f);	
+	return m_GridBottomLeftCornerLocation + FVector(adjustedTileSize.X * _row, adjustedTileSize.Y * _col, zOffset);
 }
 
-FRotator AGrid::GetTileRotationFromGridIndex(int _row, int _col)
+FRotator AGrid::_GetTileRotationFromGridIndex(int _row, int _col)
 {
 	// 오직 삼각형만 회전
 	if (m_Shape != EGridShape::Triangle)

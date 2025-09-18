@@ -16,9 +16,14 @@ class TACTICALCOMBAT_API UCameraTab : public UUserWidget
 {
 	GENERATED_BODY()
 
-public:
+protected:
+	virtual void NativeOnInitialized() override;
+	virtual void NativePreConstruct() override;
 	virtual void NativeConstruct() override;
 
+
+public:
+	virtual void SynchronizeProperties() override;
 protected:
 	UPROPERTY(Meta = (BindWidget))
 	TObjectPtr<UWithNameSpinBox> SpinBox_MovingSensitivity;

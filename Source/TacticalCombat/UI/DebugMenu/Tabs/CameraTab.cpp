@@ -6,9 +6,22 @@
 #include "TacticalCombat/Core/TCPawn.h"
 #include "TacticalCombat/UI/DebugMenu/Elements/WithNameSpinBox.h"
 
+void UCameraTab::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
+	UE_LOG(LogTemp, Warning, TEXT("NativeOnInitialized : %s"), SpinBox_MovingSensitivity == nullptr ? TEXT("invalid") : TEXT("valid"));
+}
+
+void UCameraTab::NativePreConstruct()
+{
+	Super::NativePreConstruct();
+	UE_LOG(LogTemp, Warning, TEXT("NativePreConstruct : %s"), SpinBox_MovingSensitivity == nullptr ? TEXT("invalid") : TEXT("valid"));
+}
+
 void UCameraTab::NativeConstruct()
 {
 	Super::NativeConstruct();
+	UE_LOG(LogTemp, Warning, TEXT("NativeConstruct : %s"), SpinBox_MovingSensitivity == nullptr ? TEXT("invalid") : TEXT("valid"));
 	
 	m_Pawn = Cast<ATCPawn>(GetOwningPlayerPawn());
 	if (m_Pawn.IsValid())
@@ -32,6 +45,12 @@ void UCameraTab::NativeConstruct()
 	SpinBox_MinZoom->OnValueChanged.AddDynamic(this, &UCameraTab::_OnMinZoomChanged);
 	SpinBox_MaxZoom->OnValueChanged.AddDynamic(this, &UCameraTab::_OnMaxZoomChanged);
 	
+}
+
+void UCameraTab::SynchronizeProperties()
+{
+	Super::SynchronizeProperties();
+	UE_LOG(LogTemp, Warning, TEXT("SynchronizeProperties : %s"), SpinBox_MovingSensitivity == nullptr ? TEXT("invalid") : TEXT("valid"));
 }
 
 void UCameraTab::_OnMovingSensitivityChanged(float _value)

@@ -19,6 +19,7 @@ void UWithNameSpinBox::NativePreConstruct()
 	Super::NativePreConstruct();
 
 	Text->SetText(m_Name);
+	SetValue(m_Value);
 	
 	SpinBox->SetMinSliderValue(m_SliderRange.X);
 	SpinBox->SetMaxSliderValue(m_SliderRange.Y);
@@ -43,6 +44,7 @@ void UWithNameSpinBox::SetValue(float _value)
 
 void UWithNameSpinBox::_OnValueChanged(float _value)
 {
+	m_Value = _value;
 	if (OnValueChanged.IsBound())
 	{
 		OnValueChanged.Broadcast(_value);
