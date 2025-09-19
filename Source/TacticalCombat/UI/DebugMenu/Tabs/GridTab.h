@@ -21,11 +21,14 @@ class TACTICALCOMBAT_API UGridTab : public UUserWidget
 {
 	GENERATED_BODY()
 
-protected:
+public:
 	virtual void NativeConstruct() override;
-	
+
 protected:
 #pragma region Widgets
+	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UComboBoxString> ComboBox_Environment;
+	
 	UPROPERTY(Meta = (BindWidget))
 	TObjectPtr<UComboBoxString> ComboBox_GridShape;
 
@@ -56,7 +59,8 @@ protected:
 	UPROPERTY(Meta = (BindWidget))
 	TObjectPtr<UTextBlock> Text_GridBottomLeft;
 #pragma endregion
-	
+
+	UPROPERTY()
 	TWeakObjectPtr<AGrid> m_GridInWorld;
 
 	UPROPERTY()
@@ -68,6 +72,9 @@ protected:
 private:
 	bool _TrySetDefaultValues();
 	bool _TrySpawnGrid();
+
+	UFUNCTION()
+	void _OnEnvironmentSelectionChanged(FString _selectedItem, ESelectInfo::Type _selectedType);
 	
 	UFUNCTION()
 	void _OnGridShapeSelectionChanged(FString _selectedItem, ESelectInfo::Type _selectionType);

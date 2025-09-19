@@ -8,6 +8,8 @@
 #include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 #include "TacticalCombat/Core/Grid/Grid.h"
+#include "TacticalCombat/Core/LevelScripts/EntryLevelScriptActor.h"
+#include "TacticalCombat/Subsystems/LevelLoadingSubsystem.h"
 #include "TacticalCombat/UI/DebugMenu/Elements/VectorWithNameSpinBox.h"
 #include "TacticalCombat/UI/DebugMenu/Elements/Vector2DWithNameSpinBox.h"
 #include "TacticalCombat/UI/DebugMenu/Elements/WithNameSpinBox.h"
@@ -17,7 +19,7 @@ const float DEBUG_DRAWING_DURATION = 0.1f;
 void UGridTab::NativeConstruct()
 {
 	Super::NativeConstruct();
-
+	
 	m_GridInWorld = Cast<AGrid>(UGameplayStatics::GetActorOfClass(GetWorld(), AGrid::StaticClass()));
 	_TrySetDefaultValues();
 	_TrySpawnGrid();
@@ -27,7 +29,7 @@ void UGridTab::NativeConstruct()
 	
 	GetWorld()->GetTimerManager().SetTimer(m_hDrawDebugTimer, this, &UGridTab::_DrawDebugLine, DEBUG_DRAWING_DURATION, true);
 	
-	
+	ComboBox_Environment->OnSelectionChanged.AddDynamic(this, &UGridTab::_OnEnvironmentSelectionChanged);
 	ComboBox_GridShape->OnSelectionChanged.AddDynamic(this, &UGridTab::_OnGridShapeSelectionChanged);	
 	SpinBox_Location->OnValueChanged.AddDynamic(this, &UGridTab::_OnLocationChanged);
 	SpinBox_TileCount->OnValueChanged.AddDynamic(this, &UGridTab::_OnTileCountChanged);
@@ -38,11 +40,15 @@ bool UGridTab::_TrySetDefaultValues()
 {
 	if (!m_GridInWorld.IsValid()) return false;
 
+	AEntryLevelScriptActor* pEntryLevel = Cast<AEntryLevelScriptActor>(GetWorld()->GetLevelScriptActor());
+
+	const FName& defaultLevelName = pEntryLevel->GetLevelName();
 	const FVector& defaultLocation = m_GridInWorld->GetCenterLocation();
     const FVector2D& defaultTileCount = m_GridInWorld->GetTileCount();
     const FVector& defaultTileSize = m_GridInWorld->GetTileSize();
 	EGridShape defaultGridShape = m_GridInWorld->GetGridShape();	
-	
+
+	ComboBox_Environment->SetSelectedOption(defaultLevelName.ToString());
 	ComboBox_GridShape->SetSelectedOption(StaticEnum<EGridShape>()->GetNameStringByValue((int64)defaultGridShape));
 	SpinBox_Location->SetValue(defaultLocation);
 	SpinBox_TileCount->SetValue(defaultTileCount);
@@ -62,6 +68,13 @@ bool UGridTab::_TrySpawnGrid()
 	m_GridInWorld->SpawnGrid(location, tileSize, tileCount, gridShape);
 	return true;
 }
+
+void UGridTab::_OnEnvironmentSelectionChanged(FString _selectedItem, ESelectInfo::Type _selectionType)
+{	
+	ULevelLoadingSubsystem* pLevelLoadingSubsystem  =GetWorld()->GetGameInstance()->GetSubsystem<ULevelLoadingSubsystem>();
+	pLevelLoadingSubsystem->LoadLevel(FName(*_selectedItem));
+}
+
 
 void UGridTab::_OnGridShapeSelectionChanged(FString _selectedItem, ESelectInfo::Type _selectionType)
 {	
@@ -102,6 +115,9 @@ void UGridTab::_ExecuteSpawnTimer()
 
 void UGridTab::_DrawDebugLine()
 {
+	if (!m_GridInWorld.IsValid())
+		return;
+	
 	const FVector& gridCenterLocation = m_GridInWorld->GetCenterLocation();
 	const FVector& gridBottomLeftLocation = m_GridInWorld->GetBottomLeftLocation();
 	

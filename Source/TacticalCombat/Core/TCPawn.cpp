@@ -23,7 +23,7 @@ ATCPawn::ATCPawn()
 	m_SpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm Component"));
 	m_SpringArmComp->SetupAttachment(RootComponent);
 	m_SpringArmComp->bDoCollisionTest = false;
-	m_SpringArmComp->TargetArmLength = 700.0f;
+	m_SpringArmComp->TargetArmLength = 7000.0f;
 	m_SpringArmComp->SetRelativeRotation(FRotator(-60.0f, 0.0f, 0.0f));
 	
 	m_CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera Component"));
