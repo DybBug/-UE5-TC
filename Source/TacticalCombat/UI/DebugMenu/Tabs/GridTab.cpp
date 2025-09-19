@@ -3,12 +3,16 @@
 
 #include "GridTab.h"
 
+#include "Components/CheckBox.h"
 #include "Components/ComboBoxString.h"
+#include "Components/TextBlock.h"
 #include "Kismet/GameplayStatics.h"
 #include "TacticalCombat/Core/Grid/Grid.h"
 #include "TacticalCombat/UI/DebugMenu/Elements/VectorWithNameSpinBox.h"
 #include "TacticalCombat/UI/DebugMenu/Elements/Vector2DWithNameSpinBox.h"
 #include "TacticalCombat/UI/DebugMenu/Elements/WithNameSpinBox.h"
+
+const float DEBUG_DRAWING_DURATION = 0.1f;
 
 void UGridTab::NativeConstruct()
 {
@@ -18,7 +22,13 @@ void UGridTab::NativeConstruct()
 	_TrySetDefaultValues();
 	_TrySpawnGrid();
 
-	ComboBox_GridShape->OnSelectionChanged.AddDynamic(this, &UGridTab::_OnGridShapeSelectionChanged);
+	GetWorld()->GetTimerManager().ClearTimer(m_hSpawnTimer);
+	GetWorld()->GetTimerManager().ClearTimer(m_hDrawDebugTimer);
+	
+	GetWorld()->GetTimerManager().SetTimer(m_hDrawDebugTimer, this, &UGridTab::_DrawDebugLine, DEBUG_DRAWING_DURATION, true);
+	
+	
+	ComboBox_GridShape->OnSelectionChanged.AddDynamic(this, &UGridTab::_OnGridShapeSelectionChanged);	
 	SpinBox_Location->OnValueChanged.AddDynamic(this, &UGridTab::_OnLocationChanged);
 	SpinBox_TileCount->OnValueChanged.AddDynamic(this, &UGridTab::_OnTileCountChanged);
 	SpinBox_TileSize->OnValueChanged.AddDynamic(this, &UGridTab::_OnTileSizeChanged);
@@ -88,4 +98,42 @@ void UGridTab::_OnTileSizeChanged(const FVector& _value)
 void UGridTab::_ExecuteSpawnTimer()
 {
 	_TrySpawnGrid();
+}
+
+void UGridTab::_DrawDebugLine()
+{
+	const FVector& gridCenterLocation = m_GridInWorld->GetCenterLocation();
+	const FVector& gridBottomLeftLocation = m_GridInWorld->GetBottomLeftLocation();
+	
+	Text_GridCenter->SetText(gridCenterLocation.ToText());
+	Text_GridBottomLeft->SetText(gridBottomLeftLocation.ToText());
+	
+	if (CheckBox_GridCenter->IsChecked())
+	{
+		const FVector& center = gridCenterLocation;
+		constexpr float radius = 100.0f;
+		constexpr int32 segments = 3;
+		const FColor color = FColor::Orange;
+		constexpr float thickness = 10.0f;
+		DrawDebugSphere(GetWorld(), center, radius, segments, color, false, DEBUG_DRAWING_DURATION, 0, thickness);
+	}
+
+	if (CheckBox_GridBottomLeft->IsChecked())
+	{
+		const FVector& center = gridBottomLeftLocation;
+		constexpr float radius = 100.0f;
+		constexpr int32 segments = 3;
+		const FColor color = FColor::Red;
+		constexpr float thickness = 10.0f;
+		DrawDebugSphere(GetWorld(), center, radius, segments, color, false, DEBUG_DRAWING_DURATION, 0, thickness);
+	}
+
+	if (CheckBox_GridBounds->IsChecked())
+	{
+		const FVector& center = gridCenterLocation;
+		const FVector& extent = gridCenterLocation - gridBottomLeftLocation;
+		const FColor color = FColor::Yellow;
+		constexpr float thickness = 20.0f;
+		DrawDebugBox(GetWorld(), center, extent, color, false, DEBUG_DRAWING_DURATION, 0, thickness);
+	}
 }

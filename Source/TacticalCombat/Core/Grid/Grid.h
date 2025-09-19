@@ -39,6 +39,7 @@ public:
 	FORCEINLINE const FVector& GetTileSize() const { return m_TileSize; }
 	FORCEINLINE const FVector2D& GetTileCount() const { return m_TileCount; }
 	FORCEINLINE EGridShape GetGridShape() const { return m_Shape; }
+	FORCEINLINE const FVector& GetBottomLeftLocation() const { return m_GridBottomLeftCornerLocation; }
 #pragma endregion
 	
 protected:

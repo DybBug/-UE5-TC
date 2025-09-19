@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "GridTab.generated.h"
 
+class UTextBlock;
+class UCheckBox;
 class UWithNameSpinBox;
 class UVector2DWithNameSpinBox;
 class UVectorWithNameSpinBox;
@@ -17,12 +19,13 @@ class AGrid;
 UCLASS()
 class TACTICALCOMBAT_API UGridTab : public UUserWidget
 {
-	GENERATED_BODY()	
+	GENERATED_BODY()
 
 protected:
 	virtual void NativeConstruct() override;
 	
 protected:
+#pragma region Widgets
 	UPROPERTY(Meta = (BindWidget))
 	TObjectPtr<UComboBoxString> ComboBox_GridShape;
 
@@ -37,10 +40,30 @@ protected:
 
 	UPROPERTY(Meta = (BindWidget))
 	TObjectPtr<UVectorWithNameSpinBox> SpinBox_TileSize;
+
+	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UCheckBox> CheckBox_GridBounds;
+
+	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UCheckBox> CheckBox_GridCenter;
+	
+	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UTextBlock> Text_GridCenter;
+
+	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UCheckBox> CheckBox_GridBottomLeft;
+
+	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UTextBlock> Text_GridBottomLeft;
+#pragma endregion
 	
 	TWeakObjectPtr<AGrid> m_GridInWorld;
 
+	UPROPERTY()
 	FTimerHandle m_hSpawnTimer;
+
+	UPROPERTY()
+	FTimerHandle m_hDrawDebugTimer;
 
 private:
 	bool _TrySetDefaultValues();
@@ -60,4 +83,7 @@ private:
 
 	UFUNCTION()
 	void _ExecuteSpawnTimer();
+
+	UFUNCTION()
+	void _DrawDebugLine();
 };
