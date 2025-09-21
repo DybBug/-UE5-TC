@@ -29,17 +29,25 @@ public:
 	virtual void Tick(float _deltaTime) override;
 
 	UFUNCTION()
-	void SpawnGrid(const FVector& _centerLocation, const FVector& _tileSize, const FVector2D& _tileCount, EGridShape _shape);
+	void SpawnGrid(
+		const FVector& _centerLocation,
+		const FVector& _tileSize,
+		const FIntPoint& _tileCount,
+		EGridShape _shape,
+		bool _bIsUseEnvironment = true);
 
 	UFUNCTION()
 	void DestroyGrid();
 
+	void SetZOffset(float _zOffset);
+
 #pragma region Getter
 	FORCEINLINE const FVector& GetCenterLocation() const { return m_CenterLocation; }
 	FORCEINLINE const FVector& GetTileSize() const { return m_TileSize; }
-	FORCEINLINE const FVector2D& GetTileCount() const { return m_TileCount; }
+	FORCEINLINE const FIntPoint& GetTileCount() const { return m_TileCount; }
 	FORCEINLINE EGridShape GetGridShape() const { return m_Shape; }
 	FORCEINLINE const FVector& GetBottomLeftLocation() const { return m_GridBottomLeftCornerLocation; }
+	FORCEINLINE float GetZOffset() const { return m_ZOffset; }
 #pragma endregion
 	
 protected:
@@ -59,19 +67,25 @@ protected:
 	FVector m_TileSize = FVector(200.0f, 200.0f, 100.0f);;
 
 	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Tile Count"))
-	FVector2D m_TileCount = FVector2D(10.0f, 10.0f);
+	FIntPoint m_TileCount = FIntPoint(10, 10);
 
 	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Shape Type"))
 	EGridShape m_Shape;
 
 	UPROPERTY(VisibleAnywhere, Category = "Property", Meta = (DisplayName = "Grid Bottom Left Corner Location"))
 	FVector m_GridBottomLeftCornerLocation;
+
+	UPROPERTY(VisibleAnywhere, Category = "Property", Meta = (DisplayName = "Z-Offset"))
+	float m_ZOffset = 3.0f;
+
 #pragma region
 	UPROPERTY()
 	TObjectPtr<UDataTable> m_GridShapeDataTable;
 
 protected:	
 	void CalculateCenterAndBottomLeft(FVector& _center, FVector& _bottomLeft);
+
+	FVector TraceForGround(const FVector& _location, bool& _bIsHitSomething);
 
 private:
 	FVector  _GetTileLocationFromGridIndex(int _row, int _col);

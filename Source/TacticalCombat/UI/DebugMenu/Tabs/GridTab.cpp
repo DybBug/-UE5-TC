@@ -34,6 +34,8 @@ void UGridTab::NativeConstruct()
 	SpinBox_Location->OnValueChanged.AddDynamic(this, &UGridTab::_OnLocationChanged);
 	SpinBox_TileCount->OnValueChanged.AddDynamic(this, &UGridTab::_OnTileCountChanged);
 	SpinBox_TileSize->OnValueChanged.AddDynamic(this, &UGridTab::_OnTileSizeChanged);
+	SpinBox_ZOffset->OnValueChanged.AddDynamic(this, &UGridTab::_OnZOffsetChanged);
+	CheckBox_UseEnvironment->OnCheckStateChanged.AddDynamic(this, &UGridTab::_OnUseEnvironmentCheckStateChanged);
 }
 
 bool UGridTab::_TrySetDefaultValues()
@@ -46,13 +48,16 @@ bool UGridTab::_TrySetDefaultValues()
 	const FVector& defaultLocation = m_GridInWorld->GetCenterLocation();
     const FVector2D& defaultTileCount = m_GridInWorld->GetTileCount();
     const FVector& defaultTileSize = m_GridInWorld->GetTileSize();
+	float defaultZOffset = m_GridInWorld->GetZOffset();
 	EGridShape defaultGridShape = m_GridInWorld->GetGridShape();	
 
 	ComboBox_Environment->SetSelectedOption(defaultLevelName.ToString());
 	ComboBox_GridShape->SetSelectedOption(StaticEnum<EGridShape>()->GetNameStringByValue((int64)defaultGridShape));
 	SpinBox_Location->SetValue(defaultLocation);
 	SpinBox_TileCount->SetValue(defaultTileCount);
-	SpinBox_TileSize->SetValue(defaultTileSize);	
+	SpinBox_TileSize->SetValue(defaultTileSize);
+	SpinBox_ZOffset->SetValue(defaultZOffset);
+	CheckBox_UseEnvironment->SetIsChecked(true);
 	return true;
 }
 
@@ -60,12 +65,12 @@ bool UGridTab::_TrySpawnGrid()
 {
 	if (!m_GridInWorld.IsValid()) return false;
 	const FVector& location = SpinBox_Location->GetValue();
-	const FVector2D& tileCount = SpinBox_TileCount->GetValue();
+	const FIntPoint& tileCount = FIntPoint(FMath::RoundToInt32(SpinBox_TileCount->GetValue().X), FMath::RoundToInt32(SpinBox_TileCount->GetValue().Y));
 	const FVector& tileSize = SpinBox_TileSize->GetValue();
 
 	FName gridShapeName = FName(*ComboBox_GridShape->GetSelectedOption());
 	EGridShape gridShape = static_cast<EGridShape>(StaticEnum<EGridShape>()->GetValueByName(gridShapeName));
-	m_GridInWorld->SpawnGrid(location, tileSize, tileCount, gridShape);
+	m_GridInWorld->SpawnGrid(location, tileSize, tileCount, gridShape, CheckBox_UseEnvironment->IsChecked());
 	return true;
 }
 
@@ -107,6 +112,23 @@ void UGridTab::_OnTileSizeChanged(const FVector& _value)
 		GetWorld()->GetTimerManager().SetTimer(m_hSpawnTimer, this, &UGridTab::_ExecuteSpawnTimer, SpinBox_ReGenDelay->GetValue(), false);
 	}
 }
+
+void UGridTab::_OnZOffsetChanged(float _value)
+{
+	if (!m_GridInWorld.IsValid())
+		return;
+
+	m_GridInWorld->SetZOffset(_value);
+}
+
+void UGridTab::_OnUseEnvironmentCheckStateChanged(bool _isChecked)
+{
+	if (!GetWorld()->GetTimerManager().IsTimerActive(m_hSpawnTimer))
+	{
+		GetWorld()->GetTimerManager().SetTimer(m_hSpawnTimer, this, &UGridTab::_ExecuteSpawnTimer, SpinBox_ReGenDelay->GetValue(), false);
+	}
+}
+
 
 void UGridTab::_ExecuteSpawnTimer()
 {

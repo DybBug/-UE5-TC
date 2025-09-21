@@ -45,6 +45,12 @@ protected:
 	TObjectPtr<UVectorWithNameSpinBox> SpinBox_TileSize;
 
 	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UWithNameSpinBox> SpinBox_ZOffset;
+
+	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UCheckBox> CheckBox_UseEnvironment;
+
+	UPROPERTY(Meta = (BindWidget))
 	TObjectPtr<UCheckBox> CheckBox_GridBounds;
 
 	UPROPERTY(Meta = (BindWidget))
@@ -89,8 +95,15 @@ private:
 	void _OnTileSizeChanged(const FVector& _value);
 
 	UFUNCTION()
+	void _OnZOffsetChanged(float _value);
+
+	UFUNCTION()
+	void _OnUseEnvironmentCheckStateChanged(bool _isChecked);
+
+	UFUNCTION()
 	void _ExecuteSpawnTimer();
 
 	UFUNCTION()
 	void _DrawDebugLine();
 };
+
