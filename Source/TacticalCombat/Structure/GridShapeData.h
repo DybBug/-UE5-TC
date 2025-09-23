@@ -5,15 +5,6 @@
 class UStaticMesh;
 class UMaterialInstance;
 
-UENUM(BlueprintType)
-enum class EGridShape : uint8
-{
-    None UMETA(DisplayName = "None"),
-	Square UMETA(DisplayName = "Square"),
-	Hexagon UMETA(DisplayName = "Hexagon"),
-	Triangle UMETA(DisplayName = "Triangle"),
-};
-
 USTRUCT(BlueprintType)
 struct FGridShapeData : public FTableRowBase
 {

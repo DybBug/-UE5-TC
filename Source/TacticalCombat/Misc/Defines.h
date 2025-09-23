@@ -1,4 +1,4 @@
 ﻿#pragma once
 #include "CoreMinimal.h"
 
-#define GTC_Ground ECollisionChannel::ECC_GameTraceChannel1
+#define GTC_GroundAndGridModifier ECollisionChannel::ECC_GameTraceChannel1

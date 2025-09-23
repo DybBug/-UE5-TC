@@ -13,6 +13,7 @@
 #include "TacticalCombat/UI/DebugMenu/Elements/VectorWithNameSpinBox.h"
 #include "TacticalCombat/UI/DebugMenu/Elements/Vector2DWithNameSpinBox.h"
 #include "TacticalCombat/UI/DebugMenu/Elements/WithNameSpinBox.h"
+#include "TacticalCombat/Misc/Enums.h"
 
 const float DEBUG_DRAWING_DURATION = 0.1f;
 

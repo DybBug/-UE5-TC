@@ -2,36 +2,34 @@
 
 
 #include "Grid.h"
+
+#include "GridModifier.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "TacticalCombat/Libraries/GridLibrary.h"
 #include "TacticalCombat/Libraries/UtilityLibrary.h"
 #include "TacticalCombat/Misc/Defines.h"
 #include "TacticalCombat/Structure/GridShapeData.h"
+#include "TacticalCombat/Misc/Enums.h"
 
 // Sets default values
 AGrid::AGrid()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	
+	m_SceneComponent = CreateDefaultSubobject<USceneComponent>("Scene Component");
+	RootComponent = m_SceneComponent;
 
-	static ConstructorHelpers::FObjectFinder<UDataTable> dataTableObjectFinder(TEXT("/Game/Girds/GridShapes/DT_GridShape"));
-	if (dataTableObjectFinder.Succeeded())
-	{
-		m_GridShapeDataTable = dataTableObjectFinder.Object;
-	}	
-
-	m_SceneComp = CreateDefaultSubobject<USceneComponent>("Scene Component");
-	RootComponent = m_SceneComp;
-
-	m_InstancedStaticMeshComp = CreateDefaultSubobject<UInstancedStaticMeshComponent>("Instanced StaticMesh Component");
-	m_InstancedStaticMeshComp->SetupAttachment(m_SceneComp);
+	m_InstancedStaticMeshComponent = CreateDefaultSubobject<UInstancedStaticMeshComponent>("Instanced StaticMesh Component");
+	m_InstancedStaticMeshComponent->SetupAttachment(m_SceneComponent);
 }
 
 void AGrid::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	SpawnGrid(m_InstancedStaticMeshComp->GetComponentLocation(), m_TileSize, m_TileCount, m_Shape);
+	SpawnGrid(m_InstancedStaticMeshComponent->GetComponentLocation(), m_TileSize, m_TileCount, m_Shape);
 }
 
 // Called when the game starts or when spawned
@@ -55,52 +53,47 @@ void AGrid::SpawnGrid(const FVector& _centerLocation, const FVector& _tileSize, 
 	m_TileCount = _tileCount;
 	
 	DestroyGrid();
+
+	FGridShapeData girdShapeData = UGridLibrary::GetGridShape(m_Shape);		
+	m_InstancedStaticMeshComponent->SetStaticMesh(girdShapeData.FlatMesh);
+	m_InstancedStaticMeshComponent->SetMaterial(0, girdShapeData.FlatBoardMaterial);
 	
-	if (m_GridShapeDataTable)
+	SetZOffset(m_ZOffset);
+	CalculateCenterAndBottomLeft(m_CenterLocation, m_GridBottomLeftCornerLocation);
+
+	// Make Tiles
+	int32 rowCount = m_TileCount.X;
+	for (int32 row = 0; row < rowCount; ++row)
 	{
-		FName shapeName = *StaticEnum<EGridShape>()->GetNameStringByValue((uint8)m_Shape);
-		const FGridShapeData* const pGridShapeData = m_GridShapeDataTable->FindRow<FGridShapeData>(shapeName, TEXT("Data Table Lookup"));
-		if (pGridShapeData == nullptr)
-			return;
-		
-		m_InstancedStaticMeshComp->SetStaticMesh(pGridShapeData->FlatMesh);
-		m_InstancedStaticMeshComp->SetMaterial(0, pGridShapeData->FlatBoardMaterial);
-		
-		SetZOffset(m_ZOffset);
-		CalculateCenterAndBottomLeft(m_CenterLocation, m_GridBottomLeftCornerLocation);
+		int32 startCol = (m_Shape != EGridShape::Hexagon) ? 0 : (UUtilityLibrary::IsIntEven(row) ? 0 : 1);
+		int32 colCount = (m_Shape != EGridShape::Hexagon) ? m_TileCount.Y : m_TileCount.Y * 2;
+		int32 colStep = (m_Shape != EGridShape::Hexagon) ? 1 : 2;
+		for (int32 col = startCol; col < colCount; col += colStep)
+		{			
+			FTransform tileTransform;
+			tileTransform.SetLocation(_GetTileLocationFromGridIndex(row, col));
+			tileTransform.SetRotation(_GetTileRotationFromGridIndex(row, col).Quaternion());
+			tileTransform.SetScale3D(m_TileSize / girdShapeData.MeshSize);
 
-		// Make Tiles
-		int32 rowCount = m_TileCount.X;
-		for (int32 row = 0; row < rowCount; ++row)
-		{
-			int32 startCol = (m_Shape != EGridShape::Hexagon) ? 0 : (UUtilityLibrary::IsIntEven(row) ? 0 : 1);
-			int32 colCount = (m_Shape != EGridShape::Hexagon) ? m_TileCount.Y : m_TileCount.Y * 2;
-			int32 colStep = (m_Shape != EGridShape::Hexagon) ? 1 : 2;
-			for (int32 col = startCol; col < colCount; col += colStep)
-			{			
-				FTransform tileTransform;
-				tileTransform.SetLocation(_GetTileLocationFromGridIndex(row, col));
-				tileTransform.SetRotation(_GetTileRotationFromGridIndex(row, col).Quaternion());
-				tileTransform.SetScale3D(m_TileSize / pGridShapeData->MeshSize);
-
-				if (_bIsUseEnvironment)
-				{					
-					bool bIsHitSomething = false;
-					FVector hitLocation = TraceForGround(tileTransform.GetLocation(), bIsHitSomething);					
-					if (!bIsHitSomething) continue;
-					
-					tileTransform.SetLocation(hitLocation);
-				}
+			if (_bIsUseEnvironment)
+			{					
+				ETileType tracedTileType;
+				FVector hitLocation = TraceForGround(tileTransform.GetLocation(), tracedTileType);					
+				if (!IsWalkableTile(tracedTileType))
+					continue;
 				
-				m_InstancedStaticMeshComp->AddInstance(tileTransform, false);				
+				tileTransform.SetLocation(hitLocation);
 			}
+			
+			m_InstancedStaticMeshComponent->AddInstance(tileTransform, false);				
 		}
 	}
+	
 }
 
 void AGrid::DestroyGrid()
 {
-	m_InstancedStaticMeshComp->ClearInstances();
+	m_InstancedStaticMeshComponent->ClearInstances();
 }
 
 void AGrid::SetZOffset(float _zOffset)
@@ -162,30 +155,60 @@ void AGrid::CalculateCenterAndBottomLeft(FVector& _center, FVector& _bottomLeft)
 	}	
 }
 
-FVector AGrid::TraceForGround(const FVector& _location, bool& _bIsHitSomething)
+FVector AGrid::TraceForGround(const FVector& _location, ETileType& _hitTileType)
 {
 	TArray<FHitResult> hitResults;
 	const FVector& startLocation = _location + FVector(0.0f, 0.0f, 1000.0f);
 	const FVector& endLocation = _location + FVector(0.0f, 0.0f, -1000.0f);
 	const float radius = m_TileSize.X / (m_Shape == EGridShape::Triangle ? 5.0f : 3.0f);
-	ETraceTypeQuery traceChannel = UEngineTypes::ConvertToTraceType(GTC_Ground);
+	ETraceTypeQuery traceChannel = UEngineTypes::ConvertToTraceType(GTC_GroundAndGridModifier);
 	TArray<AActor*> ignoreActors = TArray<AActor*>();
 	EDrawDebugTrace::Type drawDebugType = EDrawDebugTrace::None;
 	
 	UKismetSystemLibrary::SphereTraceMulti(GetWorld(), startLocation, endLocation, radius, traceChannel, false, ignoreActors, drawDebugType, hitResults, true);
 	if (hitResults.Num() > 0)
 	{
-		_bIsHitSomething = true;
+		_hitTileType = ETileType::Normal;
+
+		FVector resultLocation = _location;
+		for (const FHitResult hitResult : hitResults)
+		{			
+			if (AGridModifier* pGridModifier = Cast<AGridModifier>(hitResult.GetActor()))
+			{
+				_hitTileType = pGridModifier->GetType();
+			}
+			else
+			{
+				resultLocation.Z = FMath::GridSnap(hitResult.ImpactPoint.Z, m_TileSize.Z);
+			}
+		}
 		
-		FVector resultLocation;
-		resultLocation.X = _location.X;
-		resultLocation.Y = _location.Y;
-		resultLocation.Z = hitResults[0].ImpactPoint.Z; // 충돌 위치
 		return resultLocation;
 	}
 	
-	_bIsHitSomething = false;
+	_hitTileType = ETileType::None;
 	return FVector(-99999, -99999, -99999);
+}
+
+bool AGrid::IsWalkableTile(ETileType _type)
+{
+	switch (_type)
+	{
+		case ETileType::None:
+		case ETileType::Obstacle:
+		{
+			return false;
+		}
+		case ETileType::Normal:
+		{
+			return true;
+		}
+		default:
+		{			
+			checkf(false, TEXT("Invalid ETileType : %s"), *StaticEnum<ETileType>()->GetNameStringByValue((uint8)_type));
+			return false;
+		}
+	}
 }
 
 FVector AGrid::_GetTileLocationFromGridIndex(int _row, int _col)

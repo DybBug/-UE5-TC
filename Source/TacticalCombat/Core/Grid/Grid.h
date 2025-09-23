@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Grid.generated.h"
 
+enum class ETileType : uint8;
 class UInstancedStaticMeshComponent;
 enum class EGridShape : uint8;
 
@@ -53,10 +54,10 @@ public:
 protected:
 #pragma region Component
 	UPROPERTY(EditAnywhere, Category = "Component", Meta = (DisplayName = "Root"))
-	TObjectPtr<USceneComponent> m_SceneComp;
+	TObjectPtr<USceneComponent> m_SceneComponent;
 	
 	UPROPERTY(EditAnywhere, Category = "Component", Meta = (DisplayName = "Instanced Static Mesh"))
-	TObjectPtr<UInstancedStaticMeshComponent> m_InstancedStaticMeshComp;
+	TObjectPtr<UInstancedStaticMeshComponent> m_InstancedStaticMeshComponent;
 #pragma endregion
 
 #pragma region Properties
@@ -78,14 +79,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Property", Meta = (DisplayName = "Z-Offset"))
 	float m_ZOffset = 3.0f;
 
-#pragma region
-	UPROPERTY()
-	TObjectPtr<UDataTable> m_GridShapeDataTable;
+#pragma endregion
 
 protected:	
 	void CalculateCenterAndBottomLeft(FVector& _center, FVector& _bottomLeft);
 
-	FVector TraceForGround(const FVector& _location, bool& _bIsHitSomething);
+	FVector TraceForGround(const FVector& _location, ETileType& _hitTileType);
+
+	bool IsWalkableTile(ETileType _type);
 
 private:
 	FVector  _GetTileLocationFromGridIndex(int _row, int _col);
