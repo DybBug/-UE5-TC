@@ -3,7 +3,8 @@
 #include "GridShapeData.generated.h"
 
 class UStaticMesh;
-class UMaterialInstance;
+class UMaterial;
+enum class ETileType : uint8;
 
 USTRUCT(BlueprintType)
 struct FGridShapeData : public FTableRowBase
@@ -24,8 +25,24 @@ public:
 	TObjectPtr<UStaticMesh> FlatMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UMaterialInstance> FlatBoardMaterial;
+	TObjectPtr<UMaterialInstance> FlatBorderMaterial;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UMaterialInstance> FlatFilledMaterial;
+};
+
+USTRUCT(BlueprintType)
+struct FTileData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FIntPoint Index;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ETileType Type;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FTransform Transform;
 };

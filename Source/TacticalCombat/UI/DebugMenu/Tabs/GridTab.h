@@ -64,6 +64,18 @@ protected:
 
 	UPROPERTY(Meta = (BindWidget))
 	TObjectPtr<UTextBlock> Text_GridBottomLeft;
+	
+	UPROPERTY(Meta = (BindWidget))
+    TObjectPtr<UCheckBox> CheckBox_MouseLocation;
+
+    UPROPERTY(Meta = (BindWidget))
+    TObjectPtr<UTextBlock> Text_MouseLocation;
+    
+    UPROPERTY(Meta = (BindWidget))
+    TObjectPtr<UCheckBox> CheckBox_HoveredTile;
+
+    UPROPERTY(Meta = (BindWidget))
+    TObjectPtr<UTextBlock> Text_HoveredTile;
 #pragma endregion
 
 	UPROPERTY()

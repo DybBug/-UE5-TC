@@ -64,8 +64,7 @@ void UVector2DWithNameSpinBox::SetValue(const FVector2D& _value)
 
 void UVector2DWithNameSpinBox::_OnValueXChanged(float _x)
 {
-	FVector2D value = FVector2D(_x, SpinBoxY->GetValue());
-	m_Value = value;
+	m_Value.X = _x;
 	if (OnValueChanged.IsBound())
 	{
 		OnValueChanged.Broadcast(m_Value);
@@ -74,8 +73,7 @@ void UVector2DWithNameSpinBox::_OnValueXChanged(float _x)
 
 void UVector2DWithNameSpinBox::_OnValueYChanged(float _y)
 {
-	FVector2D value = FVector2D(SpinBoxX->GetValue(), _y);
-	m_Value = value;
+	m_Value.Y = _y;
 	if (OnValueChanged.IsBound())
 	{
 		OnValueChanged.Broadcast(m_Value);

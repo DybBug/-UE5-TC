@@ -23,7 +23,6 @@ void UGridTab::NativeConstruct()
 	
 	m_GridInWorld = Cast<AGrid>(UGameplayStatics::GetActorOfClass(GetWorld(), AGrid::StaticClass()));
 	_TrySetDefaultValues();
-	_TrySpawnGrid();
 
 	GetWorld()->GetTimerManager().ClearTimer(m_hSpawnTimer);
 	GetWorld()->GetTimerManager().ClearTimer(m_hDrawDebugTimer);
@@ -174,5 +173,31 @@ void UGridTab::_DrawDebugLine()
 		const FColor color = FColor::Yellow;
 		constexpr float thickness = 20.0f;
 		DrawDebugBox(GetWorld(), center, extent, color, false, DEBUG_DRAWING_DURATION, 0, thickness);
+	}
+
+	const FVector cursorLocationOnGrid = m_GridInWorld->GetCursorLocationOnGrid(0);
+	Text_MouseLocation->SetText(cursorLocationOnGrid.ToText());
+	if (CheckBox_MouseLocation->IsChecked())
+	{
+		constexpr float radius = 15.0f;
+		constexpr int32 segments = 5.0f;
+		const FColor color = FColor::Yellow;
+		constexpr float thickness = 5.0f;
+		DrawDebugSphere(GetWorld(), cursorLocationOnGrid, radius, segments, color, false, DEBUG_DRAWING_DURATION, thickness);
+	}
+
+	const FIntPoint tileIndexUnderCursor = m_GridInWorld->GetTileIndexUnderCursor(0);
+	Text_HoveredTile->SetText(FText::FromString(tileIndexUnderCursor.ToString()));
+	if (CheckBox_HoveredTile->IsChecked())
+	{
+		const FTileData* const pFoundTileData = m_GridInWorld->GetGridTileMap().Find(tileIndexUnderCursor);
+		if (pFoundTileData)
+		{
+			const FVector& center = pFoundTileData->Transform.GetLocation();;
+			const FVector extent = FVector(35.0f, 35.0f, 5.0f);
+			const FColor color = FColor::Orange;
+			constexpr float thickness = 5.0f;
+			DrawDebugBox(GetWorld(), center, extent, color, false, DEBUG_DRAWING_DURATION, 0, thickness);
+		}
 	}
 }

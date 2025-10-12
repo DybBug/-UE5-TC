@@ -2,6 +2,9 @@
 
 
 #include "GridLibrary.h"
+
+#include "Kismet/GameplayStatics.h"
+#include "TacticalCombat/Misc/Defines.h"
 #include "TacticalCombat/Misc/Enums.h"
 #include "TacticalCombat/Structure/GridShapeData.h"
 
@@ -18,9 +21,10 @@ FGridShapeData UGridLibrary::GetGridShape(EGridShape _gridShape)
 	{
 		FName girdShapeName = *(StaticEnum<EGridShape>()->GetNameStringByValue((uint8)_gridShape));
 		FGridShapeData* pGridShapeData = pLoadedDataTable->FindRow<FGridShapeData>(girdShapeName, TEXT("Data Table Lookup"));
-		check(pGridShapeData);
-		
-		return *pGridShapeData;
+		if (pGridShapeData != nullptr)
+		{
+			return *pGridShapeData;
+		}		
 	}
 	return FGridShapeData();
 }
