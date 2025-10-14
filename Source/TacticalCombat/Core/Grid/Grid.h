@@ -52,6 +52,8 @@ public:
 	FVector GetCursorLocationOnGrid(int _playerIndex);
 	FIntPoint GetTileIndexFromWorldLocation(const FVector& _location);
 	FIntPoint GetTileIndexUnderCursor(int _playerIndex);
+	void AddStateToTile(const FIntPoint& _tileIndex, const ETileStateFlags _stateFlag);
+	void RemoveStateToTile(const FIntPoint& _tileIndex, const ETileStateFlags _stateFlag);
 
 #pragma region Getter
 	FORCEINLINE const FVector& GetCenterLocation() const { return m_CenterLocation; }

@@ -25,10 +25,7 @@ public:
 	TObjectPtr<UStaticMesh> FlatMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UMaterialInstance> FlatBorderMaterial;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UMaterialInstance> FlatFilledMaterial;
+	TObjectPtr<UMaterialInstance> FlatMaterial;
 };
 
 USTRUCT(BlueprintType)
@@ -45,4 +42,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTransform Transform;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (Bitmask, BitmaskEnum = "ETileStateFlags"))
+	uint8 StateMask;
+
 };

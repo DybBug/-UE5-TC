@@ -19,3 +19,11 @@ enum class ETileType: uint8
 	Normal UMETA(DisplayName = "Normal"),
 	Obstacle UMETA(DisplayName = "Obstacle"),
 };
+
+UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
+enum class ETileStateFlags : uint8
+{
+	None     = 0 UMETA(DisplayName = "None"),
+	Hovered  = 1 << 0 UMETA(DisplayName = "Hovered"),
+	Selected = 1 << 1 UMETA(DisplayName = "Selected"),
+};

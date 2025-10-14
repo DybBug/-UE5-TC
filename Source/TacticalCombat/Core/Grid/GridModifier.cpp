@@ -48,7 +48,9 @@ void AGridModifier::OnConstruction(const FTransform& Transform)
 
 	FGridShapeData gridShapeData = UGridLibrary::GetGridShape(m_Shape);
 	m_StaticMeshComponent->SetStaticMesh(gridShapeData.Mesh.Get());
-
+	m_StaticMeshComponent->SetMaterial(0, gridShapeData.FlatMaterial);
+	
+	m_StaticMeshComponent->SetScalarParameterValueOnMaterials(TEXT("IsFilled"), 1.0f);
 	m_StaticMeshComponent->SetColorParameterValueOnMaterials(TEXT("Color"), TileColorMap[m_Type]);	
 }
 

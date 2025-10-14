@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "GridMeshInst.generated.h"
 
+enum class ETileStateFlags : uint8;
 class UInstancedStaticMeshComponent;
 class USceneComponent;
 
@@ -29,7 +30,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void InitializeGridMeshInst(UStaticMesh* const _pMesh, UMaterialInstance* const _pMaterial, const FColor& _color, ECollisionEnabled::Type _collisionEnabled);
-	void AddInstance(const FIntPoint& _index, const FTransform& _transform);
+	void AddInstance(const FIntPoint& _index, const FTransform& _transform, uint8 _tileStateMask);
 	void RemoveInstance(const FIntPoint& _index);
 	void ClearInstances();
 
@@ -45,5 +46,6 @@ protected:
 	TArray<FIntPoint> m_InstanceIndices;
 #pragma endregion
 	
-
+private:
+	FColor _GetColorFromState(uint8 _tileStateMask);
 };

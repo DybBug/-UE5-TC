@@ -217,6 +217,26 @@ FIntPoint AGrid::GetTileIndexUnderCursor(int _playerIndex)
 	return GetTileIndexFromWorldLocation(location);
 }
 
+void AGrid::AddStateToTile(const FIntPoint& _tileIndex, const ETileStateFlags _stateFlag)
+{
+	FTileData* const pTileData =  m_GridTileMap.Find(_tileIndex);
+	if (pTileData)
+	{
+		pTileData->StateMask |= static_cast<int32>(_stateFlag);
+		m_GridVisual->UpdateTileVisual(*pTileData);
+	}
+}
+
+void AGrid::RemoveStateToTile(const FIntPoint& _tileIndex, const ETileStateFlags _stateFlag)
+{
+	FTileData* const pTileData =  m_GridTileMap.Find(_tileIndex);
+	if (pTileData)
+	{
+		pTileData->StateMask &= ~static_cast<int32>(_stateFlag);
+		m_GridVisual->UpdateTileVisual(*pTileData);
+	}
+}
+
 
 void AGrid::CalculateCenterAndBottomLeft(FVector& _center, FVector& _bottomLeft)
 {

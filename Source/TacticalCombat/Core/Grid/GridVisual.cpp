@@ -48,7 +48,7 @@ void AGridVisual::Tick(float DeltaTime)
 void AGridVisual::InitializeGridVisual(AGrid* _pGrid)
 {
 	FGridShapeData gridShapeData = _pGrid->GetGridShapeData();
-	m_GridMeshInst->InitializeGridMeshInst(gridShapeData.FlatMesh, gridShapeData.FlatBorderMaterial, FColor(0.0f, 0.0f, 0.0f, 0.5f), ECollisionEnabled::Type::QueryOnly);
+	m_GridMeshInst->InitializeGridMeshInst(gridShapeData.FlatMesh, gridShapeData.FlatMaterial, FColor(0.0f, 0.0f, 0.0f, 0.5f), ECollisionEnabled::Type::QueryOnly);
 	SetActorLocation(FVector::ZeroVector);
 	SetZOffset(m_ZOffset);	
 }
@@ -72,7 +72,7 @@ void AGridVisual::UpdateTileVisual(const FTileData& _tileData)
 	m_GridMeshInst->RemoveInstance(_tileData.Index);
 	if (AGrid::IsWalkableTile(_tileData.Type))
 	{
-		m_GridMeshInst->AddInstance(_tileData.Index, _tileData.Transform);
+		m_GridMeshInst->AddInstance(_tileData.Index, _tileData.Transform, _tileData.StateMask);
 	}
 }
 
