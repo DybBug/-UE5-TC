@@ -87,7 +87,7 @@ FColor AGridMeshInst::_GetColorFromState(uint8 _tileStateMask)
 	bool isSelected = (_tileStateMask & static_cast<uint8>(ETileStateFlags::Selected)) != 0;
 	if (isSelected)
 	{
-		return FColor::Orange;
+		return FColor::Red;
 	}
 
 	bool isHovered = (_tileStateMask & static_cast<uint8>(ETileStateFlags::Hovered)) != 0;
