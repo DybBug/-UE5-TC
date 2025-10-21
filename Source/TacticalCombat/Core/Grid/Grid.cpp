@@ -87,7 +87,7 @@ void AGrid::SpawnGrid(const FVector& _centerLocation, const FVector& _tileSize, 
 
 	m_GridVisual->InitializeGridVisual(this);
 	
-	CalculateCenterAndBottomLeft(m_CenterLocation, m_GridBottomLeftCornerLocation);
+	_CalculateCenterAndBottomLeft(m_CenterLocation, m_GridBottomLeftCornerLocation);
 
 	// Make Tiles
 	int32 rowCount = m_TileCount.X;
@@ -99,9 +99,9 @@ void AGrid::SpawnGrid(const FVector& _centerLocation, const FVector& _tileSize, 
 		for (int32 col = startCol; col < colCount; col += colStep)
 		{			
 			FTransform tileTransform;
-			tileTransform.SetLocation(_GetTileLocationFromGridIndex(row, col));
-			tileTransform.SetRotation(_GetTileRotationFromGridIndex(row, col).Quaternion());
-			tileTransform.SetScale3D(m_TileSize / GetGridShapeData().MeshSize);
+			tileTransform.SetLocation(GetTileLocationFromGridIndex(row, col));
+			tileTransform.SetRotation(GetTileRotationFromGridIndex(row, col).Quaternion());
+			tileTransform.SetScale3D(GetTileScale());
 
 			ETileType tracedTileType = ETileType::Normal;
 			if (_bIsUseEnvironment)
@@ -142,24 +142,28 @@ FVector AGrid::GetCursorLocationOnGrid(int _playerIndex)
 		{
 			return hitResult.ImpactPoint;
 		}
-		else
+
+		isSucceeded = pPlayerController->GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(GTC_GroundAndGridModifier), true, hitResult);
+		if (isSucceeded)
 		{
-			FVector worldLocation, worldDirection;	
-			pPlayerController->DeprojectMousePositionToWorld(worldLocation, worldDirection);
-
-			float t;
-			FVector intersection;
-			const FVector lineStart = worldLocation;
-			const FVector lineEnd = worldLocation + ( worldDirection * 999999.0f);
-			const FPlane plane = UKismetMathLibrary::MakePlaneFromPointAndNormal(m_CenterLocation, FVector::UpVector);
-
-			isSucceeded = UKismetMathLibrary::LinePlaneIntersection(lineStart, lineEnd, plane, t, intersection);
-			if (isSucceeded)
-			{
-				return intersection;
-			}
-			return FVector(-999.0f);
+			return hitResult.ImpactPoint;
 		}
+
+		FVector worldLocation, worldDirection;	
+		pPlayerController->DeprojectMousePositionToWorld(worldLocation, worldDirection);
+
+		float t;
+		FVector intersection;
+		const FVector lineStart = worldLocation;
+		const FVector lineEnd = worldLocation + ( worldDirection * 999999.0f);
+		const FPlane plane = UKismetMathLibrary::MakePlaneFromPointAndNormal(m_CenterLocation, FVector::UpVector);
+
+		isSucceeded = UKismetMathLibrary::LinePlaneIntersection(lineStart, lineEnd, plane, t, intersection);
+		if (isSucceeded)
+		{
+			return intersection;
+		}
+		return FVector(-999.0f);
 	}
 
 	return FVector(-999.0f);
@@ -217,6 +221,24 @@ FIntPoint AGrid::GetTileIndexUnderCursor(int _playerIndex)
 	return GetTileIndexFromWorldLocation(location);
 }
 
+void AGrid::AddGridTile(const FTileData& _tileData)
+{
+	m_GridTileMap.Add(_tileData.Index, _tileData);
+	m_GridVisual->UpdateTileVisual(_tileData);
+}
+
+void AGrid::RemoveGridTile(const FIntPoint& _tileIndex)
+{
+	bool isRemove = m_GridTileMap.Remove(_tileIndex) > 0;
+	if (isRemove)
+	{
+		FTileData tileData;
+		tileData.Index = _tileIndex;
+		tileData.Type = ETileType::None;
+		m_GridVisual->UpdateTileVisual(tileData);
+	}	
+}
+
 void AGrid::AddStateToTile(const FIntPoint& _tileIndex, const ETileStateFlags _stateFlag)
 {
 	FTileData* const pTileData =  m_GridTileMap.Find(_tileIndex);
@@ -237,8 +259,100 @@ void AGrid::RemoveStateToTile(const FIntPoint& _tileIndex, const ETileStateFlags
 	}
 }
 
+bool AGrid::IsIndexValid(const FIntPoint& _tileIndex)
+{
+	return m_GridTileMap.Contains(_tileIndex);
+}
 
-void AGrid::CalculateCenterAndBottomLeft(FVector& _center, FVector& _bottomLeft)
+FVector AGrid::TraceForGround(const FVector& _location, ETileType& _hitTileType)
+{
+	TArray<FHitResult> hitResults;
+	const FVector& startLocation = _location + FVector(0.0f, 0.0f, 1000.0f);
+	const FVector& endLocation = _location + FVector(0.0f, 0.0f, -1000.0f);
+	const float radius = m_TileSize.X / (m_Shape == EGridShape::Triangle ? 5.0f : 3.0f);
+	ETraceTypeQuery traceChannel = UEngineTypes::ConvertToTraceType(GTC_GroundAndGridModifier);
+	TArray<AActor*> ignoreActors = TArray<AActor*>();
+	EDrawDebugTrace::Type drawDebugType = EDrawDebugTrace::None;
+	
+	UKismetSystemLibrary::SphereTraceMulti(GetWorld(), startLocation, endLocation, radius, traceChannel, false, ignoreActors, drawDebugType, hitResults, true);
+	if (hitResults.Num() > 0)
+	{
+		_hitTileType = ETileType::Normal;
+
+		FVector resultLocation = _location;
+		for (const FHitResult hitResult : hitResults)
+		{			
+			if (AGridModifier* pGridModifier = Cast<AGridModifier>(hitResult.GetActor()))
+			{
+				_hitTileType = pGridModifier->GetType();
+				return FVector(-99999, -99999, -99999);
+			}
+			resultLocation.Z = UKismetMathLibrary::GridSnap_Float(hitResult.ImpactPoint.Z, m_TileSize.Z);
+		}
+		
+		return resultLocation;
+	}
+	
+	_hitTileType = ETileType::None;
+	return FVector(-99999, -99999, -99999);
+}
+
+
+FVector AGrid::GetTileLocationFromGridIndex(int _row, int _col)
+{
+	FVector sizeOffset = FVector::Zero();
+	switch (m_Shape)
+	{
+		case EGridShape::Square:
+		{
+			sizeOffset = FVector(1.0f, 1.0f, 0.0f);
+			break;
+		}
+		case EGridShape::Hexagon:
+		{
+			sizeOffset = FVector(0.75f, 0.5f, 0.0f);
+			break;
+		}
+		case EGridShape::Triangle:
+		{
+			sizeOffset = FVector(1.0f, 0.5f, 0.0f);
+			break;
+		}
+		case EGridShape::None:
+			default:
+		{
+			sizeOffset = FVector::Zero();
+			break;
+		}
+	}
+	
+	FVector adjustedTileSize =  m_TileSize * sizeOffset;
+	return m_GridBottomLeftCornerLocation + FVector(adjustedTileSize.X * _row, adjustedTileSize.Y * _col, adjustedTileSize.Z);
+}
+
+FRotator AGrid::GetTileRotationFromGridIndex(int _row, int _col)
+{
+	// 오직 삼각형만 회전
+	if (m_Shape != EGridShape::Triangle)
+		return FRotator::ZeroRotator;
+
+	if (UUtilityLibrary::IsIntEven (_col) && !UUtilityLibrary::IsIntEven (_row))
+		return FRotator(0.0f, 180.0f, 0.0f);
+
+	if (!UUtilityLibrary::IsIntEven (_col) && UUtilityLibrary::IsIntEven (_row))
+		return FRotator(0.0f, 180.0f, 0.0f);
+
+	return FRotator::ZeroRotator;
+}
+
+FVector AGrid::GetTileScale()
+{
+	return m_TileSize / GetGridShapeData().MeshSize;
+}
+
+
+
+void AGrid::_CalculateCenterAndBottomLeft(FVector& _center, FVector& _bottomLeft)
 {
 	switch (m_Shape)
 	{
@@ -287,91 +401,5 @@ void AGrid::CalculateCenterAndBottomLeft(FVector& _center, FVector& _bottomLeft)
 			break;
 		}
 	}	
-}
-
-FVector AGrid::TraceForGround(const FVector& _location, ETileType& _hitTileType)
-{
-	TArray<FHitResult> hitResults;
-	const FVector& startLocation = _location + FVector(0.0f, 0.0f, 1000.0f);
-	const FVector& endLocation = _location + FVector(0.0f, 0.0f, -1000.0f);
-	const float radius = m_TileSize.X / (m_Shape == EGridShape::Triangle ? 5.0f : 3.0f);
-	ETraceTypeQuery traceChannel = UEngineTypes::ConvertToTraceType(GTC_GroundAndGridModifier);
-	TArray<AActor*> ignoreActors = TArray<AActor*>();
-	EDrawDebugTrace::Type drawDebugType = EDrawDebugTrace::None;
-	
-	UKismetSystemLibrary::SphereTraceMulti(GetWorld(), startLocation, endLocation, radius, traceChannel, false, ignoreActors, drawDebugType, hitResults, true);
-	if (hitResults.Num() > 0)
-	{
-		_hitTileType = ETileType::Normal;
-
-		FVector resultLocation = _location;
-		for (const FHitResult hitResult : hitResults)
-		{			
-			if (AGridModifier* pGridModifier = Cast<AGridModifier>(hitResult.GetActor()))
-			{
-				_hitTileType = pGridModifier->GetType();
-				return FVector(-99999, -99999, -99999);
-			}
-			resultLocation.Z = UKismetMathLibrary::GridSnap_Float(hitResult.ImpactPoint.Z, m_TileSize.Z);
-		}
-		
-		return resultLocation;
-	}
-	
-	_hitTileType = ETileType::None;
-	return FVector(-99999, -99999, -99999);
-}
-
-void AGrid::AddGridTile(const FTileData& _tileData)
-{
-	m_GridTileMap.Add(_tileData.Index, _tileData);
-	m_GridVisual->UpdateTileVisual(_tileData);
-}
-
-FVector AGrid::_GetTileLocationFromGridIndex(int _row, int _col)
-{
-	FVector sizeOffset = FVector::Zero();
-	switch (m_Shape)
-	{
-		case EGridShape::Square:
-		{
-			sizeOffset = FVector(1.0f, 1.0f, 0.0f);
-			break;
-		}
-		case EGridShape::Hexagon:
-		{
-			sizeOffset = FVector(0.75f, 0.5f, 0.0f);
-			break;
-		}
-		case EGridShape::Triangle:
-		{
-			sizeOffset = FVector(1.0f, 0.5f, 0.0f);
-			break;
-		}
-		case EGridShape::None:
-			default:
-		{
-			sizeOffset = FVector::Zero();
-			break;
-		}
-	}
-	
-	FVector adjustedTileSize =  m_TileSize * sizeOffset;
-	return m_GridBottomLeftCornerLocation + FVector(adjustedTileSize.X * _row, adjustedTileSize.Y * _col, adjustedTileSize.Z);
-}
-
-FRotator AGrid::_GetTileRotationFromGridIndex(int _row, int _col)
-{
-	// 오직 삼각형만 회전
-	if (m_Shape != EGridShape::Triangle)
-		return FRotator::ZeroRotator;
-
-	if (UUtilityLibrary::IsIntEven (_col) && !UUtilityLibrary::IsIntEven (_row))
-		return FRotator(0.0f, 180.0f, 0.0f);
-
-	if (!UUtilityLibrary::IsIntEven (_col) && UUtilityLibrary::IsIntEven (_row))
-		return FRotator(0.0f, 180.0f, 0.0f);
-
-	return FRotator::ZeroRotator;
 }
 

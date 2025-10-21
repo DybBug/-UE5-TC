@@ -4,7 +4,7 @@
 #include "CameraTab.h"
 
 #include "TacticalCombat/Core/TCPawn.h"
-#include "TacticalCombat/UI/DebugMenu/Elements/WithNameSpinBox.h"
+#include "TacticalCombat/UI/DebugMenu/Elements/SpinBox/WithNameSpinBox.h"
 
 void UCameraTab::NativeOnInitialized()
 {

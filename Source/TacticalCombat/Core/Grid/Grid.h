@@ -52,8 +52,16 @@ public:
 	FVector GetCursorLocationOnGrid(int _playerIndex);
 	FIntPoint GetTileIndexFromWorldLocation(const FVector& _location);
 	FIntPoint GetTileIndexUnderCursor(int _playerIndex);
+	void AddGridTile(const FTileData& _tileData);
+	void RemoveGridTile(const FIntPoint& _tileIndex);
 	void AddStateToTile(const FIntPoint& _tileIndex, const ETileStateFlags _stateFlag);
 	void RemoveStateToTile(const FIntPoint& _tileIndex, const ETileStateFlags _stateFlag);
+	bool IsIndexValid(const FIntPoint& _tileIndex);
+	FVector TraceForGround(const FVector& _location, ETileType& _hitTileType);
+
+	FVector  GetTileLocationFromGridIndex(int _row, int _col);
+	FRotator GetTileRotationFromGridIndex(int _row, int _col);
+	FVector GetTileScale();
 
 #pragma region Getter
 	FORCEINLINE const FVector& GetCenterLocation() const { return m_CenterLocation; }
@@ -108,15 +116,7 @@ protected:
 	TWeakObjectPtr<AGridVisual> m_GridVisual;
 #pragma endregion
 
-	
-
-protected:	
-	void CalculateCenterAndBottomLeft(FVector& _center, FVector& _bottomLeft);
-	FVector TraceForGround(const FVector& _location, ETileType& _hitTileType);
-	void AddGridTile(const FTileData& _tileData);
 
 private:
-	FVector  _GetTileLocationFromGridIndex(int _row, int _col);
-	FRotator _GetTileRotationFromGridIndex(int _row, int _col);
-
+	void _CalculateCenterAndBottomLeft(FVector& _center, FVector& _bottomLeft);
 };

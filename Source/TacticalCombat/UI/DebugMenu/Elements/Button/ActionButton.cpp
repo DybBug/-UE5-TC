@@ -32,7 +32,7 @@ void UActionButton::NativeConstruct()
 	}
 	
 	Button->OnClicked.AddDynamic(this, &UActionButton::_OnButtonClicked);
-	m_PlayerActions->OnSelectedActionsChanged.AddUObject(this, &UActionButton::_OnSelectedActionsChanged);
+	m_PlayerActions->OnSelectedActionsChanged.AddUObject(this, &UActionButton::OnSelectedActionsChanged);
 }
 
 void UActionButton::NativePreConstruct()
@@ -40,6 +40,19 @@ void UActionButton::NativePreConstruct()
 	Super::NativePreConstruct();
 	Text->SetText(FText::FromString(m_ActionText));
 }
+
+void UActionButton::OnSelectedActionsChanged(const UAbstractAction* const _leftClickAction, const UAbstractAction* const _rightClickAction)
+{
+	if (m_PlayerActions->GetLeftClickSelectAction() == nullptr)
+	{
+		Button->SetBackgroundColor(FColor::Silver);
+	}
+	else if (m_PlayerActions->GetLeftClickSelectAction()->GetClass() == m_LeftClickActionClass.Get())
+	{
+		Button->SetBackgroundColor(FColor::Blue);
+	}
+}
+
 
 void UActionButton::_OnButtonClicked()
 {
@@ -51,17 +64,5 @@ void UActionButton::_OnButtonClicked()
 	else
 	{
 		m_PlayerActions->SetSelectedActionWithNotify(nullptr, nullptr);
-	}
-}
-
-void UActionButton::_OnSelectedActionsChanged(const UAbstractAction* const _leftClickAction, const UAbstractAction* const _rightClickAction)
-{
-	if (m_PlayerActions->GetLeftClickSelectAction() == nullptr)
-	{
-		Button->SetBackgroundColor(FColor::Silver);
-	}
-	else if (m_PlayerActions->GetLeftClickSelectAction()->GetClass() == m_LeftClickActionClass.Get())
-	{
-		Button->SetBackgroundColor(FColor::Blue);
 	}
 }

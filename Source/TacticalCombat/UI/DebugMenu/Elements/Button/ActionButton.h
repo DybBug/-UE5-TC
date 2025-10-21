@@ -49,10 +49,11 @@ protected:
 	TWeakObjectPtr<APlayerActions> m_PlayerActions;
 #pragma endregion
 
+protected:
+	UFUNCTION()
+	virtual void OnSelectedActionsChanged(const UAbstractAction* const _leftClickAction, const UAbstractAction* const _rightClickAction);
+
 private:
 	UFUNCTION()
 	void _OnButtonClicked();
-
-	UFUNCTION()
-	void _OnSelectedActionsChanged(const UAbstractAction* const _leftClickAction, const UAbstractAction* const _rightClickAction);
 };

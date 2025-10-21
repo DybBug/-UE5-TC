@@ -18,7 +18,10 @@ enum class ETileType: uint8
 	None UMETA(DisplayName = "None"),
 	Normal UMETA(DisplayName = "Normal"),
 	Obstacle UMETA(DisplayName = "Obstacle"),
+	Max UMETA(Hidden)
 };
+ENUM_RANGE_BY_COUNT(ETileType, ETileType::Max)
+
 
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class ETileStateFlags : uint8

@@ -40,6 +40,8 @@ public:
 	FORCEINLINE AGrid* const GetGrid() const { return m_Grid.Get(); }
 	FORCEINLINE UAbstractAction* const GetLeftClickSelectAction() const { return m_LeftClickSelectAction.Get(); }
 	FORCEINLINE UAbstractAction* const GetRightClickSelectAction() const { return m_RightClickSelectAction.Get(); }
+	FORCEINLINE bool IsLeftClickDown() const { return m_bIsLeftClickDown; }
+	FORCEINLINE bool IsRightClickDown() const { return m_bIsRightClickDown; }
 #pragma endregion
 
 #pragma region Setter
@@ -70,15 +72,29 @@ protected:
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Right Click Select Action"))
 	TObjectPtr<UAbstractAction> m_RightClickSelectAction;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Is Left Click Down"))
+	bool m_bIsLeftClickDown;
+
+	UPROPERTY(VisibleINSTANCEONLY, Category = "Internal", Meta = (DisplayName = "Is Right Click Down"))
+	bool m_bIsRightClickDown;
 #pragma endregion
 
 
 private:
 	void _UpdateHoveredTile();
 
-	UFUNCTION()
-	void _OnLeftClicked();
+	void _OnHoveredTileChanged();
 
 	UFUNCTION()
-	void _OnRightClicked();
+	void _OnLeftClickPressed();
+
+	UFUNCTION()
+	void _OnLeftClickReleased();
+
+	UFUNCTION()
+	void _OnRightClickPressed();
+
+	UFUNCTION()
+	void _OnRightClickReleased();
 };

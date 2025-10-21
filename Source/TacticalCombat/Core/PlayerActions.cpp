@@ -35,8 +35,10 @@ void APlayerActions::BeginPlay()
 	if (pPlayerController)
 	{
 		EnableInput(pPlayerController);
-		InputComponent->BindAction("LeftClick", IE_Pressed, this, &APlayerActions::_OnLeftClicked);
-		InputComponent->BindAction("RightClick", IE_Pressed, this, &APlayerActions::_OnRightClicked);
+		InputComponent->BindAction("LeftClick", IE_Pressed, this, &APlayerActions::_OnLeftClickPressed);
+		InputComponent->BindAction("LeftClick", IE_Released, this, &APlayerActions::_OnLeftClickReleased);
+		InputComponent->BindAction("RightClick", IE_Pressed, this, &APlayerActions::_OnRightClickPressed);
+		InputComponent->BindAction("RightClick", IE_Released, this, &APlayerActions::_OnRightClickReleased);
 	}
 	
 	m_Grid = Cast<AGrid>(UGameplayStatics::GetActorOfClass(GetWorld(), AGrid::StaticClass()));
@@ -89,25 +91,61 @@ void APlayerActions::_UpdateHoveredTile()
 		
 		m_HoveredTileIndex = hoveredTileIndex;
 		m_Grid->AddStateToTile(m_HoveredTileIndex, ETileStateFlags::Hovered);
+
+		_OnHoveredTileChanged();
 	}
 }
 
-void APlayerActions::_OnLeftClicked()
+void APlayerActions::_OnHoveredTileChanged()
 {
+	if (m_bIsLeftClickDown)
+	{
+		if (m_LeftClickSelectAction)
+		{
+			m_LeftClickSelectAction->Execute(m_HoveredTileIndex);
+		}
+		return;
+	}
+
+	if (m_bIsRightClickDown)
+	{
+		if (m_RightClickSelectAction)
+		{
+			m_RightClickSelectAction->Execute(m_HoveredTileIndex);
+		}
+		return;
+	}
+}
+
+void APlayerActions::_OnLeftClickPressed()
+{
+	m_bIsLeftClickDown = true;
 	_UpdateHoveredTile();
 	if (m_LeftClickSelectAction)
 	{
 		m_LeftClickSelectAction->Execute(m_HoveredTileIndex);
 	}
+
 }
 
-void APlayerActions::_OnRightClicked()
+void APlayerActions::_OnLeftClickReleased()
 {
+	m_bIsLeftClickDown = false;
+}
+
+void APlayerActions::_OnRightClickPressed()
+{
+	m_bIsRightClickDown = true;
 	_UpdateHoveredTile();
 	if (m_RightClickSelectAction)
 	{
 		m_RightClickSelectAction->Execute(m_HoveredTileIndex);
 	}
+}
+
+void APlayerActions::_OnRightClickReleased()
+{
+	m_bIsRightClickDown = false;
 }
 
 

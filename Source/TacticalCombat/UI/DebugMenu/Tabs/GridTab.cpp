@@ -10,9 +10,9 @@
 #include "TacticalCombat/Core/Grid/Grid.h"
 #include "TacticalCombat/Core/LevelScripts/EntryLevelScriptActor.h"
 #include "TacticalCombat/Subsystems/LevelLoadingSubsystem.h"
-#include "TacticalCombat/UI/DebugMenu/Elements/VectorWithNameSpinBox.h"
-#include "TacticalCombat/UI/DebugMenu/Elements/Vector2DWithNameSpinBox.h"
-#include "TacticalCombat/UI/DebugMenu/Elements/WithNameSpinBox.h"
+#include "TacticalCombat/UI/DebugMenu/Elements/SpinBox/VectorWithNameSpinBox.h"
+#include "TacticalCombat/UI/DebugMenu/Elements/SpinBox/Vector2DWithNameSpinBox.h"
+#include "TacticalCombat/UI/DebugMenu/Elements/SpinBox/WithNameSpinBox.h"
 #include "TacticalCombat/Misc/Enums.h"
 
 const float DEBUG_DRAWING_DURATION = 0.1f;
