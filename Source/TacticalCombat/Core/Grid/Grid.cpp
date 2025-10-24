@@ -123,6 +123,10 @@ void AGrid::DestroyGrid()
 	if (m_GridVisual.IsValid())
 	{
 		m_GridVisual->DestroyGridVisual();
+		if (OnGridDestroyed.IsBound())
+		{
+			OnGridDestroyed.Broadcast();
+		}
 	}
 }
 
@@ -225,6 +229,10 @@ void AGrid::AddGridTile(const FTileData& _tileData)
 {
 	m_GridTileMap.Add(_tileData.Index, _tileData);
 	m_GridVisual->UpdateTileVisual(_tileData);
+	if (OnTileDataUpdated.IsBound())
+	{
+		OnTileDataUpdated.Broadcast(_tileData.Index);
+	}
 }
 
 void AGrid::RemoveGridTile(const FIntPoint& _tileIndex)
@@ -236,6 +244,11 @@ void AGrid::RemoveGridTile(const FIntPoint& _tileIndex)
 		tileData.Index = _tileIndex;
 		tileData.Type = ETileType::None;
 		m_GridVisual->UpdateTileVisual(tileData);
+
+		if (OnTileDataUpdated.IsBound())
+		{
+			OnTileDataUpdated.Broadcast(_tileIndex);
+		}
 	}	
 }
 
@@ -246,16 +259,26 @@ void AGrid::AddStateToTile(const FIntPoint& _tileIndex, const ETileStateFlags _s
 	{
 		pTileData->StateMask |= static_cast<int32>(_stateFlag);
 		m_GridVisual->UpdateTileVisual(*pTileData);
+
+		if (OnTileDataUpdated.IsBound())
+		{
+			OnTileDataUpdated.Broadcast(_tileIndex);
+		}
 	}
 }
 
-void AGrid::RemoveStateToTile(const FIntPoint& _tileIndex, const ETileStateFlags _stateFlag)
+void AGrid::RemoveStateFromTile(const FIntPoint& _tileIndex, const ETileStateFlags _stateFlag)
 {
 	FTileData* const pTileData =  m_GridTileMap.Find(_tileIndex);
 	if (pTileData)
 	{
 		pTileData->StateMask &= ~static_cast<int32>(_stateFlag);
 		m_GridVisual->UpdateTileVisual(*pTileData);
+
+		if (OnTileDataUpdated.IsBound())
+		{
+			OnTileDataUpdated.Broadcast(_tileIndex);
+		}
 	}
 }
 

@@ -9,6 +9,9 @@
 #include "TacticalCombat/Structure/GridShapeData.h"
 #include "Grid.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnTileDataUpdatedEvent, const FIntPoint&)
+DECLARE_MULTICAST_DELEGATE(FOnGridDestroyedEvent)
+
 class AGridVisual;
 enum class ETileType : uint8;
 class UInstancedStaticMeshComponent;
@@ -55,7 +58,7 @@ public:
 	void AddGridTile(const FTileData& _tileData);
 	void RemoveGridTile(const FIntPoint& _tileIndex);
 	void AddStateToTile(const FIntPoint& _tileIndex, const ETileStateFlags _stateFlag);
-	void RemoveStateToTile(const FIntPoint& _tileIndex, const ETileStateFlags _stateFlag);
+	void RemoveStateFromTile(const FIntPoint& _tileIndex, const ETileStateFlags _stateFlag);
 	bool IsIndexValid(const FIntPoint& _tileIndex);
 	FVector TraceForGround(const FVector& _location, ETileType& _hitTileType);
 
@@ -83,6 +86,10 @@ public:
 		}
 	}
 #pragma endregion
+
+public:
+	FOnTileDataUpdatedEvent OnTileDataUpdated;
+	FOnGridDestroyedEvent OnGridDestroyed;
 	
 protected:
 #pragma region Component

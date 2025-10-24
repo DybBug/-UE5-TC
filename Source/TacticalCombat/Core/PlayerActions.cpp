@@ -87,7 +87,7 @@ void APlayerActions::_UpdateHoveredTile()
 	const FIntPoint& hoveredTileIndex =  m_Grid->GetTileIndexUnderCursor(0);
 	if (m_HoveredTileIndex != hoveredTileIndex)
 	{
-		m_Grid->RemoveStateToTile(m_HoveredTileIndex, ETileStateFlags::Hovered);
+		m_Grid->RemoveStateFromTile(m_HoveredTileIndex, ETileStateFlags::Hovered);
 		
 		m_HoveredTileIndex = hoveredTileIndex;
 		m_Grid->AddStateToTile(m_HoveredTileIndex, ETileStateFlags::Hovered);

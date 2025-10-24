@@ -4,7 +4,7 @@
 #include "ModifyTileHeightButton.h"
 
 #include "TacticalCombat/Core/PlayerActions.h"
-#include "TacticalCombat/Core/Actions/ModifyTileHeightAction.h"
+#include "TacticalCombat/Core/Actions/Grid/ModifyTileHeightAction.h"
 
 
 void UModifyTileHeightButton::OnSelectedActionsChanged(const UAbstractAction* const _leftClickAction, const UAbstractAction* const rightClickAction)

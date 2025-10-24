@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AbstractAction.h"
+#include "../AbstractAction.h"
 #include "SetTileTypeAction.generated.h"
 
 enum class ETileType :uint8;

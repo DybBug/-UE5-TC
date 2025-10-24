@@ -3,17 +3,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AbstractAction.h"
-#include "AddTileAction.generated.h"
+#include "../AbstractAction.h"
+#include "SelectTileAction.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TACTICALCOMBAT_API UAddTileAction : public UAbstractAction
+class TACTICALCOMBAT_API USelectTileAction : public UAbstractAction
 {
 	GENERATED_BODY()
 
 public:
+	virtual void BeginDestroy() override;
+	
 	virtual void Execute(const FIntPoint& _index) override;
+	
 };

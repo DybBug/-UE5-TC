@@ -5,6 +5,7 @@
 
 #include "Blueprint/UserWidget.h"
 #include "../UI/DebugMenu/DebugMenu.h"
+#include "Grid/Other/DebugTextOnTiles.h"
 
 ATCHUD::ATCHUD()
 {
@@ -20,5 +21,5 @@ void ATCHUD::BeginPlay()
 	Super::BeginPlay();
 
 	m_DebugMenu = CreateWidget<UDebugMenu>(GetWorld(), m_DebugMenuClass);
-	m_DebugMenu->AddToViewport();	
+	m_DebugMenu->AddToViewport();
 }

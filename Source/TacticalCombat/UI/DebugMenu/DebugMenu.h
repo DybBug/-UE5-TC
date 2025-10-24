@@ -35,6 +35,9 @@ protected:
 	TObjectPtr<UButton> Button_Tab3;
 
 	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UButton> Button_Tab4;
+
+	UPROPERTY(Meta = (BindWidget))
 	TObjectPtr<UWidgetSwitcher> WidgetSwitcher;
 
 private:
@@ -46,6 +49,9 @@ private:
 
 	UFUNCTION()
 	void _OnClicked_Tab3();
+
+	UFUNCTION()
+	void _OnClicked_Tab4();
 
 private:
 	void _ToggleTabIndex(int32 _tabIndex);

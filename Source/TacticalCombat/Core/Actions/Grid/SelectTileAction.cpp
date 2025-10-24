@@ -18,14 +18,14 @@ void USelectTileAction::Execute(const FIntPoint& _index)
 	const FIntPoint& selectedTileIndex = m_PlayerActions->GetSelectedTileIndex();
 	if (selectedTileIndex != _index)
 	{
-		pGrid->RemoveStateToTile(selectedTileIndex, ETileStateFlags::Selected);
+		pGrid->RemoveStateFromTile(selectedTileIndex, ETileStateFlags::Selected);
 		
 		m_PlayerActions->SetSelectedTileIndex(_index);
 		pGrid->AddStateToTile(_index, ETileStateFlags::Selected);
 	}
 	else
 	{
-		pGrid->RemoveStateToTile(selectedTileIndex, ETileStateFlags::Selected);
+		pGrid->RemoveStateFromTile(selectedTileIndex, ETileStateFlags::Selected);
 		m_PlayerActions->SetSelectedTileIndex(FIntPoint(-999, -999));
 	}
 }

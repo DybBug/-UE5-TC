@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "AbstractAction.h"
-#include "RemoveTileAction.generated.h"
+#include "../AbstractAction.h"
+#include "AddTileAction.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TACTICALCOMBAT_API URemoveTileAction : public UAbstractAction
+class TACTICALCOMBAT_API UAddTileAction : public UAbstractAction
 {
 	GENERATED_BODY()
 
