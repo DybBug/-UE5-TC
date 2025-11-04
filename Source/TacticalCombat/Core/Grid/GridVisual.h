@@ -3,12 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GridMeshInst.h"
 #include "GameFramework/Actor.h"
 #include "GridVisual.generated.h"
 
 class AGrid;
-class AGridMeshInst;
+class UInstancedStaticMeshComponent;
 struct FTileData;
 
 UCLASS()
@@ -21,10 +20,10 @@ public:
 	AGridVisual();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 	virtual void OnConstruction(const FTransform& Transform) override;
 
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -36,24 +35,33 @@ public:
 	
 	void DestroyGridVisual();
 	void UpdateTileVisual(const FTileData& _tileData);
+
+	void InitializeGridMeshInst(UStaticMesh* const _pMesh, UMaterialInstance* const _pMaterial, const FColor& _color, ECollisionEnabled::Type _collisionEnabled);
+	void AddInstance(const FIntPoint& _index, const FTransform& _transform, uint8 _tileStateMask);
+	void RemoveInstance(const FIntPoint& _index);
+	void ClearInstances();
 	
 protected:
 #pragma region Components
 	UPROPERTY(VisibleAnywhere, Category = "Component", Meta = (DisplayName = "Root"))
 	TObjectPtr<USceneComponent> m_SceneComponent;
 
-	UPROPERTY(VisibleAnywhere, Category = "Component", Meta = (DisplayName = "Grid Mesh Instance"))
-	TObjectPtr<UChildActorComponent> m_ChildActorGridMeshInst;
+	UPROPERTY(VisibleAnywhere, Category = "Component", Meta = (DisplayName = "Instanced StaticMesh Component"))
+	TObjectPtr<UInstancedStaticMeshComponent> m_InstancedStaticMeshComponent;
 #pragma endregion
 
 #pragma region Properties
 	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Z-Offset"))
-	float m_ZOffset = 2.0f;
-
-	UPROPERTY(VisibleAnywhere, Category = "Property", Meta = (DisplayName = "Grid Inst"))
-	TWeakObjectPtr<AGridMeshInst> m_GridMeshInst;
+	float m_ZOffset = 2.0f;	
+	
+	UPROPERTY(VisibleAnywhere, Category = "Property", Meta = (DisplayName = "Instance Indices"))
+	TArray<FIntPoint> m_InstanceIndices;
 #pragma endregion
 
+	
+private:
+	FColor _GetColorFromState(uint8 _tileStateMask);
+	
 
 };
 

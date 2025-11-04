@@ -4,7 +4,8 @@
 #include "GridVisual.h"
 
 #include "Grid.h"
-#include "GridMeshInst.h"
+#include "Components/InstancedStaticMeshComponent.h"
+#include "TacticalCombat/Misc/Defines.h"
 
 // Sets default values
 AGridVisual::AGridVisual()
@@ -15,29 +16,26 @@ AGridVisual::AGridVisual()
 	m_SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComponent"));
 	RootComponent = m_SceneComponent;
 
-	m_ChildActorGridMeshInst = CreateDefaultSubobject<UChildActorComponent>(TEXT("ChildActorComponent"));
-	m_ChildActorGridMeshInst->SetChildActorClass(AGridMeshInst::StaticClass());
-	m_ChildActorGridMeshInst->SetupAttachment(RootComponent);
-
-	// static ConstructorHelpers::FClassFinder<AActor> gridMeshInstClassFinder(TEXT("/Game/Grids/BP_GridMeshInst.BP_GridMeshInst_C"));
-	// if (gridMeshInstClassFinder.Succeeded())
-	// {
-	// 	m_ChildActorGridMeshInst->SetChildActorClass(gridMeshInstClassFinder.Class);
-	// }
+	m_InstancedStaticMeshComponent = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("InstancedStaticMeshComponent"));
+	m_InstancedStaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	m_InstancedStaticMeshComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldStatic);
+	m_InstancedStaticMeshComponent->SetCollisionResponseToChannel(GTC_Grid, ECollisionResponse::ECR_Block);
+	m_InstancedStaticMeshComponent->NumCustomDataFloats = 4;
+	RootComponent = m_InstancedStaticMeshComponent;
+	SetActorLocation(FVector::ZeroVector);
 }
+
+void AGridVisual::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+}
+
 
 // Called when the game starts or when spawned
 void AGridVisual::BeginPlay()
 {
 	Super::BeginPlay();
 }
-
-void AGridVisual::OnConstruction(const FTransform& Transform)
-{
-	Super::OnConstruction(Transform);
-	m_GridMeshInst = Cast<AGridMeshInst>(m_ChildActorGridMeshInst->GetChildActor());
-}
-
 
 // Called every frame
 void AGridVisual::Tick(float DeltaTime)
@@ -48,7 +46,7 @@ void AGridVisual::Tick(float DeltaTime)
 void AGridVisual::InitializeGridVisual(AGrid* _pGrid)
 {
 	FGridShapeData gridShapeData = _pGrid->GetGridShapeData();
-	m_GridMeshInst->InitializeGridMeshInst(gridShapeData.FlatMesh, gridShapeData.FlatMaterial, FColor(0.0f, 0.0f, 0.0f, 0.5f), ECollisionEnabled::Type::QueryOnly);
+	InitializeGridMeshInst(gridShapeData.FlatMesh, gridShapeData.FlatMaterial, FColor(0.0f, 0.0f, 0.0f, 0.5f), ECollisionEnabled::Type::QueryOnly);
 	SetActorLocation(FVector::ZeroVector);
 	SetZOffset(m_ZOffset);	
 }
@@ -64,15 +62,77 @@ void AGridVisual::SetZOffset(float _offset)
 
 void AGridVisual::DestroyGridVisual()
 {
-	m_GridMeshInst->ClearInstances();
+	ClearInstances();
 }
 
 void AGridVisual::UpdateTileVisual(const FTileData& _tileData)
 {
-	m_GridMeshInst->RemoveInstance(_tileData.Index);
+	RemoveInstance(_tileData.Index);
 	if (AGrid::IsWalkableTile(_tileData.Type))
 	{
-		m_GridMeshInst->AddInstance(_tileData.Index, _tileData.Transform, _tileData.StateMask);
+		AddInstance(_tileData.Index, _tileData.Transform, _tileData.StateMask);
 	}
 }
 
+void AGridVisual::InitializeGridMeshInst(UStaticMesh* const _pMesh, UMaterialInstance* const _pMaterial, const FColor& _color, ECollisionEnabled::Type _collisionEnabled)
+{
+	m_InstancedStaticMeshComponent->SetStaticMesh(_pMesh);
+	m_InstancedStaticMeshComponent->SetMaterial(0, _pMaterial);
+	m_InstancedStaticMeshComponent->SetColorParameterValueOnMaterials("Color", _color);
+	m_InstancedStaticMeshComponent->SetCollisionEnabled(_collisionEnabled);
+}
+
+void AGridVisual::AddInstance(const FIntPoint& _index, const FTransform& _transform, uint8 _tileStateMask)
+{
+	RemoveInstance(_index);
+	m_InstancedStaticMeshComponent->AddInstance(_transform, false);
+	m_InstanceIndices.Add(_index);
+	
+	FColor tileColor = _GetColorFromState(_tileStateMask);
+	const uint8 index = m_InstanceIndices.Num() - 1;
+	m_InstancedStaticMeshComponent->SetCustomDataValue(index, 0, tileColor.R);
+	m_InstancedStaticMeshComponent->SetCustomDataValue(index, 1, tileColor.G);
+	m_InstancedStaticMeshComponent->SetCustomDataValue(index, 2, tileColor.B);
+	m_InstancedStaticMeshComponent->SetCustomDataValue(index, 3, tileColor.A);
+}
+
+void AGridVisual::RemoveInstance(const FIntPoint& _index)
+{
+	if (m_InstanceIndices.Contains(_index))
+	{
+		int32 foundInstanceIndex = m_InstanceIndices.Find(_index);
+		m_InstancedStaticMeshComponent->RemoveInstance(foundInstanceIndex);
+		m_InstanceIndices.Remove(_index);
+	}
+}
+
+void AGridVisual::ClearInstances()
+{
+	m_InstancedStaticMeshComponent->ClearInstances();
+	m_InstanceIndices.Empty();
+}
+
+FColor AGridVisual::_GetColorFromState(uint8 _tileStateMask)
+{
+	bool isSelected = (_tileStateMask & static_cast<uint8>(ETileStateFlags::Selected)) != 0;
+	if (isSelected)
+	{
+		return FColor::Red;
+	}
+
+	bool isHovered = (_tileStateMask & static_cast<uint8>(ETileStateFlags::Hovered)) != 0;
+	if (isHovered)
+	{
+		return FColor::Yellow;
+	}
+
+	bool isNeighbor = (_tileStateMask & static_cast<uint8>(ETileStateFlags::Neighbor)) != 0;
+	if (isNeighbor)
+	{
+		return FColor::Purple;
+	}
+
+	FColor color = FColor::Black;
+	color.A = 0.0f;
+	return color;
+}

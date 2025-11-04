@@ -3,7 +3,6 @@
 
 #include "SetTileTypeActionButton.h"
 #include "Components/ComboBoxString.h"
-#include "Kismet/GameplayStatics.h"
 #include "TacticalCombat/Core/PlayerActions.h"
 #include "TacticalCombat/Core/Actions/Grid/SetTileTypeAction.h"
 #include "TacticalCombat/Core/Grid/Grid.h"

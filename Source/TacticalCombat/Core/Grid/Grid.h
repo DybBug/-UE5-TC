@@ -13,8 +13,9 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnTileDataUpdatedEvent, const FIntPoint&)
 DECLARE_MULTICAST_DELEGATE(FOnGridDestroyedEvent)
 
 class AGridVisual;
-enum class ETileType : uint8;
+class AGridPathfinding;
 class UInstancedStaticMeshComponent;
+enum class ETileType : uint8;
 enum class EGridShape : uint8;
 
 UCLASS()
@@ -29,9 +30,10 @@ public:
 	// Sets default values for this actor's properties
 	AGrid();
 	
-	virtual void OnConstruction(const FTransform& Transform) override;
 	
 protected:
+	virtual void OnConstruction(const FTransform& Transform) override;
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -66,21 +68,25 @@ public:
 	FRotator GetTileRotationFromGridIndex(int _row, int _col);
 	FVector GetTileScale();
 
+	TArray<FIntPoint> GetAllTilesWithState(const ETileStateFlags _stateFlag);
+	void ClearStateFromTiles(const ETileStateFlags _stateFlag);
+
 #pragma region Getter
 	FORCEINLINE const FVector& GetCenterLocation() const { return m_CenterLocation; }
 	FORCEINLINE const FVector& GetTileSize() const { return m_TileSize; }
 	FORCEINLINE const FIntPoint& GetTileCount() const { return m_TileCount; }
 	FORCEINLINE EGridShape GetGridShape() const { return m_Shape; }
 	FORCEINLINE const FVector& GetBottomLeftLocation() const { return m_GridBottomLeftCornerLocation; }
-	FORCEINLINE float GetZOffset() { return m_GridVisual.IsValid() ? m_GridVisual->GetZOffset() : 0.0f; }
+	FORCEINLINE float GetZOffset() { return m_GridVisual != nullptr ? m_GridVisual->GetZOffset() : 0.0f; }
 	FORCEINLINE const TMap<FIntPoint, FTileData>& GetGridTileMap() const { return m_GridTileMap; }
+	FORCEINLINE AGridPathfinding* const GetGridPathfinding() const { return m_GridPathfinding.Get(); }
 
 #pragma endregion
 	
 
 #pragma region Setter
 	FORCEINLINE void SetZOffset(float _offset) {
-		if (m_GridVisual.IsValid())
+		if (m_GridVisual)
 		{
 			m_GridVisual->SetZOffset(_offset);
 		}
@@ -98,6 +104,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Component", Meta = (DisplayName = "Grid Visual"))
 	TObjectPtr<UChildActorComponent> m_ChildActorGridVisual;
+	
+	UPROPERTY(EditAnywhere, Category = "Component", Meta = (DisplayName = "Grid Pathfinding"))
+	TObjectPtr<UChildActorComponent> m_ChildActorGridPathFinding;
 #pragma endregion
 
 #pragma region Properties
@@ -120,7 +129,10 @@ protected:
 	TMap<FIntPoint, FTileData> m_GridTileMap;
 
 	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Grid Visual"))
-	TWeakObjectPtr<AGridVisual> m_GridVisual;
+	TObjectPtr<AGridVisual> m_GridVisual;
+
+	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Grid Pathfinding"))
+	TObjectPtr<AGridPathfinding> m_GridPathfinding;
 #pragma endregion
 
 

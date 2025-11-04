@@ -4,6 +4,7 @@
 #include "Grid.h"
 
 #include "GridModifier.h"
+#include "GridPathfinding.h"
 #include "GridVisual.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -44,21 +45,33 @@ AGrid::AGrid()
 	m_SceneComponent = CreateDefaultSubobject<USceneComponent>("Scene Component");
 	RootComponent = m_SceneComponent;
 
-	m_ChildActorGridVisual = CreateDefaultSubobject<UChildActorComponent>("ChildActor Component");
+	m_ChildActorGridVisual = CreateDefaultSubobject<UChildActorComponent>("Grid Visual ChildActor Component");
 	m_ChildActorGridVisual->SetChildActorClass(AGridVisual::StaticClass());
 	m_ChildActorGridVisual->SetupAttachment(m_SceneComponent);
-
-	// static ConstructorHelpers::FClassFinder<AActor> gridVisualClassFinder(TEXT("/Game/Grids/BP_GridVisual.BP_GridVisual_C"));
-	// if (gridVisualClassFinder.Succeeded())
-	// {
-	// 	m_ChildActorGridVisual->SetChildActorClass(gridVisualClassFinder.Class);	
-	// }
+	
+	m_ChildActorGridPathFinding = CreateDefaultSubobject<UChildActorComponent>("Grid Pathfinding ChildActor Component");
+    m_ChildActorGridPathFinding->SetChildActorClass(AGridPathfinding::StaticClass());
+    m_ChildActorGridPathFinding->SetupAttachment(m_SceneComponent);
 }
 
 void AGrid::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
+	
+#if WITH_EDITOR
+	// 에디터 전용 미리보기
 	m_GridVisual = Cast<AGridVisual>(m_ChildActorGridVisual->GetChildActor());
+	if (m_GridVisual == nullptr)
+		return;
+	
+	m_GridPathfinding = Cast<AGridPathfinding>(m_ChildActorGridPathFinding->GetChildActor());
+	if (m_GridPathfinding == nullptr)
+		return;
+	
+	m_GridPathfinding->SetGrid(this);
+	
+	SpawnGrid(GetActorLocation(), m_TileSize, m_TileCount, m_Shape, true);
+#endif
 }
 
 // Called when the game starts or when spawned
@@ -67,6 +80,10 @@ void AGrid::BeginPlay()
 	Super::BeginPlay();
 	
 	m_GridVisual = Cast<AGridVisual>(m_ChildActorGridVisual->GetChildActor());
+	m_GridPathfinding = Cast<AGridPathfinding>(m_ChildActorGridPathFinding->GetChildActor());
+	
+	m_GridPathfinding->SetGrid(this);
+	
 	SpawnGrid(GetActorLocation(), m_TileSize, m_TileCount, m_Shape, true);
 }
 
@@ -120,7 +137,7 @@ void AGrid::SpawnGrid(const FVector& _centerLocation, const FVector& _tileSize, 
 void AGrid::DestroyGrid()
 {
 	m_GridTileMap.Empty();
-	if (m_GridVisual.IsValid())
+	if (m_GridVisual)
 	{
 		m_GridVisual->DestroyGridVisual();
 		if (OnGridDestroyed.IsBound())
@@ -373,7 +390,27 @@ FVector AGrid::GetTileScale()
 	return m_TileSize / GetGridShapeData().MeshSize;
 }
 
+TArray<FIntPoint> AGrid::GetAllTilesWithState(const ETileStateFlags _stateFlag)
+{
+	TArray<FIntPoint> indices;
+	for (auto& [index, tileData] : m_GridTileMap)
+	{
+		if ((tileData.StateMask & (uint8)_stateFlag) != 0)
+		{
+			indices.Add(tileData.Index);
+		}
+	}
+	return indices;
+}
 
+void AGrid::ClearStateFromTiles(const ETileStateFlags _stateFlag)
+{
+	TArray<FIntPoint> indices = GetAllTilesWithState(_stateFlag);
+	for (const FIntPoint& index : indices)
+	{
+		RemoveStateFromTile(index, _stateFlag);
+	}
+}
 
 void AGrid::_CalculateCenterAndBottomLeft(FVector& _center, FVector& _bottomLeft)
 {
@@ -425,4 +462,3 @@ void AGrid::_CalculateCenterAndBottomLeft(FVector& _center, FVector& _bottomLeft
 		}
 	}	
 }
-
