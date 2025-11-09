@@ -14,21 +14,19 @@ void UActionButton::NativeConstruct()
 
 	m_PlayerActions = Cast<APlayerActions>(UGameplayStatics::GetActorOfClass(GetWorld(), APlayerActions::StaticClass()));
 
-	const UAbstractAction* pAction = m_PlayerActions->GetLeftClickSelectAction();
-	if (pAction == nullptr)
+	const UAbstractAction* pLeftAction = m_PlayerActions->GetLeftClickSelectAction();	
+	const UAbstractAction* pRightAction = m_PlayerActions->GetRightClickSelectAction();
+	
+	bool isValidLeftAction = m_LeftClickActionClass == ((pLeftAction == nullptr) ? nullptr : pLeftAction->GetClass());
+	bool isValidRightAction = m_RightClickActionClass == ((pRightAction == nullptr) ? nullptr : pRightAction->GetClass());
+	
+	if ( isValidLeftAction && isValidRightAction)
 	{
-		Button->SetBackgroundColor(FColor::Silver);
+		Button->SetBackgroundColor(FColor::Blue);
 	}
 	else
 	{
-		if (m_PlayerActions->GetLeftClickSelectAction()->GetClass() == m_LeftClickActionClass.Get()->GetClass())
-		{
-			Button->SetBackgroundColor(FColor::Blue);
-		}
-		else
-		{
-			Button->SetBackgroundColor(FColor::Silver);
-		}
+		Button->SetBackgroundColor(FColor::Silver);
 	}
 	
 	Button->OnClicked.AddDynamic(this, &UActionButton::_OnButtonClicked);
@@ -43,26 +41,37 @@ void UActionButton::NativePreConstruct()
 
 void UActionButton::OnSelectedActionsChanged(const UAbstractAction* const _leftClickAction, const UAbstractAction* const _rightClickAction)
 {
-	if (m_PlayerActions->GetLeftClickSelectAction() == nullptr)
-	{
-		Button->SetBackgroundColor(FColor::Silver);
-	}
-	else if (m_PlayerActions->GetLeftClickSelectAction()->GetClass() == m_LeftClickActionClass.Get())
+	const UAbstractAction* pLeftAction = m_PlayerActions->GetLeftClickSelectAction();	
+	const UAbstractAction* pRightAction = m_PlayerActions->GetRightClickSelectAction();
+	
+	bool isValidLeftAction = m_LeftClickActionClass == ((pLeftAction == nullptr) ? nullptr : pLeftAction->GetClass());
+	bool isValidRightAction = m_RightClickActionClass == ((pRightAction == nullptr) ? nullptr : pRightAction->GetClass());
+	
+	if ( isValidLeftAction && isValidRightAction)
 	{
 		Button->SetBackgroundColor(FColor::Blue);
+	}
+	else
+	{
+		Button->SetBackgroundColor(FColor::Silver);
 	}
 }
 
 
 void UActionButton::_OnButtonClicked()
 {
-	const UAbstractAction* pLeftClickSelectedAction = m_PlayerActions->GetLeftClickSelectAction();
-	if (pLeftClickSelectedAction == nullptr || m_PlayerActions->GetLeftClickSelectAction()->GetClass() != m_LeftClickActionClass.Get())
+	const UAbstractAction* pLeftAction = m_PlayerActions->GetLeftClickSelectAction();
+	const UAbstractAction* pRightAction = m_PlayerActions->GetRightClickSelectAction();
+	
+	bool isValidLeftAction = m_LeftClickActionClass == ((pLeftAction == nullptr) ? nullptr : pLeftAction->GetClass());
+	bool isValidRightAction = m_RightClickActionClass == ((pRightAction == nullptr) ? nullptr : pRightAction->GetClass());
+	
+	if ( isValidLeftAction && isValidRightAction)
 	{
-		m_PlayerActions->SetSelectedActionWithNotify(m_LeftClickActionClass, m_RightClickActionClass);
+		m_PlayerActions->SetSelectedActionWithNotify(nullptr, nullptr);
 	}
 	else
 	{
-		m_PlayerActions->SetSelectedActionWithNotify(nullptr, nullptr);
+		m_PlayerActions->SetSelectedActionWithNotify(m_LeftClickActionClass, m_RightClickActionClass);
 	}
 }
