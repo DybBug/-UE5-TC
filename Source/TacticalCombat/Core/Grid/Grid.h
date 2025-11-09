@@ -6,7 +6,7 @@
 #include "GridModifier.h"
 #include "GridVisual.h"
 #include "GameFramework/Actor.h"
-#include "TacticalCombat/Structure/GridShapeData.h"
+#include "TacticalCombat/Structure/GridDatas.h"
 #include "Grid.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnTileDataUpdatedEvent, const FIntPoint&)
@@ -70,6 +70,8 @@ public:
 
 	TArray<FIntPoint> GetAllTilesWithState(const ETileStateFlags _stateFlag);
 	void ClearStateFromTiles(const ETileStateFlags _stateFlag);
+
+	bool IsWalkableTile(const FIntPoint& _index);
 
 #pragma region Getter
 	FORCEINLINE const FVector& GetCenterLocation() const { return m_CenterLocation; }

@@ -1,6 +1,6 @@
 #pragma once
 #include "Engine/DataTable.h"
-#include "GridShapeData.generated.h"
+#include "GridDatas.generated.h"
 
 class UStaticMesh;
 class UMaterial;

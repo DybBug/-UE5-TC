@@ -3,10 +3,8 @@
 
 #include "GridLibrary.h"
 
-#include "Kismet/GameplayStatics.h"
-#include "TacticalCombat/Misc/Defines.h"
 #include "TacticalCombat/Misc/Enums.h"
-#include "TacticalCombat/Structure/GridShapeData.h"
+#include "TacticalCombat/Structure/GridDatas.h"
 
 FGridShapeData UGridLibrary::GetGridShape(EGridShape _gridShape)
 {

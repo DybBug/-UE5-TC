@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "../AbstractAction.h"
+#include "TacticalCombat/Core/PlayerActions.h"
 #include "SetTileTypeAction.generated.h"
 
 enum class ETileType :uint8;

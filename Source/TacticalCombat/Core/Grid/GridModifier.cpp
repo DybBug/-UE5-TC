@@ -6,7 +6,7 @@
 #include "TacticalCombat/Libraries/GridLibrary.h"
 #include "TacticalCombat/Misc/Defines.h"
 #include "TacticalCombat/Misc/Enums.h"
-#include "TacticalCombat/Structure/GridShapeData.h"
+#include "TacticalCombat/Structure/GridDatas.h"
 
 TMap<ETileType, FColor> AGridModifier::TileColorMap = {
 	{ETileType::None, FColor::Black},

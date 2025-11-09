@@ -132,6 +132,12 @@ FColor AGridVisual::_GetColorFromState(uint8 _tileStateMask)
 		return FColor::Purple;
 	}
 
+	bool isInPath = (_tileStateMask & static_cast<uint8>(ETileStateFlags::InPath)) != 0;
+	if (isInPath)
+	{
+		return FColor::Blue;
+	}
+	
 	FColor color = FColor::Black;
 	color.A = 0.0f;
 	return color;

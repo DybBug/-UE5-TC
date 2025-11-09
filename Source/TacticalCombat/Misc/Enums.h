@@ -26,8 +26,9 @@ ENUM_RANGE_BY_COUNT(ETileType, ETileType::Max)
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class ETileStateFlags : uint8
 {
-	None     = 0 UMETA(DisplayName = "None"),
-	Hovered  = 1 << 0 UMETA(DisplayName = "Hovered"),
-	Selected = 1 << 1 UMETA(DisplayName = "Selected"),
-	Neighbor = 1 << 2 UMETA(DisplayName = "Neighbor"),
+	None		= 0		 UMETA(DisplayName = "None"),
+	Hovered		= 1 << 0 UMETA(DisplayName = "Hovered"),
+	Selected	= 1 << 1 UMETA(DisplayName = "Selected"),
+	Neighbor	= 1 << 2 UMETA(DisplayName = "Neighbor"),
+	InPath		= 1 << 3 UMETA(DisplayName = "InPath"),
 };

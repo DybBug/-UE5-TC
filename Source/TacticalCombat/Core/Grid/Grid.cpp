@@ -12,7 +12,6 @@
 #include "TacticalCombat/Libraries/GridLibrary.h"
 #include "TacticalCombat/Libraries/UtilityLibrary.h"
 #include "TacticalCombat/Misc/Defines.h"
-#include "TacticalCombat/Structure/GridShapeData.h"
 #include "TacticalCombat/Misc/Enums.h"
 
 bool AGrid::IsWalkableTile(ETileType _type)
@@ -410,6 +409,14 @@ void AGrid::ClearStateFromTiles(const ETileStateFlags _stateFlag)
 	{
 		RemoveStateFromTile(index, _stateFlag);
 	}
+}
+
+bool AGrid::IsWalkableTile(const FIntPoint& _index)
+{
+	const FTileData* pTile = m_GridTileMap.Find(_index);
+	if (!pTile) return false;
+
+	return IsWalkableTile(pTile->Type);
 }
 
 void AGrid::_CalculateCenterAndBottomLeft(FVector& _center, FVector& _bottomLeft)

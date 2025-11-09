@@ -13,6 +13,9 @@ void USelectTileAction::BeginDestroy()
 
 void USelectTileAction::Execute(const FIntPoint& _index)
 {
+	if (!m_PlayerActions.IsValid())
+		return;
+	
 	AGrid* const pGrid =  m_PlayerActions->GetGrid();
 
 	const FIntPoint& selectedTileIndex = m_PlayerActions->GetSelectedTileIndex();
