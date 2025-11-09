@@ -23,8 +23,8 @@ void UFindPathToTargetButton::OnSelectedActionsChanged(const UAbstractAction* co
 {
 	Super::OnSelectedActionsChanged(_leftClickAction, _rightClickAction);
 
-	UFindPathToTargetAction* pFindpathToTargetAction = Cast<UFindPathToTargetAction>(m_PlayerActions->GetLeftClickSelectAction());
-	if (!pFindpathToTargetAction)
+	UFindPathToTargetAction* pFindPathToTargetAction = Cast<UFindPathToTargetAction>(m_PlayerActions->GetRightClickSelectAction());
+	if (!pFindPathToTargetAction)
 	{
 		CheckBox_UseDiagonals->SetVisibility(ESlateVisibility::Collapsed);
 		return;
@@ -35,13 +35,13 @@ void UFindPathToTargetButton::OnSelectedActionsChanged(const UAbstractAction* co
 
 void UFindPathToTargetButton::OnUseDiagonalsCheckBoxStateChanged(bool _bIsChecked)
 {
-	UShowTileNeighborsAction* pShowTileNeighborsAction = Cast<UShowTileNeighborsAction>(m_PlayerActions->GetLeftClickSelectAction());
-	if (!pShowTileNeighborsAction)
+	UFindPathToTargetAction* pFindPathToTargetAction = Cast<UFindPathToTargetAction>(m_PlayerActions->GetRightClickSelectAction());
+	if (!pFindPathToTargetAction)
 	{
 		CheckBox_UseDiagonals->SetVisibility(ESlateVisibility::Collapsed);
 		return;
 	}
 
-	pShowTileNeighborsAction->SetUseDiagonals(_bIsChecked);
+	pFindPathToTargetAction->SetUseDiagonals(_bIsChecked);
 	CheckBox_UseDiagonals->SetVisibility(ESlateVisibility::Visible);
 }

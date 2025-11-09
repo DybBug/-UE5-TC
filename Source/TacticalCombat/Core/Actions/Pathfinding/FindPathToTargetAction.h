@@ -17,6 +17,10 @@ class TACTICALCOMBAT_API UFindPathToTargetAction : public USetTileTypeAction
 public:
 	virtual void Execute(const FIntPoint& _index) override;
 
+#pragma region Setter
+	FORCEINLINE void SetUseDiagonals(bool _bUseDiagonals) {m_bUseDiagonals = _bUseDiagonals; }
+#pragma endregion
+
 protected:
 	bool m_bUseDiagonals;
 	
