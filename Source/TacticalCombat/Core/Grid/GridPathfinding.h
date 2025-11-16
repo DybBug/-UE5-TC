@@ -4,8 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "TacticalCombat/Misc/Enums.h"
 #include "TacticalCombat/Structure/PathfindingDatas.h"
 #include "GridPathfinding.generated.h"
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPathfindingNodeUpdated, const FIntPoint&);
+DECLARE_MULTICAST_DELEGATE(FOnPathfindingNodeCleared);
 
 class AGrid;
 
@@ -39,8 +43,21 @@ public:
 	bool DiscoverNextNeighbor();
 	void InsertNodeInDiscoveredArray(const FPathfindingNode& _node);
 	void ClearGeneratedData();
+	bool IsDiagonal(const FIntPoint& _index1, const FIntPoint& _index2);
+
+#pragma region Getter
+	FORCEINLINE const FPathfindingNode* FindPathFindingNode(const FIntPoint& _index) const { return m_PathfindingNodesByIndex.Find(_index); }
+	FORCEINLINE int32 FindDiscoveredNodeIndex(const FIntPoint& _index) const { return m_DiscoveredNodeIndices.Find(_index); }
+	FORCEINLINE int32 FindDiscoveredNodeSortingCost(uint32 _index) const  { return m_DiscoveredNodeSortingCosts.IsValidIndex(_index) ? m_DiscoveredNodeSortingCosts[_index] : INVALID_SORTING_COST;}
+#pragma endregion 
+	
 #pragma region Setter
 	FORCEINLINE void SetGrid(AGrid* const _pGrid) { m_Grid = _pGrid; }
+#pragma endregion
+
+#pragma region Events
+	FOnPathfindingNodeUpdated OnPathfindingNodeUpdated;
+	FOnPathfindingNodeCleared OnPathfindingNodeCleared;
 #pragma endregion
 
 private:
@@ -85,6 +102,7 @@ private:
 	TArray<FIntPoint> _GetNeighborIndicesForHexagon(const FIntPoint& _index);
 	TArray<FIntPoint> _GetNeighborIndicesForTriangle(const FIntPoint& _index, bool _bIsDiagonalIncluded);
 
+	int32 _GetTileSortingCost(const FPathfindingNode& _node);
 };
 
 

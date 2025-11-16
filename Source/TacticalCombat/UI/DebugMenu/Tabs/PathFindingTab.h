@@ -22,6 +22,18 @@ protected:
 #pragma region  Widgets
 	UPROPERTY(Meta = (BindWidget))
 	TObjectPtr<UCheckBox> CheckBox_IsShowIndicesOnTiles;
+
+	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UCheckBox> CheckBox_IsShowCostToEnterTile;
+
+	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UCheckBox> CheckBox_IsShowMinCostToTarget;
+	
+	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UCheckBox> CheckBox_IsShowCostFromStart;
+
+	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UCheckBox> CheckBox_IsShowSortOrder;
 #pragma endregion
 	
 #pragma region Internals
@@ -31,5 +43,17 @@ protected:
 
 protected:
 	UFUNCTION()
-	void OnCheckStateChanged(bool _bIsChecked);
+	void OnIsShowIndicesOnTilesCheckStateChanged(bool _bIsChecked);
+
+	UFUNCTION()
+	void OnIsShowCostToEnterTileCheckStateChanged(bool _bIsChecked);
+
+	UFUNCTION()
+	void OnIsShowMinCostToTargetCheckStateChanged(bool _bIsChecked);
+
+	UFUNCTION()
+	void OnIsShowCostFromStartCheckStateChanged(bool _bIsChecked);
+
+	UFUNCTION()
+	void OnIsShowSortOrderCheckStateChanged(bool _bIsChecked);
 };

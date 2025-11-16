@@ -8,7 +8,8 @@
 
 void URemoveTileAction::Execute(const FIntPoint& _index)
 {
-	Super::Execute(_index);
+	if (!m_PlayerActions.IsValid())
+		return;
 
 	AGrid* const pGrid = m_PlayerActions->GetGrid();
 	if (pGrid == nullptr)

@@ -1,7 +1,6 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-
 #include "PathfindingDatas.generated.h"
 
 USTRUCT(BlueprintType)
@@ -10,17 +9,19 @@ struct FPathfindingNode
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FIntPoint Index = FIntPoint(-999, -999);
+	FIntPoint Index = FIntPoint(INVALID_POINT_VALUE, INVALID_POINT_VALUE);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 CostToEnterTile = 1;
+	int32 CostToEnterTile = DEFAULT_COST_TO_ENTER;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 CostFromStart = 999999;
+	int32 CostFromStart = DEFAULT_COST;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 MinimumCostToTarget = 999999;
+	int32 MinimumCostToTarget = DEFAULT_COST;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FIntPoint PreviousIndex = FIntPoint(-999, -999);
+	FIntPoint PreviousIndex = FIntPoint(INVALID_POINT_VALUE, INVALID_POINT_VALUE);
 };
+
+

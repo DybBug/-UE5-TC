@@ -113,22 +113,89 @@ void AGridPathfinding::DiscoverNode(const FPathfindingNode& _node)
 {
 	m_PathfindingNodesByIndex.Add(_node.Index, _node);
 	InsertNodeInDiscoveredArray(_node);
+	if (OnPathfindingNodeUpdated.IsBound())
+	{
+		OnPathfindingNodeUpdated.Broadcast(_node.Index);
+	}
 }
 
 int32 AGridPathfinding::GetMinimumCostBetweenTwoNodes(const FIntPoint& _index1, const FIntPoint& _index2, bool _bIsDiagonalIncluded)
 {
-	if (_bIsDiagonalIncluded)
+	switch (m_Grid->GetGridShape())
 	{
-		int32 x = FMath::Abs(_index1.X - _index2.X);
-		int32 y = FMath::Abs(_index1.Y - _index2.Y);
-		return FMath::Max(x, y);
+		case EGridShape::None:
+		{
+			return -1;
+		}
+		case EGridShape::Square:
+		{
+			if (_bIsDiagonalIncluded)
+			{
+				int32 dx = FMath::Abs(_index1.X - _index2.X);
+				int32 dy = FMath::Abs(_index1.Y - _index2.Y);
+				return FMath::Max(dx, dy);
+			}
+			else
+			{
+				int32 dx = FMath::Abs(_index1.X - _index2.X);
+				int32 dy = FMath::Abs(_index1.Y - _index2.Y);
+				return dx + dy;				
+			}
+		}
+		case EGridShape::Hexagon:
+		{
+			int32 dx = FMath::Abs(_index1.X - _index2.X);
+			int32 dy = FMath::Max((FMath::Abs(_index1.Y - _index2.Y) - dx) * 0.5f, 0);
+			return dx + dy;
+		}
+		case EGridShape::Triangle:
+		{
+			if (_bIsDiagonalIncluded)
+			{
+				int32 dx = FMath::Abs(_index1.X - _index2.X);
+				int32 dy = FMath::Abs(_index1.Y - _index2.Y);
+				return dx + dy;		
+			}
+			else
+			{
+				int32 dx = FMath::Abs(_index1.X - _index2.X);
+				int32 dy = FMath::Abs(_index1.Y - _index2.Y);
+
+				bool isStartingTileFacingUp = UUtilityLibrary::IsIntEven(_index1.X) == UUtilityLibrary::IsIntEven(_index1.Y);
+		
+				bool isPartOfTheNormalZone = isStartingTileFacingUp
+											? (_index2.X < _index1.X) ? ((dx - 1) <= dy) : (dx <= dy)
+											: (_index2.X < _index1.X) ? (dx <= dy) : ((dx - 1) <= dy);
+
+				if (isPartOfTheNormalZone)
+				{
+					return dx + dy;
+				}
+				else
+				{
+					bool isTileFacingUp = UUtilityLibrary::IsIntEven(dx) == UUtilityLibrary::IsIntEven(dy);
+					if (isTileFacingUp)
+					{
+						return dx * 2;
+					}
+					else
+					{						
+						bool isBellowStartingTile = _index2.X < _index1.X;
+						int32 offset = isBellowStartingTile ? -1 : 1;
+						return (dx * 2) + (isStartingTileFacingUp ? offset : -offset);			
+					}
+				}				
+			}
+		}
+		default:
+		{
+			checkf(false, TEXT("GridShape value %d is invalid in %s"), 
+				   static_cast<int>(m_Grid->GetGridShape()), 
+				   TEXT(__FUNCTION__));
+			return -1;	
+		}
 	}
-	else
-	{
-		int32 x = FMath::Abs(_index1.X - _index2.X);
-		int32 y = FMath::Abs(_index1.Y - _index2.Y);
-		return x + y;  
-	}
+
 }
 
 bool AGridPathfinding::AnalyseNextDiscoveredNode()
@@ -223,7 +290,8 @@ bool AGridPathfinding::DiscoverNextNeighbor()
 
 void AGridPathfinding::InsertNodeInDiscoveredArray(const FPathfindingNode& _node)
 {
-	int32 sortingCost = _node.CostFromStart + _node.MinimumCostToTarget;
+	int32 sortingCost = _GetTileSortingCost(_node);
+
 
 	// 1. 비어있을 경우
 	if (m_DiscoveredNodeSortingCosts.Num() == 0)
@@ -259,6 +327,17 @@ void AGridPathfinding::ClearGeneratedData()
 	m_DiscoveredNodeSortingCosts.Empty();
 	m_DiscoveredNodeIndices.Empty();
 	m_AnalysedNodeIndices.Empty();
+	
+	if (OnPathfindingNodeCleared.IsBound())
+	{
+		OnPathfindingNodeCleared.Broadcast();
+	}
+}
+
+bool AGridPathfinding::IsDiagonal(const FIntPoint& _index1, const FIntPoint& _index2)
+{
+	TArray<FIntPoint> neighborIndices = GetNeighborIndices(_index1);
+	return !neighborIndices.Contains(_index2);
 }
 
 TArray<FIntPoint> AGridPathfinding::_GetNeighborIndicesForSquare(const FIntPoint& _index, bool _bIsDiagonalIncluded)
@@ -325,6 +404,12 @@ TArray<FIntPoint> AGridPathfinding::_GetNeighborIndicesForTriangle(const FIntPoi
 	}
 	
 	return neighbors;
+}
+
+int32 AGridPathfinding::_GetTileSortingCost(const FPathfindingNode& _node)
+{
+	const int32 diagonalCost = IsDiagonal(_node.Index, _node.PreviousIndex) ? 1 : 0;
+	return (_node.CostFromStart + _node.MinimumCostToTarget) * 2 + diagonalCost;
 }
 
 

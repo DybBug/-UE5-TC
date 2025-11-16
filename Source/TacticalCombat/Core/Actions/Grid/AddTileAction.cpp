@@ -7,12 +7,10 @@
 
 void UAddTileAction::Execute(const FIntPoint& _index)
 {
-	AGrid* const pGrid = m_PlayerActions->GetGrid();
-	if (pGrid == nullptr)
+	if (!m_PlayerActions.IsValid())
 		return;
 	
-	if (pGrid->IsIndexValid(_index))
-		return;
+	AGrid* const pGrid = m_PlayerActions->GetGrid();	
 	
 	ETileType tileType;
 	FVector tileLocation =  pGrid->GetTileLocationFromGridIndex(_index.X, _index.Y);

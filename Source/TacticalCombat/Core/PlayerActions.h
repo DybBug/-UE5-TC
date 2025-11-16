@@ -9,7 +9,7 @@
 
 class UAbstractAction;
 
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSelectedActionsChangedEvent, const UAbstractAction* const, const UAbstractAction* const);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSelectedActionsChanged, const UAbstractAction* const, const UAbstractAction* const);
 
 UCLASS()
 class TACTICALCOMBAT_API APlayerActions : public AActor
@@ -31,7 +31,7 @@ public:
 	void SetSelectedActionWithNotify(const TSubclassOf<UAbstractAction>& _leftClickActionClass, const TSubclassOf<UAbstractAction>& _rightClickActionClass);
 
 #pragma region Delegate
-	FOnSelectedActionsChangedEvent OnSelectedActionsChanged;
+	FOnSelectedActionsChanged OnSelectedActionsChanged;
 #pragma endregion
 
 #pragma region Getter

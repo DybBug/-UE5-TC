@@ -8,6 +8,7 @@
 
 class AGrid;
 class ATextRenderActor;
+enum class ETileDebugFlags : uint8;
 
 UCLASS()
 class TACTICALCOMBAT_API UDebugTextOnTiles : public UObject
@@ -17,13 +18,9 @@ class TACTICALCOMBAT_API UDebugTextOnTiles : public UObject
 public:
 	UDebugTextOnTiles();
 	
-	void Initialize();
-	
-	
-	UFUNCTION()
-	ATextRenderActor* GetTextActor(const FIntPoint& _index);
+	void Initialize();	
 
-	UFUNCTION()
+	ATextRenderActor* GetTextActor(const FIntPoint& _index);
 	void DestroyTextActor(const FIntPoint& _index);
 
 	UFUNCTION()
@@ -32,13 +29,14 @@ public:
 	UFUNCTION()
 	void UpdateTextOnTile(const FIntPoint& _index);
 
-#pragma region Getter
-	FORCEINLINE bool IsShowTileIndices() const { return m_bIsShowTileIndices; }
-#pragma endregion
-
-#pragma region Setter
-	void SetShowTileIndices(bool _bIsShow);
-#pragma endregion
+	UFUNCTION()
+	void UpdateTextOnAllTiles();
+	
+	void AddTileDebugFlag(ETileDebugFlags _flags);
+	void RemoveTileDebugFlag(ETileDebugFlags _flags);
+	bool HasTileDebugFlag(ETileDebugFlags flag) const;
+	
+	FORCEINLINE bool IsShowDebugText() const { return static_cast<uint8>(m_TileDebugMask) != 0; }
 
 protected:
 #pragma region Internal
@@ -48,9 +46,11 @@ protected:
 	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Grid"))
 	TObjectPtr<AGrid> m_Grid;
 
-	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Is Show Tile Indices"))
-	bool m_bIsShowTileIndices;
+	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Tile Debug Mask"))
+	uint8 m_TileDebugMask;
 #pragma endregion
 
-};
+private:
+	void _ReUpdateAllTextsAfterDelay(const FIntPoint& _index);
 
+};

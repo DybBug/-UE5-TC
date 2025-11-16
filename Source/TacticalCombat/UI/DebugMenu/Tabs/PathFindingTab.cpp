@@ -5,6 +5,7 @@
 
 #include "Components/CheckBox.h"
 #include "TacticalCombat/Core/Grid/Other/DebugTextOnTiles.h"
+#include "TacticalCombat/Misc/Enums.h"
 
 void UPathFindingTab::NativeConstruct()
 {
@@ -16,11 +17,78 @@ void UPathFindingTab::NativeConstruct()
 		m_DebugTextOnTiles->Initialize();
 	}
 
-	CheckBox_IsShowIndicesOnTiles->SetIsChecked(m_DebugTextOnTiles->IsShowTileIndices());
-	CheckBox_IsShowIndicesOnTiles->OnCheckStateChanged.AddDynamic(this, &UPathFindingTab::OnCheckStateChanged);
+	CheckBox_IsShowIndicesOnTiles->SetIsChecked(m_DebugTextOnTiles->HasTileDebugFlag(ETileDebugFlags::TileIndices));
+	CheckBox_IsShowIndicesOnTiles->OnCheckStateChanged.AddDynamic(this, &UPathFindingTab::OnIsShowIndicesOnTilesCheckStateChanged);
+
+	CheckBox_IsShowCostToEnterTile->SetIsChecked(m_DebugTextOnTiles->HasTileDebugFlag(ETileDebugFlags::CostToEnterTile));
+	CheckBox_IsShowCostToEnterTile->OnCheckStateChanged.AddDynamic(this, &UPathFindingTab::OnIsShowCostToEnterTileCheckStateChanged);
+
+	CheckBox_IsShowMinCostToTarget->SetIsChecked(m_DebugTextOnTiles->HasTileDebugFlag(ETileDebugFlags::MinCostToTarget));
+	CheckBox_IsShowMinCostToTarget->OnCheckStateChanged.AddDynamic(this, &UPathFindingTab::OnIsShowMinCostToTargetCheckStateChanged);
+
+	CheckBox_IsShowCostFromStart->SetIsChecked(m_DebugTextOnTiles->HasTileDebugFlag(ETileDebugFlags::CostFromStart));
+	CheckBox_IsShowCostFromStart->OnCheckStateChanged.AddDynamic(this, &UPathFindingTab::OnIsShowCostFromStartCheckStateChanged);
+
+	CheckBox_IsShowSortOrder->SetIsChecked(m_DebugTextOnTiles->HasTileDebugFlag(ETileDebugFlags::SortOrder));
+	CheckBox_IsShowSortOrder->OnCheckStateChanged.AddDynamic(this, &UPathFindingTab::OnIsShowSortOrderCheckStateChanged);
 }
 
-void UPathFindingTab::OnCheckStateChanged(bool _bIsChecked)
+void UPathFindingTab::OnIsShowIndicesOnTilesCheckStateChanged(bool _bIsChecked)
 {
-	m_DebugTextOnTiles->SetShowTileIndices(_bIsChecked);	
+	if (_bIsChecked)
+	{
+		m_DebugTextOnTiles->AddTileDebugFlag(ETileDebugFlags::TileIndices);	
+	}
+	else
+	{
+		m_DebugTextOnTiles->RemoveTileDebugFlag(ETileDebugFlags::TileIndices);	
+	}
+}
+
+void UPathFindingTab::OnIsShowCostToEnterTileCheckStateChanged(bool _bIsChecked)
+{
+	if (_bIsChecked)
+	{
+		m_DebugTextOnTiles->AddTileDebugFlag(ETileDebugFlags::CostToEnterTile);	
+	}
+	else
+	{
+		m_DebugTextOnTiles->RemoveTileDebugFlag(ETileDebugFlags::CostToEnterTile);	
+	}	
+}
+
+void UPathFindingTab::OnIsShowMinCostToTargetCheckStateChanged(bool _bIsChecked)
+{
+	if (_bIsChecked)
+	{
+		m_DebugTextOnTiles->AddTileDebugFlag(ETileDebugFlags::MinCostToTarget);	
+	}
+	else
+	{
+		m_DebugTextOnTiles->RemoveTileDebugFlag(ETileDebugFlags::MinCostToTarget);	
+	}
+}
+
+void UPathFindingTab::OnIsShowCostFromStartCheckStateChanged(bool _bIsChecked)
+{
+	if (_bIsChecked)
+	{
+		m_DebugTextOnTiles->AddTileDebugFlag(ETileDebugFlags::CostFromStart);	
+	}
+	else
+	{
+		m_DebugTextOnTiles->RemoveTileDebugFlag(ETileDebugFlags::CostFromStart);	
+	}
+}
+
+void UPathFindingTab::OnIsShowSortOrderCheckStateChanged(bool _bIsChecked)
+{
+	if (_bIsChecked)
+	{
+		m_DebugTextOnTiles->AddTileDebugFlag(ETileDebugFlags::SortOrder);	
+	}
+	else
+	{
+		m_DebugTextOnTiles->RemoveTileDebugFlag(ETileDebugFlags::SortOrder);	
+	}
 }

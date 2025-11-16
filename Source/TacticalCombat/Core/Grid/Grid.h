@@ -9,8 +9,8 @@
 #include "TacticalCombat/Structure/GridDatas.h"
 #include "Grid.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnTileDataUpdatedEvent, const FIntPoint&)
-DECLARE_MULTICAST_DELEGATE(FOnGridDestroyedEvent)
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnTileDataUpdated, const FIntPoint&);
+DECLARE_MULTICAST_DELEGATE(FOnGridDestroyed);
 
 class AGridVisual;
 class AGridPathfinding;
@@ -81,7 +81,7 @@ public:
 	FORCEINLINE const FVector& GetBottomLeftLocation() const { return m_GridBottomLeftCornerLocation; }
 	FORCEINLINE float GetZOffset() { return m_GridVisual != nullptr ? m_GridVisual->GetZOffset() : 0.0f; }
 	FORCEINLINE const TMap<FIntPoint, FTileData>& GetGridTileMap() const { return m_GridTileMap; }
-	FORCEINLINE AGridPathfinding* const GetGridPathfinding() const { return m_GridPathfinding.Get(); }
+	FORCEINLINE AGridPathfinding* GetGridPathfinding() const { return m_GridPathfinding.Get(); }
 
 #pragma endregion
 	
@@ -96,8 +96,8 @@ public:
 #pragma endregion
 
 public:
-	FOnTileDataUpdatedEvent OnTileDataUpdated;
-	FOnGridDestroyedEvent OnGridDestroyed;
+	FOnTileDataUpdated OnTileDataUpdated;
+	FOnGridDestroyed OnGridDestroyed;
 	
 protected:
 #pragma region Component

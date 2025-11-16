@@ -2,14 +2,7 @@
 
 
 #include "SelectTileAction.h"
-
 #include "TacticalCombat/Core/PlayerActions.h"
-
-void USelectTileAction::BeginDestroy()
-{
-	Super::BeginDestroy();
-	Execute(FIntPoint(-999, -999));
-}
 
 void USelectTileAction::Execute(const FIntPoint& _index)
 {

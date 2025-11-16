@@ -14,9 +14,7 @@ class TACTICALCOMBAT_API USelectTileAction : public UAbstractAction
 {
 	GENERATED_BODY()
 
-public:
-	virtual void BeginDestroy() override;
-	
+public:	
 	virtual void Execute(const FIntPoint& _index) override;
 	
 };

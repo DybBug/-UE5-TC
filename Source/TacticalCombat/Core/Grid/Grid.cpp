@@ -336,7 +336,6 @@ FVector AGrid::TraceForGround(const FVector& _location, ETileType& _hitTileType)
 	return FVector(-99999, -99999, -99999);
 }
 
-
 FVector AGrid::GetTileLocationFromGridIndex(int _row, int _col)
 {
 	FVector sizeOffset = FVector::Zero();
