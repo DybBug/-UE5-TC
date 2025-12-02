@@ -4,7 +4,7 @@
 #include "PathFindingTab.h"
 
 #include "Components/CheckBox.h"
-#include "TacticalCombat/Core/Grid/Other/DebugTextOnTiles.h"
+#include "TacticalCombat/Core/Grid/Other/DebugTextAndColorOnTiles.h"
 #include "TacticalCombat/Misc/Enums.h"
 
 void UPathFindingTab::NativeConstruct()
@@ -13,7 +13,7 @@ void UPathFindingTab::NativeConstruct()
 
 	if (!m_DebugTextOnTiles)
 	{
-		m_DebugTextOnTiles = NewObject<UDebugTextOnTiles>(this);
+		m_DebugTextOnTiles = NewObject<UDebugTextAndColorOnTiles>(this);
 		m_DebugTextOnTiles->Initialize();
 	}
 
@@ -31,64 +31,45 @@ void UPathFindingTab::NativeConstruct()
 
 	CheckBox_IsShowSortOrder->SetIsChecked(m_DebugTextOnTiles->HasTileDebugFlag(ETileDebugFlags::SortOrder));
 	CheckBox_IsShowSortOrder->OnCheckStateChanged.AddDynamic(this, &UPathFindingTab::OnIsShowSortOrderCheckStateChanged);
+
+	CheckBox_IsShowDiscoveredTiles->SetIsChecked(m_DebugTextOnTiles->HasTileDebugFlag(ETileDebugFlags::DiscoveredTiles));
+	CheckBox_IsShowDiscoveredTiles->OnCheckStateChanged.AddDynamic(this, &UPathFindingTab::OnIsShowDiscoveredTilesCheckStateChanged);
+
+	CheckBox_IsShowAnalyzedTiles->SetIsChecked(m_DebugTextOnTiles->HasTileDebugFlag(ETileDebugFlags::AnalysedTiles));
+	CheckBox_IsShowAnalyzedTiles->OnCheckStateChanged.AddDynamic(this, &UPathFindingTab::OnIsShowAnalyzedTilesCheckStateChanged);
 }
 
 void UPathFindingTab::OnIsShowIndicesOnTilesCheckStateChanged(bool _bIsChecked)
 {
-	if (_bIsChecked)
-	{
-		m_DebugTextOnTiles->AddTileDebugFlag(ETileDebugFlags::TileIndices);	
-	}
-	else
-	{
-		m_DebugTextOnTiles->RemoveTileDebugFlag(ETileDebugFlags::TileIndices);	
-	}
+	m_DebugTextOnTiles->SetTileDebugFlag(ETileDebugFlags::TileIndices, _bIsChecked);
 }
 
 void UPathFindingTab::OnIsShowCostToEnterTileCheckStateChanged(bool _bIsChecked)
 {
-	if (_bIsChecked)
-	{
-		m_DebugTextOnTiles->AddTileDebugFlag(ETileDebugFlags::CostToEnterTile);	
-	}
-	else
-	{
-		m_DebugTextOnTiles->RemoveTileDebugFlag(ETileDebugFlags::CostToEnterTile);	
-	}	
+	m_DebugTextOnTiles->SetTileDebugFlag(ETileDebugFlags::CostToEnterTile, _bIsChecked);	
 }
 
 void UPathFindingTab::OnIsShowMinCostToTargetCheckStateChanged(bool _bIsChecked)
 {
-	if (_bIsChecked)
-	{
-		m_DebugTextOnTiles->AddTileDebugFlag(ETileDebugFlags::MinCostToTarget);	
-	}
-	else
-	{
-		m_DebugTextOnTiles->RemoveTileDebugFlag(ETileDebugFlags::MinCostToTarget);	
-	}
+	m_DebugTextOnTiles->SetTileDebugFlag(ETileDebugFlags::MinCostToTarget, _bIsChecked);
 }
 
 void UPathFindingTab::OnIsShowCostFromStartCheckStateChanged(bool _bIsChecked)
 {
-	if (_bIsChecked)
-	{
-		m_DebugTextOnTiles->AddTileDebugFlag(ETileDebugFlags::CostFromStart);	
-	}
-	else
-	{
-		m_DebugTextOnTiles->RemoveTileDebugFlag(ETileDebugFlags::CostFromStart);	
-	}
+	m_DebugTextOnTiles->SetTileDebugFlag(ETileDebugFlags::CostFromStart, _bIsChecked);
 }
 
 void UPathFindingTab::OnIsShowSortOrderCheckStateChanged(bool _bIsChecked)
 {
-	if (_bIsChecked)
-	{
-		m_DebugTextOnTiles->AddTileDebugFlag(ETileDebugFlags::SortOrder);	
-	}
-	else
-	{
-		m_DebugTextOnTiles->RemoveTileDebugFlag(ETileDebugFlags::SortOrder);	
-	}
+	m_DebugTextOnTiles->SetTileDebugFlag(ETileDebugFlags::SortOrder, _bIsChecked);
+}
+
+void UPathFindingTab::OnIsShowDiscoveredTilesCheckStateChanged(bool _bIsChecked)
+{	
+	m_DebugTextOnTiles->SetShowTileStates(_bIsChecked, CheckBox_IsShowAnalyzedTiles->IsChecked());
+}
+
+void UPathFindingTab::OnIsShowAnalyzedTilesCheckStateChanged(bool _bIsChecked)
+{
+	m_DebugTextOnTiles->SetShowTileStates(CheckBox_IsShowDiscoveredTiles->IsChecked(), _bIsChecked);
 }

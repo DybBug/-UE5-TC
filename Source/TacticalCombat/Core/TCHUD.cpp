@@ -5,7 +5,7 @@
 
 #include "Blueprint/UserWidget.h"
 #include "../UI/DebugMenu/DebugMenu.h"
-#include "Grid/Other/DebugTextOnTiles.h"
+#include "Grid/Other/DebugTextAndColorOnTiles.h"
 
 ATCHUD::ATCHUD()
 {

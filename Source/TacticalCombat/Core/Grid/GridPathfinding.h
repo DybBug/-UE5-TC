@@ -10,6 +10,7 @@
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnPathfindingNodeUpdated, const FIntPoint&);
 DECLARE_MULTICAST_DELEGATE(FOnPathfindingNodeCleared);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPathfindingCompleted, const TArray<FIntPoint>&);
 
 class AGrid;
 
@@ -33,7 +34,7 @@ public:
 	TArray<FPathfindingNode> GetValidTileNeighborNodes(const FIntPoint& _index, bool _bIsDiagonalIncluded = false);
 	TArray<FIntPoint> GetNeighborIndices(const FIntPoint& _index, bool _bIsDiagonalIncluded = false);
 
-	TArray<FIntPoint> FindPath(const FIntPoint& _start, const FIntPoint& _target, bool _bIsDiagonalIncluded);
+	TArray<FIntPoint> FindPath(const FIntPoint& _start, const FIntPoint& _target, bool _bIsDiagonalIncluded, float _delayTime, float _maxMs);
 	bool IsInputDataValid();
 	void DiscoverNode(const FPathfindingNode& _node);
 	int32 GetMinimumCostBetweenTwoNodes(const FIntPoint& _index1, const FIntPoint& _index2, bool _bIsDiagonalIncluded);
@@ -45,10 +46,14 @@ public:
 	void ClearGeneratedData();
 	bool IsDiagonal(const FIntPoint& _index1, const FIntPoint& _index2);
 
+	UFUNCTION()
+	void FindPathWithDelay();
+
 #pragma region Getter
 	FORCEINLINE const FPathfindingNode* FindPathFindingNode(const FIntPoint& _index) const { return m_PathfindingNodesByIndex.Find(_index); }
 	FORCEINLINE int32 FindDiscoveredNodeIndex(const FIntPoint& _index) const { return m_DiscoveredNodeIndices.Find(_index); }
 	FORCEINLINE int32 FindDiscoveredNodeSortingCost(uint32 _index) const  { return m_DiscoveredNodeSortingCosts.IsValidIndex(_index) ? m_DiscoveredNodeSortingCosts[_index] : INVALID_SORTING_COST;}
+	FORCEINLINE int32 FindAnalysedNodeIndex(const FIntPoint& _index) const {return m_AnalysedNodeIndices.Find(_index); }
 #pragma endregion 
 	
 #pragma region Setter
@@ -58,6 +63,7 @@ public:
 #pragma region Events
 	FOnPathfindingNodeUpdated OnPathfindingNodeUpdated;
 	FOnPathfindingNodeCleared OnPathfindingNodeCleared;
+	FOnPathfindingCompleted OnPathfindingCompleted;
 #pragma endregion
 
 private:
@@ -94,7 +100,19 @@ private:
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Current Neighbor Node"))
 	FPathfindingNode m_CurrentNeighborNode;
-	
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Delay Between Iterations"))
+	float m_DelayBetweenIterations;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName ="Max Ms Per Frame"))
+	float m_MaxMsPerFrame;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName ="Max Ms Per Frame"))
+	FDateTime m_LoopStartDateTime;
+
+	UPROPERTY()
+	FLatentActionInfo m_LatentInfo_FindPathWithDelay;
+
 #pragma endregion
 
 private:
@@ -102,7 +120,7 @@ private:
 	TArray<FIntPoint> _GetNeighborIndicesForHexagon(const FIntPoint& _index);
 	TArray<FIntPoint> _GetNeighborIndicesForTriangle(const FIntPoint& _index, bool _bIsDiagonalIncluded);
 
-	int32 _GetTileSortingCost(const FPathfindingNode& _node);
+	int32 _GetTileSortingCost(const FPathfindingNode& _node);	
 };
 
 

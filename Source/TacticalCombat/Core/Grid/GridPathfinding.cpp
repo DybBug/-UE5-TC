@@ -3,6 +3,8 @@
 
 #include "GridPathfinding.h"
 #include "Grid.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "NavMesh/RecastNavMesh.h"
 #include "TacticalCombat/Structure/GridDatas.h"
 #include "TacticalCombat/Libraries/UtilityLibrary.h"
 
@@ -71,13 +73,21 @@ TArray<FIntPoint> AGridPathfinding::GetNeighborIndices(const FIntPoint& _index, 
 	}
 }
 
-TArray<FIntPoint> AGridPathfinding::FindPath(const FIntPoint& _start, const FIntPoint& _target, bool _bIsDiagonalIncluded)
+TArray<FIntPoint> AGridPathfinding::FindPath(const FIntPoint& _start, const FIntPoint& _target, bool _bIsDiagonalIncluded, float _delayTime, float _maxMs)
 {
-	TArray<FIntPoint> path;
+	static TArray<FIntPoint> path;
+	path.Empty();
+	
 	m_StartIndex = _start;
 	m_TargetIndex = _target;
 	m_bIsDiagonalIncluded = _bIsDiagonalIncluded;
+	m_DelayBetweenIterations = _delayTime;
+	m_MaxMsPerFrame = _maxMs;
 
+	FLatentActionManager& LatentActionManager = GetWorld()->GetLatentActionManager();
+	LatentActionManager.RemoveActionsForObject(m_LatentInfo_FindPathWithDelay.CallbackTarget);
+	m_LatentInfo_FindPathWithDelay.CallbackTarget = nullptr;
+	
 	ClearGeneratedData();
 
 	if (IsInputDataValid())
@@ -89,14 +99,29 @@ TArray<FIntPoint> AGridPathfinding::FindPath(const FIntPoint& _start, const FInt
 		node.MinimumCostToTarget = GetMinimumCostBetweenTwoNodes(m_StartIndex, m_TargetIndex, m_bIsDiagonalIncluded);
 		DiscoverNode(node);
 
+		if (m_DelayBetweenIterations > 0.0f)
+		{
+			FindPathWithDelay();
+			return path;
+		}
+		
 		while (m_DiscoveredNodeIndices.Num() > 0)		
 		{
 			if (AnalyseNextDiscoveredNode())
 			{
 				path = GeneratePath();
+				if (OnPathfindingCompleted.IsBound())
+				{
+					OnPathfindingCompleted.Broadcast(path);
+				}
 				return path;
 			}
-		}			
+		}				
+	}
+	
+	if (OnPathfindingCompleted.IsBound())
+	{
+		OnPathfindingCompleted.Broadcast(path);
 	}
 	return path;
 }
@@ -201,6 +226,12 @@ int32 AGridPathfinding::GetMinimumCostBetweenTwoNodes(const FIntPoint& _index1, 
 bool AGridPathfinding::AnalyseNextDiscoveredNode()
 {
 	m_CurrentDiscoveredNode = PullCheapestNodeOutOfDiscoveredList();
+
+	if (OnPathfindingNodeUpdated.IsBound())
+	{
+		OnPathfindingNodeUpdated.Broadcast(m_CurrentDiscoveredNode.Index);
+	}
+	
 	m_CurrentNeighborNodes = GetValidTileNeighborNodes(m_CurrentDiscoveredNode.Index, m_bIsDiagonalIncluded);
 
 	while (m_CurrentNeighborNodes.Num() > 0)
@@ -272,7 +303,7 @@ bool AGridPathfinding::DiscoverNextNeighbor()
 	if (costFromStart < m_CurrentNeighborNode.CostFromStart)
 	{
 		m_DiscoveredNodeIndices.RemoveAt(indexInDiscovered);
-		m_DiscoveredNodeSortingCosts.Add(indexInDiscovered);
+		m_DiscoveredNodeSortingCosts.RemoveAt(indexInDiscovered);
 		
 		FPathfindingNode node;
 		node.Index = m_CurrentNeighborNode.Index;
@@ -340,6 +371,49 @@ bool AGridPathfinding::IsDiagonal(const FIntPoint& _index1, const FIntPoint& _in
 	return !neighborIndices.Contains(_index2);
 }
 
+void AGridPathfinding::FindPathWithDelay()
+{
+	m_LoopStartDateTime = FDateTime::Now();
+	
+	while (m_DiscoveredNodeIndices.Num() > 0)		
+	{
+		if (AnalyseNextDiscoveredNode())
+		{
+			TArray<FIntPoint> path = GeneratePath();
+			if (OnPathfindingCompleted.IsBound())
+			{
+				OnPathfindingCompleted.Broadcast(path);
+			}
+			return;
+		}
+
+		if (m_MaxMsPerFrame > 0.0f)
+		{
+			float deltaMs = (FDateTime::Now() - m_LoopStartDateTime).GetTotalMilliseconds();
+			if (deltaMs < m_MaxMsPerFrame)
+			{
+				continue;
+			}
+		}
+		
+		if (m_LatentInfo_FindPathWithDelay.CallbackTarget == nullptr)
+		{		
+			m_LatentInfo_FindPathWithDelay.UUID = __LINE__;
+			m_LatentInfo_FindPathWithDelay.CallbackTarget = this;
+			m_LatentInfo_FindPathWithDelay.ExecutionFunction = "FindPathWithDelay";
+			m_LatentInfo_FindPathWithDelay.Linkage = 0;	
+		}
+		UKismetSystemLibrary::RetriggerableDelay(GetWorld(), m_DelayBetweenIterations, m_LatentInfo_FindPathWithDelay);
+		return;
+	}
+	
+	if (OnPathfindingCompleted.IsBound())
+	{
+		TArray<FIntPoint> path;
+		OnPathfindingCompleted.Broadcast(path);
+	}
+}
+
 TArray<FIntPoint> AGridPathfinding::_GetNeighborIndicesForSquare(const FIntPoint& _index, bool _bIsDiagonalIncluded)
 {
 	TArray <FIntPoint> neighbors;
@@ -366,7 +440,6 @@ TArray<FIntPoint> AGridPathfinding::_GetNeighborIndicesForHexagon(const FIntPoin
 	neighbors.Add(_index + FIntPoint(-1, +1));
 	neighbors.Add(_index + FIntPoint(-1, -1));
 	neighbors.Add(_index + FIntPoint(+0, -2));
-	neighbors.Add(_index + FIntPoint(+1, -1));
 	return neighbors;
 }
 
@@ -411,6 +484,4 @@ int32 AGridPathfinding::_GetTileSortingCost(const FPathfindingNode& _node)
 	const int32 diagonalCost = IsDiagonal(_node.Index, _node.PreviousIndex) ? 1 : 0;
 	return (_node.CostFromStart + _node.MinimumCostToTarget) * 2 + diagonalCost;
 }
-
-
 

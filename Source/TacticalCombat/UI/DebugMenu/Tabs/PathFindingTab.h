@@ -7,7 +7,7 @@
 #include "PathFindingTab.generated.h"
 
 class UCheckBox;
-class UDebugTextOnTiles;
+class UDebugTextAndColorOnTiles;
 /**
  * 
  */
@@ -34,11 +34,17 @@ protected:
 
 	UPROPERTY(Meta = (BindWidget))
 	TObjectPtr<UCheckBox> CheckBox_IsShowSortOrder;
+
+	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UCheckBox> CheckBox_IsShowDiscoveredTiles;
+
+	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UCheckBox> CheckBox_IsShowAnalyzedTiles;
 #pragma endregion
 	
 #pragma region Internals
 	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Debug Text On Tiles"))
-	TObjectPtr<UDebugTextOnTiles> m_DebugTextOnTiles;
+	TObjectPtr<UDebugTextAndColorOnTiles> m_DebugTextOnTiles;
 #pragma endregion
 
 protected:
@@ -56,4 +62,10 @@ protected:
 
 	UFUNCTION()
 	void OnIsShowSortOrderCheckStateChanged(bool _bIsChecked);
+
+	UFUNCTION()
+	void OnIsShowDiscoveredTilesCheckStateChanged(bool _bIsChecked);
+
+	UFUNCTION()
+	void OnIsShowAnalyzedTilesCheckStateChanged(bool _bIsChecked);
 };

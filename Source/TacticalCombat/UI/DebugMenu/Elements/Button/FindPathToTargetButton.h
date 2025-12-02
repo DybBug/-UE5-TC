@@ -6,6 +6,7 @@
 #include "ActionButton.h"
 #include "FindPathToTargetButton.generated.h"
 
+class UWithNameSpinBox;
 class UCheckBox;
 class UAbstractAction;
 /**
@@ -25,10 +26,22 @@ protected:
 	UPROPERTY(Meta = (BindWidget))
 	TObjectPtr<UCheckBox> CheckBox_UseDiagonals;
 
+	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UWithNameSpinBox> SpinBox_Delay;
+
+	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UWithNameSpinBox> SpinBox_MaxMs;
 protected:
 	virtual void OnSelectedActionsChanged(const UAbstractAction* const _leftClickAction, const UAbstractAction* const _rightClickAction) override;
 
 	UFUNCTION()
 	virtual void OnUseDiagonalsCheckBoxStateChanged(bool _bIsChecked);
+
+	UFUNCTION()
+	virtual void OnDelaySpinBoxValueChanged(float _value);
+	
+	UFUNCTION()
+	virtual void OnMaxMsSpinBoxValueChanged(float _value);
 	
 };
+

@@ -4,19 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "DebugTextOnTiles.generated.h"
+#include "DebugTextAndColorOnTiles.generated.h"
 
 class AGrid;
 class ATextRenderActor;
 enum class ETileDebugFlags : uint8;
 
 UCLASS()
-class TACTICALCOMBAT_API UDebugTextOnTiles : public UObject
+class TACTICALCOMBAT_API UDebugTextAndColorOnTiles : public UObject
 {
 	GENERATED_BODY()
 	
 public:
-	UDebugTextOnTiles();
+	UDebugTextAndColorOnTiles();
 	
 	void Initialize();	
 
@@ -31,10 +31,19 @@ public:
 
 	UFUNCTION()
 	void UpdateTextOnAllTiles();
+
+	UFUNCTION()
+	void UpdateStateOnTile(const FIntPoint& _index);
 	
+	UFUNCTION()
+	void UpdateStateOnAllTiles();
+	
+	void SetShowTileStates(bool _isShowDiscovered, bool _isShowAnalysed);
+
+	void SetTileDebugFlag(ETileDebugFlags _flag, bool _bIsEnabled);
 	void AddTileDebugFlag(ETileDebugFlags _flags);
 	void RemoveTileDebugFlag(ETileDebugFlags _flags);
-	bool HasTileDebugFlag(ETileDebugFlags flag) const;
+	bool HasTileDebugFlag(ETileDebugFlags _flag) const;
 	
 	FORCEINLINE bool IsShowDebugText() const { return static_cast<uint8>(m_TileDebugMask) != 0; }
 
@@ -48,9 +57,9 @@ protected:
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Tile Debug Mask"))
 	uint8 m_TileDebugMask;
-#pragma endregion
 
-private:
-	void _ReUpdateAllTextsAfterDelay(const FIntPoint& _index);
+	UPROPERTY()
+	FLatentActionInfo m_LatentInfo_ReUpdateAllTiles;
+#pragma endregion	
 
 };

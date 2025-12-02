@@ -38,6 +38,8 @@ enum class ETileStateFlags: uint8
 	Selected	= 1 << 1 UMETA(DisplayName = "Selected"),
 	Neighbor	= 1 << 2 UMETA(DisplayName = "Neighbor"),
 	InPath		= 1 << 3 UMETA(DisplayName = "InPath"),
+	Discovered	= 1 << 4 UMETA(DisplayName = "Discovered"),
+	Analyzed	= 1 << 5 UMETA(DisplayName = "Analyzed"),
 };
 
 UENUM(BlueprintType, Meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
@@ -49,4 +51,6 @@ enum class ETileDebugFlags: uint8
 	MinCostToTarget = 1 << 2	UMETA(DisplayName = "Minimum Cost To Target"),
 	CostFromStart	= 1 << 3	UMETA(DisplayName = "Cost From Start"),
 	SortOrder		= 1 << 4	UMETA(DisplayName = "Sort Order"),
+	DiscoveredTiles = 1 << 5	UMETA(DisplayName = "Discovered Tiles"),
+	AnalysedTiles	= 1 << 6	UMETA(DisplayName = "Analysed Tiles"),
 };

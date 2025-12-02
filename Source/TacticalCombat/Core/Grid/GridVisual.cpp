@@ -89,7 +89,7 @@ void AGridVisual::AddInstance(const FIntPoint& _index, const FTransform& _transf
 	m_InstanceIndices.Add(_index);
 	
 	FColor tileColor = _GetColorFromState(_tileStateMask);
-	const uint8 index = m_InstanceIndices.Num() - 1;
+	int32 index = m_InstanceIndices.Num() - 1;
 	m_InstancedStaticMeshComponent->SetCustomDataValue(index, 0, tileColor.R);
 	m_InstancedStaticMeshComponent->SetCustomDataValue(index, 1, tileColor.G);
 	m_InstancedStaticMeshComponent->SetCustomDataValue(index, 2, tileColor.B);
@@ -117,25 +117,37 @@ FColor AGridVisual::_GetColorFromState(uint8 _tileStateMask)
 	bool isSelected = (_tileStateMask & static_cast<uint8>(ETileStateFlags::Selected)) != 0;
 	if (isSelected)
 	{
-		return FColor::Red;
+		return FColor(255,0,0);
 	}
 
 	bool isHovered = (_tileStateMask & static_cast<uint8>(ETileStateFlags::Hovered)) != 0;
 	if (isHovered)
 	{
-		return FColor::Yellow;
+		return FColor(255,255,0);
 	}
 
 	bool isNeighbor = (_tileStateMask & static_cast<uint8>(ETileStateFlags::Neighbor)) != 0;
 	if (isNeighbor)
 	{
-		return FColor::Purple;
+		return FColor(169, 7, 228);
 	}
 
 	bool isInPath = (_tileStateMask & static_cast<uint8>(ETileStateFlags::InPath)) != 0;
 	if (isInPath)
 	{
-		return FColor::Blue;
+		return FColor(0,0,255);
+	}
+
+	bool isDiscovered = (_tileStateMask & static_cast<uint8>(ETileStateFlags::Discovered)) != 0;
+	if (isDiscovered)
+	{
+		return FColor(179, 27, 77);
+	}
+
+	bool isAnalyzed = (_tileStateMask & static_cast<uint8>(ETileStateFlags::Analyzed)) != 0;
+	if (isAnalyzed)
+	{
+		return FColor(248, 112, 158);
 	}
 	
 	FColor color = FColor::Black;

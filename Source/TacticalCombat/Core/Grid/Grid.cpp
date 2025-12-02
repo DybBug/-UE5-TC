@@ -274,6 +274,11 @@ void AGrid::AddStateToTile(const FIntPoint& _tileIndex, const ETileStateFlags _s
 	if (pTileData)
 	{
 		pTileData->StateMask |= static_cast<int32>(_stateFlag);
+
+		TArray<FIntPoint> allTilesWithStateFlag  = GetAllTilesWithStateFlag(_stateFlag);
+		allTilesWithStateFlag.Add(_tileIndex);
+		m_TileIndicesByStateFlag.Add(_stateFlag, allTilesWithStateFlag);		
+		
 		m_GridVisual->UpdateTileVisual(*pTileData);
 
 		if (OnTileDataUpdated.IsBound())
@@ -289,6 +294,11 @@ void AGrid::RemoveStateFromTile(const FIntPoint& _tileIndex, const ETileStateFla
 	if (pTileData)
 	{
 		pTileData->StateMask &= ~static_cast<int32>(_stateFlag);
+
+		TArray<FIntPoint> allTilesWithStateFlag  = GetAllTilesWithStateFlag(_stateFlag);
+		allTilesWithStateFlag.Remove(_tileIndex);
+		m_TileIndicesByStateFlag.Add(_stateFlag, allTilesWithStateFlag);	
+		
 		m_GridVisual->UpdateTileVisual(*pTileData);
 
 		if (OnTileDataUpdated.IsBound())
@@ -388,22 +398,18 @@ FVector AGrid::GetTileScale()
 	return m_TileSize / GetGridShapeData().MeshSize;
 }
 
-TArray<FIntPoint> AGrid::GetAllTilesWithState(const ETileStateFlags _stateFlag)
+TArray<FIntPoint> AGrid::GetAllTilesWithStateFlag(const ETileStateFlags _stateFlag)
 {
-	TArray<FIntPoint> indices;
-	for (auto& [index, tileData] : m_GridTileMap)
-	{
-		if ((tileData.StateMask & (uint8)_stateFlag) != 0)
-		{
-			indices.Add(tileData.Index);
-		}
-	}
-	return indices;
+	TArray<FIntPoint>* pIndices = m_TileIndicesByStateFlag.Find(_stateFlag);
+	if (pIndices == nullptr)
+		return TArray<FIntPoint>();
+	
+	return *pIndices;
 }
 
 void AGrid::ClearStateFromTiles(const ETileStateFlags _stateFlag)
 {
-	TArray<FIntPoint> indices = GetAllTilesWithState(_stateFlag);
+	TArray<FIntPoint> indices = GetAllTilesWithStateFlag(_stateFlag);
 	for (const FIntPoint& index : indices)
 	{
 		RemoveStateFromTile(index, _stateFlag);

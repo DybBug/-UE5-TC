@@ -68,7 +68,7 @@ public:
 	FRotator GetTileRotationFromGridIndex(int _row, int _col);
 	FVector GetTileScale();
 
-	TArray<FIntPoint> GetAllTilesWithState(const ETileStateFlags _stateFlag);
+	TArray<FIntPoint> GetAllTilesWithStateFlag(const ETileStateFlags _stateFlag);
 	void ClearStateFromTiles(const ETileStateFlags _stateFlag);
 
 	bool IsWalkableTile(const FIntPoint& _index);
@@ -136,6 +136,11 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Grid Pathfinding"))
 	TObjectPtr<AGridPathfinding> m_GridPathfinding;
 #pragma endregion
+
+#pragma region Internals
+	TMap<ETileStateFlags, TArray<FIntPoint>> m_TileIndicesByStateFlag;
+#pragma endregion
+	
 
 
 private:

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "DebugTextOnTiles.h"
+#include "DebugTextAndColorOnTiles.h"
 
 #include "Components/TextRenderComponent.h"
 #include "Engine/TextRenderActor.h"
@@ -11,22 +11,24 @@
 #include "TacticalCombat/Core/Grid/GridPathfinding.h"
 
 // Sets default values
-UDebugTextOnTiles::UDebugTextOnTiles()
+UDebugTextAndColorOnTiles::UDebugTextAndColorOnTiles()
 {
 
 }
 
 // Called when the game starts or when spawned
-void UDebugTextOnTiles::Initialize()
+void UDebugTextAndColorOnTiles::Initialize()
 {
 	m_Grid = Cast<AGrid>(UGameplayStatics::GetActorOfClass(GetWorld(), AGrid::StaticClass()));
-	m_Grid->OnTileDataUpdated.AddUObject(this, &UDebugTextOnTiles::UpdateTextOnTile);
-	m_Grid->OnGridDestroyed.AddUObject(this, &UDebugTextOnTiles::ClearAllTextActors);
-	m_Grid->GetGridPathfinding()->OnPathfindingNodeUpdated.AddUObject(this, &UDebugTextOnTiles::_ReUpdateAllTextsAfterDelay);
-	m_Grid->GetGridPathfinding()->OnPathfindingNodeCleared.AddUObject(this, &UDebugTextOnTiles::ClearAllTextActors);
+	m_Grid->OnTileDataUpdated.AddUObject(this, &UDebugTextAndColorOnTiles::UpdateTextOnTile);
+	m_Grid->OnGridDestroyed.AddUObject(this, &UDebugTextAndColorOnTiles::ClearAllTextActors);
+	m_Grid->GetGridPathfinding()->OnPathfindingNodeUpdated.AddUObject(this, &UDebugTextAndColorOnTiles::UpdateStateOnTile);
+	m_Grid->GetGridPathfinding()->OnPathfindingNodeCleared.AddUObject(this, &UDebugTextAndColorOnTiles::UpdateStateOnAllTiles);
+	m_Grid->GetGridPathfinding()->OnPathfindingNodeUpdated.AddUObject(this, &UDebugTextAndColorOnTiles::UpdateTextOnTile);
+	m_Grid->GetGridPathfinding()->OnPathfindingNodeCleared.AddUObject(this, &UDebugTextAndColorOnTiles::UpdateTextOnAllTiles);
 }
 
-ATextRenderActor* UDebugTextOnTiles::GetTextActor(const FIntPoint& _index)
+ATextRenderActor* UDebugTextAndColorOnTiles::GetTextActor(const FIntPoint& _index)
 {
 	TObjectPtr<ATextRenderActor>* pTextRenderActor = m_SpawnedTextMap.Find(_index);
 	if (pTextRenderActor == nullptr || !IsValid(pTextRenderActor->Get()))
@@ -43,7 +45,7 @@ ATextRenderActor* UDebugTextOnTiles::GetTextActor(const FIntPoint& _index)
 	return pTextRenderActor->Get();	
 }
 
-void UDebugTextOnTiles::DestroyTextActor(const FIntPoint& _index)
+void UDebugTextAndColorOnTiles::DestroyTextActor(const FIntPoint& _index)
 {
 	TObjectPtr<ATextRenderActor>* pTextRenderActor = m_SpawnedTextMap.Find(_index);
 	if (pTextRenderActor != nullptr && IsValid(pTextRenderActor->Get()))
@@ -53,7 +55,7 @@ void UDebugTextOnTiles::DestroyTextActor(const FIntPoint& _index)
 	}
 }
 
-void UDebugTextOnTiles::ClearAllTextActors()
+void UDebugTextAndColorOnTiles::ClearAllTextActors()
 {
 	for (auto it = m_SpawnedTextMap.CreateIterator(); it; ++it)
 	{
@@ -63,7 +65,7 @@ void UDebugTextOnTiles::ClearAllTextActors()
 	m_SpawnedTextMap.Empty();
 }
 
-void UDebugTextOnTiles::UpdateTextOnTile(const FIntPoint& _index)
+void UDebugTextAndColorOnTiles::UpdateTextOnTile(const FIntPoint& _index)
 {
 	if (!IsShowDebugText()) return;
 		
@@ -149,7 +151,7 @@ void UDebugTextOnTiles::UpdateTextOnTile(const FIntPoint& _index)
 	DestroyTextActor(_index);
 }
 
-void UDebugTextOnTiles::UpdateTextOnAllTiles()
+void UDebugTextAndColorOnTiles::UpdateTextOnAllTiles()
 {
 	if (!IsShowDebugText())
 	{
@@ -165,32 +167,89 @@ void UDebugTextOnTiles::UpdateTextOnAllTiles()
 	}	
 }
 
-void UDebugTextOnTiles::AddTileDebugFlag(ETileDebugFlags _flags)
+void UDebugTextAndColorOnTiles::UpdateStateOnTile(const FIntPoint& _index)
+{
+	if (HasTileDebugFlag(ETileDebugFlags::DiscoveredTiles))
+	{
+		int32 discoveredNodeIndex = m_Grid->GetGridPathfinding()->FindDiscoveredNodeIndex(_index);
+		if (discoveredNodeIndex != INDEX_NONE)
+		{
+			m_Grid->AddStateToTile(_index, ETileStateFlags::Discovered);
+		}
+		else
+		{
+			m_Grid->RemoveStateFromTile(_index, ETileStateFlags::Discovered);
+		}
+	}
+	else
+	{
+		m_Grid->RemoveStateFromTile(_index, ETileStateFlags::Discovered);
+	}
+	
+
+	if (HasTileDebugFlag(ETileDebugFlags::AnalysedTiles))
+	{
+		int32 analysedNodeIndex = m_Grid->GetGridPathfinding()->FindAnalysedNodeIndex(_index);
+		if (analysedNodeIndex != INDEX_NONE)
+		{
+			m_Grid->AddStateToTile(_index, ETileStateFlags::Analyzed);
+		}
+		else
+		{
+			m_Grid->RemoveStateFromTile(_index, ETileStateFlags::Analyzed);
+		}
+	}
+	else
+	{
+		m_Grid->RemoveStateFromTile(_index, ETileStateFlags::Analyzed);
+	}
+}
+
+void UDebugTextAndColorOnTiles::UpdateStateOnAllTiles()
+{
+	if (HasTileDebugFlag(ETileDebugFlags::DiscoveredTiles) | HasTileDebugFlag(ETileDebugFlags::AnalysedTiles))
+	{
+		TArray<FIntPoint> tileIndices;
+		m_Grid->GetGridTileMap().GetKeys(tileIndices);
+		for (const FIntPoint& tileIndex : tileIndices)
+		{
+			UpdateStateOnTile(tileIndex);
+		}
+	}
+	else
+	{
+		m_Grid->ClearStateFromTiles(ETileStateFlags::Discovered);
+		m_Grid->ClearStateFromTiles(ETileStateFlags::Analyzed);
+	}
+}
+
+void UDebugTextAndColorOnTiles::SetShowTileStates(bool _isShowDiscovered, bool _isShowAnalysed)
+{
+	SetTileDebugFlag(ETileDebugFlags::DiscoveredTiles, _isShowDiscovered);
+	SetTileDebugFlag(ETileDebugFlags::AnalysedTiles, _isShowAnalysed);
+
+	UpdateStateOnAllTiles();
+}
+
+void UDebugTextAndColorOnTiles::SetTileDebugFlag(ETileDebugFlags _flag, bool _bIsEnabled)
+{
+	_bIsEnabled ? AddTileDebugFlag(_flag) : RemoveTileDebugFlag(_flag);
+}
+
+void UDebugTextAndColorOnTiles::AddTileDebugFlag(ETileDebugFlags _flags)
 {
 	m_TileDebugMask |= static_cast<uint8>(_flags);
 	UpdateTextOnAllTiles();
 }
 
-void UDebugTextOnTiles::RemoveTileDebugFlag(ETileDebugFlags _flags)
+void UDebugTextAndColorOnTiles::RemoveTileDebugFlag(ETileDebugFlags _flags)
 {
 	m_TileDebugMask &= ~static_cast<uint8>(_flags);
 	UpdateTextOnAllTiles();
 }
 
-bool UDebugTextOnTiles::HasTileDebugFlag(ETileDebugFlags flag) const
+bool UDebugTextAndColorOnTiles::HasTileDebugFlag(ETileDebugFlags _flag) const
 {
-	return (m_TileDebugMask & static_cast<uint8>(flag)) != 0;
+	return (m_TileDebugMask & static_cast<uint8>(_flag)) != 0;
 }
-
-#pragma region Private Methods
-void UDebugTextOnTiles::_ReUpdateAllTextsAfterDelay(const FIntPoint& _index)
-{
-	FLatentActionInfo latentInfo;
-	latentInfo.CallbackTarget = this;
-	latentInfo.ExecutionFunction = TEXT("UpdateTextOnAllTiles");
-	latentInfo.Linkage = 0;
-	latentInfo.UUID = __LINE__;
-	UKismetSystemLibrary::RetriggerableDelay(GetWorld(), 0.1f, latentInfo);
-}
-#pragma endregion
 

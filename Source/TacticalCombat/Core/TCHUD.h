@@ -7,7 +7,7 @@
 #include "TCHUD.generated.h"
 
 class UDebugMenu;
-class UDebugTextOnTiles;
+class UDebugTextAndColorOnTiles;
 /**
  * 
  */
