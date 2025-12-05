@@ -7,7 +7,7 @@
 #include "GridVisual.generated.h"
 
 class AGrid;
-class UInstancedStaticMeshComponent;
+class UGridInstancedStaticMeshComponent;
 struct FTileData;
 
 UCLASS()
@@ -46,22 +46,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Component", Meta = (DisplayName = "Root"))
 	TObjectPtr<USceneComponent> m_SceneComponent;
 
-	UPROPERTY(VisibleAnywhere, Category = "Component", Meta = (DisplayName = "Instanced StaticMesh Component"))
-	TObjectPtr<UInstancedStaticMeshComponent> m_InstancedStaticMeshComponent;
+	UPROPERTY(VisibleAnywhere, Category = "Component", Meta = (DisplayName = "Grid Instanced StaticMesh Component"))
+	TObjectPtr<UGridInstancedStaticMeshComponent> m_GridInstancedStaticMeshComponent;
 #pragma endregion
 
 #pragma region Properties
 	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Z-Offset"))
 	float m_ZOffset = 2.0f;	
-	
-	UPROPERTY(VisibleAnywhere, Category = "Property", Meta = (DisplayName = "Instance Indices"))
-	TArray<FIntPoint> m_InstanceIndices;
 #pragma endregion
-
-	
-private:
-	FColor _GetColorFromState(uint8 _tileStateMask);
-	
 
 };
 
