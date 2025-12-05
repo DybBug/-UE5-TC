@@ -17,8 +17,19 @@ void UFindPathToTargetAction::Execute(const FIntPoint& _index)
 
 	FIntPoint start = m_PlayerActions->GetSelectedTileIndex();
 	FIntPoint target = _index;
-	TArray<FIntPoint> neighborIndices =  pGrid->GetGridPathfinding()->FindPath(start, target, m_bUseDiagonals, m_DelayBetweenIterations, m_MaxMs);
 
+	TArray<ETileType> validTileTypes =  {
+		ETileType::Normal,
+		ETileType::DoubleCost,
+		ETileType::TripleCost		
+	};
+	
+	if (m_bCanUseFlyingOnly)
+	{
+		validTileTypes.Add(ETileType::FlyingUnitsOnly);
+	}
+	
+	TArray<FIntPoint> neighborIndices =  pGrid->GetGridPathfinding()->FindPath(start, target, m_bCanUseDiagonals, validTileTypes, m_DelayBetweenIterations, m_MaxMs);
 }
 
 void UFindPathToTargetAction::_OnPathfindingCompleted(const TArray<FIntPoint>& _path)

@@ -24,6 +24,9 @@ bool AGrid::IsWalkableTile(ETileType _type)
 			return false;
 		}
 		case ETileType::Normal:
+		case ETileType::DoubleCost:
+		case ETileType::TripleCost:
+		case ETileType::FlyingUnitsOnly:
 		{
 			return true;
 		}
@@ -324,26 +327,34 @@ FVector AGrid::TraceForGround(const FVector& _location, ETileType& _hitTileType)
 	EDrawDebugTrace::Type drawDebugType = EDrawDebugTrace::None;
 	
 	UKismetSystemLibrary::SphereTraceMulti(GetWorld(), startLocation, endLocation, radius, traceChannel, false, ignoreActors, drawDebugType, hitResults, true);
-	if (hitResults.Num() > 0)
+	if (hitResults.Num() <= 0)
 	{
-		_hitTileType = ETileType::Normal;
-
-		FVector resultLocation = _location;
-		for (const FHitResult hitResult : hitResults)
-		{			
-			if (AGridModifier* pGridModifier = Cast<AGridModifier>(hitResult.GetActor()))
-			{
-				_hitTileType = pGridModifier->GetType();
-				return FVector(-99999, -99999, -99999);
-			}
-			resultLocation.Z = UKismetMathLibrary::GridSnap_Float(hitResult.ImpactPoint.Z, m_TileSize.Z);
-		}
-		
-		return resultLocation;
+		_hitTileType = ETileType::None;
+		return FVector(-99999, -99999, -99999);
 	}
-	
-	_hitTileType = ETileType::None;
-	return FVector(-99999, -99999, -99999);
+
+	_hitTileType = ETileType::Normal;
+	FVector resultLocation = _location;
+	for (const FHitResult hitResult : hitResults)
+	{			
+		if (AGridModifier* pGridModifier = Cast<AGridModifier>(hitResult.GetActor()))
+		{
+			_hitTileType = pGridModifier->GetType();
+			if (!IsWalkableTile(_hitTileType))
+			{
+				resultLocation = FVector(-99999, -99999, -99999);				
+				break;
+			}
+			
+			if (pGridModifier->GetIsUsingTileHeight())
+			{
+				resultLocation.Z = UKismetMathLibrary::GridSnap_Float(hitResult.ImpactPoint.Z, m_TileSize.Z);
+				break;
+			}
+		}
+		resultLocation.Z = UKismetMathLibrary::GridSnap_Float(hitResult.ImpactPoint.Z, m_TileSize.Z);
+	}			
+	return resultLocation;	
 }
 
 FVector AGrid::GetTileLocationFromGridIndex(int _row, int _col)

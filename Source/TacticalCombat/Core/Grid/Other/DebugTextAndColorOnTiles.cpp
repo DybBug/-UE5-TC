@@ -77,24 +77,37 @@ void UDebugTextAndColorOnTiles::UpdateTextOnTile(const FIntPoint& _index)
 		int longestTextLength = 0;
 		
 		TArray<FString> textes;
-		
-		if ((m_TileDebugMask & static_cast<uint8>(ETileDebugFlags::TileIndices)) != 0)
+
+		// 타일 인덱스 텍스트
+		if (HasTileDebugFlag(ETileDebugFlags::TileIndices))
 		{
 			FString debugStr = FString::Printf(TEXT("%d, %d"), _index.X, _index.Y);
 			longestTextLength = FMath::Max(longestTextLength, debugStr.Len());
 			textes.Add(debugStr);
 		}
-		
+
+		// 타일 타입 텍스트
+		if (HasTileDebugFlag(ETileDebugFlags::TileType))
+		{
+			if (pTileData->Type != ETileType::Normal && pTileData->Type != ETileType::None)
+			{
+				FString debugStr = FString::Printf(TEXT("%s"), *StaticEnum<ETileType>()->GetNameStringByValue((uint8)pTileData->Type));
+				longestTextLength = FMath::Max(longestTextLength, debugStr.Len());
+				textes.Add(debugStr);
+			}
+		}
+
+		// 타일 경로 텍스트
 		if (const FPathfindingNode* pPathfindingNode = m_Grid->GetGridPathfinding()->FindPathFindingNode(_index))
 		{
-			if ((m_TileDebugMask & static_cast<uint8>(ETileDebugFlags::CostToEnterTile)) != 0)
+			if (HasTileDebugFlag(ETileDebugFlags::CostToEnterTile))
 			{
 				FString debugStr =  FString::Printf(TEXT("Enter: %d"),  pPathfindingNode->CostToEnterTile);
 				longestTextLength = FMath::Max(longestTextLength, debugStr.Len());
 				textes.Add(debugStr);				
 			}
 
-			if ((m_TileDebugMask & static_cast<uint8>(ETileDebugFlags::MinCostToTarget)) != 0)
+			if (HasTileDebugFlag(ETileDebugFlags::MinCostToTarget))
 			{
 				if (pPathfindingNode->MinimumCostToTarget != DEFAULT_COST)
 				{
@@ -104,7 +117,7 @@ void UDebugTextAndColorOnTiles::UpdateTextOnTile(const FIntPoint& _index)
 				}
 			}
 			
-			if ((m_TileDebugMask & static_cast<uint8>(ETileDebugFlags::CostFromStart)) != 0)
+			if (HasTileDebugFlag(ETileDebugFlags::CostFromStart))
 			{
 				if (pPathfindingNode->CostFromStart != DEFAULT_COST)
 				{
@@ -114,7 +127,7 @@ void UDebugTextAndColorOnTiles::UpdateTextOnTile(const FIntPoint& _index)
 				}
 			}
 
-			if ((m_TileDebugMask & static_cast<uint8>(ETileDebugFlags::SortOrder)) != 0)
+			if (HasTileDebugFlag(ETileDebugFlags::SortOrder))
 			{
 				int32 discoveredNodeIndex = m_Grid->GetGridPathfinding()->FindDiscoveredNodeIndex(_index);
 				 if (discoveredNodeIndex != INDEX_NONE)
@@ -126,7 +139,8 @@ void UDebugTextAndColorOnTiles::UpdateTextOnTile(const FIntPoint& _index)
 				 }
 			}
 		}		
-		
+
+		// 텍스트 머지
 		if (textes.Num() > 0)
 		{
 			ATextRenderActor* const pTextActor =  GetTextActor(_index);

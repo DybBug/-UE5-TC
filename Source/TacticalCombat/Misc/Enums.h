@@ -25,6 +25,9 @@ enum class ETileType: uint8
 	None UMETA(DisplayName = "None"),
 	Normal UMETA(DisplayName = "Normal"),
 	Obstacle UMETA(DisplayName = "Obstacle"),
+	DoubleCost UMETA(DisplayName = "Double Cost"),
+	TripleCost UMETA(DisplayName = "Triple Cost"),
+	FlyingUnitsOnly UMETA(DisplayName = "Flying Units Only"),
 	Max UMETA(Hidden)
 };
 ENUM_RANGE_BY_COUNT(ETileType, ETileType::Max)
@@ -53,4 +56,5 @@ enum class ETileDebugFlags: uint8
 	SortOrder		= 1 << 4	UMETA(DisplayName = "Sort Order"),
 	DiscoveredTiles = 1 << 5	UMETA(DisplayName = "Discovered Tiles"),
 	AnalysedTiles	= 1 << 6	UMETA(DisplayName = "Analysed Tiles"),
+	TileType		= 1 << 7	UMETA(DisplayName = "Tile Type"),
 };

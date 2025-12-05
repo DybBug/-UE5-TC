@@ -24,6 +24,9 @@ protected:
 	TObjectPtr<UCheckBox> CheckBox_IsShowIndicesOnTiles;
 
 	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UCheckBox> CheckBox_IsShowTileType;
+
+	UPROPERTY(Meta = (BindWidget))
 	TObjectPtr<UCheckBox> CheckBox_IsShowCostToEnterTile;
 
 	UPROPERTY(Meta = (BindWidget))
@@ -50,6 +53,9 @@ protected:
 protected:
 	UFUNCTION()
 	void OnIsShowIndicesOnTilesCheckStateChanged(bool _bIsChecked);
+
+	UFUNCTION()
+	void OnIsShowTileTypeCheckStateChanged(bool _bIsChecked);
 
 	UFUNCTION()
 	void OnIsShowCostToEnterTileCheckStateChanged(bool _bIsChecked);

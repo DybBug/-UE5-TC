@@ -31,10 +31,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	TArray<FPathfindingNode> GetValidTileNeighborNodes(const FIntPoint& _index, bool _bIsDiagonalIncluded = false);
+	TArray<FPathfindingNode> GetValidTileNeighborNodes(const FIntPoint& _index, bool _bIsDiagonalIncluded, const TArray<ETileType>& _validTypes);
 	TArray<FIntPoint> GetNeighborIndices(const FIntPoint& _index, bool _bIsDiagonalIncluded = false);
 
-	TArray<FIntPoint> FindPath(const FIntPoint& _start, const FIntPoint& _target, bool _bIsDiagonalIncluded, float _delayTime, float _maxMs);
+	TArray<FIntPoint> FindPath(const FIntPoint& _start, const FIntPoint& _target, bool _bIsDiagonalIncluded, const TArray<ETileType>& _tileTypes, float _delayTime, float _maxMs);
 	bool IsInputDataValid();
 	void DiscoverNode(const FPathfindingNode& _node);
 	int32 GetMinimumCostBetweenTwoNodes(const FIntPoint& _index1, const FIntPoint& _index2, bool _bIsDiagonalIncluded);
@@ -66,8 +66,15 @@ public:
 	FOnPathfindingCompleted OnPathfindingCompleted;
 #pragma endregion
 
+protected:
+#pragma region Properties
+	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Valid Tile Types"))
+	TArray<ETileType> m_ValidTileTypes;
+#pragma endregion
+
 private:
 #pragma region Internals
+	
 	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Grid"))
 	TWeakObjectPtr<AGrid> m_Grid;
 

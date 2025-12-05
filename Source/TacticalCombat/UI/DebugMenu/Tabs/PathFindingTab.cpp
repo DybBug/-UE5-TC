@@ -20,6 +20,9 @@ void UPathFindingTab::NativeConstruct()
 	CheckBox_IsShowIndicesOnTiles->SetIsChecked(m_DebugTextOnTiles->HasTileDebugFlag(ETileDebugFlags::TileIndices));
 	CheckBox_IsShowIndicesOnTiles->OnCheckStateChanged.AddDynamic(this, &UPathFindingTab::OnIsShowIndicesOnTilesCheckStateChanged);
 
+	CheckBox_IsShowTileType->SetIsChecked(m_DebugTextOnTiles->HasTileDebugFlag(ETileDebugFlags::TileType));
+	CheckBox_IsShowTileType->OnCheckStateChanged.AddDynamic(this, &UPathFindingTab::OnIsShowTileTypeCheckStateChanged);
+
 	CheckBox_IsShowCostToEnterTile->SetIsChecked(m_DebugTextOnTiles->HasTileDebugFlag(ETileDebugFlags::CostToEnterTile));
 	CheckBox_IsShowCostToEnterTile->OnCheckStateChanged.AddDynamic(this, &UPathFindingTab::OnIsShowCostToEnterTileCheckStateChanged);
 
@@ -42,6 +45,11 @@ void UPathFindingTab::NativeConstruct()
 void UPathFindingTab::OnIsShowIndicesOnTilesCheckStateChanged(bool _bIsChecked)
 {
 	m_DebugTextOnTiles->SetTileDebugFlag(ETileDebugFlags::TileIndices, _bIsChecked);
+}
+
+void UPathFindingTab::OnIsShowTileTypeCheckStateChanged(bool _bIsChecked)
+{
+	m_DebugTextOnTiles->SetTileDebugFlag(ETileDebugFlags::TileType, _bIsChecked);
 }
 
 void UPathFindingTab::OnIsShowCostToEnterTileCheckStateChanged(bool _bIsChecked)

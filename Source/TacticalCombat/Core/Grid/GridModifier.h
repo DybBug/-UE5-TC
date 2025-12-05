@@ -9,6 +9,8 @@
 
 enum class EGridShape: uint8;
 enum class ETileType: uint8;
+class UStaticMesh;
+class UMaterial;
 
 UCLASS()
 class TACTICALCOMBAT_API AGridModifier : public AActor
@@ -30,6 +32,7 @@ protected:
 
 public:
 	FORCEINLINE ETileType GetType() const { return m_Type; }
+	FORCEINLINE bool GetIsUsingTileHeight() const {	return m_bIsUsingTileHeight; }
 
 protected:
 #pragma region Components
@@ -46,5 +49,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Shape"))
 	ETileType m_Type;
+
+	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Is Using Tile Height"))
+	bool m_bIsUsingTileHeight;
 #pragma endregion
 };

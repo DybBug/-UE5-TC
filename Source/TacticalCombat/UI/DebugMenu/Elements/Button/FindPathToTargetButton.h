@@ -24,7 +24,10 @@ public:
 
 protected:
 	UPROPERTY(Meta = (BindWidget))
-	TObjectPtr<UCheckBox> CheckBox_UseDiagonals;
+	TObjectPtr<UCheckBox> CheckBox_CanUseDiagonals;
+
+	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UCheckBox> CheckBox_CanUseFlyingOnly;
 
 	UPROPERTY(Meta = (BindWidget))
 	TObjectPtr<UWithNameSpinBox> SpinBox_Delay;
@@ -35,13 +38,18 @@ protected:
 	virtual void OnSelectedActionsChanged(const UAbstractAction* const _leftClickAction, const UAbstractAction* const _rightClickAction) override;
 
 	UFUNCTION()
-	virtual void OnUseDiagonalsCheckBoxStateChanged(bool _bIsChecked);
+	virtual void OnCanUseDiagonalsCheckBoxStateChanged(bool _bIsChecked);
+
+	UFUNCTION()
+	virtual void OnCanUseFlyingOnlyCheckBoxStateChanged(bool _bIsChecked);
 
 	UFUNCTION()
 	virtual void OnDelaySpinBoxValueChanged(float _value);
 	
 	UFUNCTION()
 	virtual void OnMaxMsSpinBoxValueChanged(float _value);
+
+private:
+	void _UpdateAllElementVisibility(bool _isVisible);
 	
 };
-

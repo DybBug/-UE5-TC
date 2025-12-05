@@ -7,6 +7,9 @@
 
 void USetTileTypeAction::Execute(const FIntPoint& _index)
 {
+	if (m_PlayerActions == nullptr)
+		return;
+	
 	AGrid* const pGrid = m_PlayerActions->GetGrid();
 	if (!pGrid) return;
 	if (!pGrid->IsIndexValid(_index)) return;

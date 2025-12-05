@@ -9,9 +9,12 @@
 #include "TacticalCombat/Structure/GridDatas.h"
 
 TMap<ETileType, FColor> AGridModifier::TileColorMap = {
-	{ETileType::None, FColor::Black},
-	{ETileType::Normal, FColor::White},
-	{ETileType::Obstacle, FColor::Red}
+	{ETileType::None, FColor(0, 0, 0, 255)},
+	{ETileType::Normal, FColor(255, 255, 255, 255)},
+	{ETileType::Obstacle, FColor(255, 0, 0, 255)},
+	{ETileType::DoubleCost, FColor(255, 255, 0, 255)},
+	{ETileType::TripleCost, FColor(255, 127, 0, 255)},
+	{ETileType::FlyingUnitsOnly, FColor(0, 127, 0, 255)},
 };
 
 
@@ -29,13 +32,13 @@ AGridModifier::AGridModifier()
 	m_StaticMeshComponent->SetupAttachment(RootComponent);
 	m_StaticMeshComponent->SetCollisionResponseToChannel(GTC_GroundAndGridModifier, ECollisionResponse::ECR_Overlap);
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshObjectFinder(TEXT("/Game/Grids/GridShapes/Square/SM_Grid_Square.SM_Grid_Square"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshObjectFinder(TEXT("/Game/Grids/GridShapes/Square/SM_Grid_Square"));
 	if (meshObjectFinder.Succeeded())
 	{
 		m_StaticMeshComponent->SetStaticMesh(meshObjectFinder.Object);
 	}	
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> materialObjectFinder(TEXT("/Game/Grids/GridShapes/M_Grid_Flat_Filled.M_Grid_Flat_Filled"));
+	static ConstructorHelpers::FObjectFinder<UMaterial> materialObjectFinder(TEXT("/Game/Grids/GridShapes/M_Grid_Flat"));
 	if (materialObjectFinder.Succeeded())
 	{
 		m_StaticMeshComponent->SetMaterial(0, materialObjectFinder.Object);	
@@ -48,6 +51,8 @@ void AGridModifier::OnConstruction(const FTransform& Transform)
 
 	FGridShapeData gridShapeData = UGridLibrary::GetGridShape(m_Shape);
 	m_StaticMeshComponent->SetStaticMesh(gridShapeData.Mesh.Get());
+
+	//MaterialInstanceDynamic* pDynamicMaterial = UMaterialInstanceDynamic::Create(gridShapeData.FlatMaterial,  this);
 	m_StaticMeshComponent->SetMaterial(0, gridShapeData.FlatMaterial);
 	
 	m_StaticMeshComponent->SetScalarParameterValueOnMaterials(TEXT("IsFilled"), 1.0f);

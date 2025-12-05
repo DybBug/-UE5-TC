@@ -4,10 +4,17 @@
 #include "GridPathfinding.h"
 #include "Grid.h"
 #include "Kismet/KismetSystemLibrary.h"
-#include "NavMesh/RecastNavMesh.h"
 #include "TacticalCombat/Structure/GridDatas.h"
 #include "TacticalCombat/Libraries/UtilityLibrary.h"
 
+static TMap<ETileType, int> gs_TileTypeToCost = {
+	{ETileType::None, 0},
+	{ETileType::Normal, 1},
+	{ETileType::Obstacle, 0},
+	{ETileType::DoubleCost, 2},
+	{ETileType::TripleCost, 3},
+	{ETileType::FlyingUnitsOnly, 1}
+};
 
 // Sets default values
 AGridPathfinding::AGridPathfinding()
@@ -31,7 +38,7 @@ void AGridPathfinding::Tick(float DeltaTime)
 
 }
 
-TArray<FPathfindingNode> AGridPathfinding::GetValidTileNeighborNodes(const FIntPoint& _index, bool _bIsDiagonalIncluded)
+TArray<FPathfindingNode> AGridPathfinding::GetValidTileNeighborNodes(const FIntPoint& _index, bool _bIsDiagonalIncluded, const TArray<ETileType>& _validTypes)
 {
 	TArray<FPathfindingNode> neighborNodes;
 	const FTileData* pInputTileData = m_Grid->GetGridTileMap().Find(_index);
@@ -44,7 +51,7 @@ TArray<FPathfindingNode> AGridPathfinding::GetValidTileNeighborNodes(const FIntP
 	for (const FIntPoint& tempNeighborIndex : tempNeighborIndices)
 	{
 		const FTileData* pTempNeighborTileData = m_Grid->GetGridTileMap().Find(tempNeighborIndex);
-		if (pTempNeighborTileData && AGrid::IsWalkableTile(pTempNeighborTileData->Type))
+		if (pTempNeighborTileData && _validTypes.Contains(pTempNeighborTileData->Type))
 		{
 			float inputTileHeight = pInputTileData->Transform.GetLocation().Z;
 			float tempNeighborTileHeight = pTempNeighborTileData->Transform.GetLocation().Z;
@@ -53,6 +60,7 @@ TArray<FPathfindingNode> AGridPathfinding::GetValidTileNeighborNodes(const FIntP
 				FPathfindingNode neighborNode;
 				neighborNode.Index = tempNeighborIndex;
 				neighborNode.PreviousIndex = _index;
+				neighborNode.CostToEnterTile = gs_TileTypeToCost[pTempNeighborTileData->Type];
 				
 				neighborNodes.Add(neighborNode);
 			}
@@ -73,14 +81,14 @@ TArray<FIntPoint> AGridPathfinding::GetNeighborIndices(const FIntPoint& _index, 
 	}
 }
 
-TArray<FIntPoint> AGridPathfinding::FindPath(const FIntPoint& _start, const FIntPoint& _target, bool _bIsDiagonalIncluded, float _delayTime, float _maxMs)
+TArray<FIntPoint> AGridPathfinding::FindPath(const FIntPoint& _start, const FIntPoint& _target, bool _bIsDiagonalIncluded, const TArray<ETileType>& _tileTypes, float _delayTime, float _maxMs)
 {
-	static TArray<FIntPoint> path;
-	path.Empty();
+	TArray<FIntPoint> path;
 	
 	m_StartIndex = _start;
 	m_TargetIndex = _target;
 	m_bIsDiagonalIncluded = _bIsDiagonalIncluded;
+	m_ValidTileTypes = _tileTypes;
 	m_DelayBetweenIterations = _delayTime;
 	m_MaxMsPerFrame = _maxMs;
 
@@ -131,6 +139,10 @@ bool AGridPathfinding::IsInputDataValid()
 	if (m_StartIndex == m_TargetIndex)			return false;
 	if (!m_Grid->IsWalkableTile(m_StartIndex))	return false;
 	if (!m_Grid->IsWalkableTile(m_TargetIndex)) return false;
+
+	const FTileData* pTile = m_Grid->GetGridTileMap().Find(m_TargetIndex);
+	if (pTile == nullptr) return false;
+	
 	return true;
 }
 
@@ -232,7 +244,7 @@ bool AGridPathfinding::AnalyseNextDiscoveredNode()
 		OnPathfindingNodeUpdated.Broadcast(m_CurrentDiscoveredNode.Index);
 	}
 	
-	m_CurrentNeighborNodes = GetValidTileNeighborNodes(m_CurrentDiscoveredNode.Index, m_bIsDiagonalIncluded);
+	m_CurrentNeighborNodes = GetValidTileNeighborNodes(m_CurrentDiscoveredNode.Index, m_bIsDiagonalIncluded, m_ValidTileTypes);
 
 	while (m_CurrentNeighborNodes.Num() > 0)
 	{
