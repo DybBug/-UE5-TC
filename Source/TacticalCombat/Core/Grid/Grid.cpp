@@ -89,12 +89,6 @@ void AGrid::BeginPlay()
 	SpawnGrid(GetActorLocation(), m_TileSize, m_TileCount, m_Shape, true);
 }
 
-// Called every frame
-void AGrid::Tick(float _deltaTime)
-{
-	Super::Tick(_deltaTime);
-}
-
 void AGrid::SpawnGrid(const FVector& _centerLocation, const FVector& _tileSize, const FIntPoint& _tileCount, EGridShape _shape, bool _bIsUseEnvironment)
 {	
 	m_CenterLocation = _centerLocation;
@@ -330,7 +324,7 @@ FVector AGrid::TraceForGround(const FVector& _location, ETileType& _hitTileType)
 	if (hitResults.Num() <= 0)
 	{
 		_hitTileType = ETileType::None;
-		return FVector(-99999, -99999, -99999);
+		return FVector::ZeroVector;
 	}
 
 	_hitTileType = ETileType::Normal;
@@ -340,17 +334,11 @@ FVector AGrid::TraceForGround(const FVector& _location, ETileType& _hitTileType)
 		if (AGridModifier* pGridModifier = Cast<AGridModifier>(hitResult.GetActor()))
 		{
 			_hitTileType = pGridModifier->GetType();
-			if (!IsWalkableTile(_hitTileType))
-			{
-				resultLocation = FVector(-99999, -99999, -99999);				
-				break;
-			}
-			
-			if (pGridModifier->GetIsUsingTileHeight())
+			if (!IsWalkableTile(_hitTileType) || pGridModifier->GetIsUsingTileHeight())
 			{
 				resultLocation.Z = UKismetMathLibrary::GridSnap_Float(hitResult.ImpactPoint.Z, m_TileSize.Z);
 				break;
-			}
+			}			
 		}
 		resultLocation.Z = UKismetMathLibrary::GridSnap_Float(hitResult.ImpactPoint.Z, m_TileSize.Z);
 	}			
@@ -359,7 +347,7 @@ FVector AGrid::TraceForGround(const FVector& _location, ETileType& _hitTileType)
 
 FVector AGrid::GetTileLocationFromGridIndex(int _row, int _col)
 {
-	FVector sizeOffset = FVector::Zero();
+	FVector sizeOffset = FVector::ZeroVector;
 	switch (m_Shape)
 	{
 		case EGridShape::Square:
@@ -380,7 +368,7 @@ FVector AGrid::GetTileLocationFromGridIndex(int _row, int _col)
 		case EGridShape::None:
 			default:
 		{
-			sizeOffset = FVector::Zero();
+			sizeOffset = FVector::ZeroVector;
 			break;
 		}
 	}

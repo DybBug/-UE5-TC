@@ -55,9 +55,9 @@ void APlayerActions::SetSelectedActionWithNotify(const TSubclassOf<UAbstractActi
 {
 	if (m_LeftClickSelectAction)
 	{		
-		m_LeftClickSelectAction->ConditionalBeginDestroy(); // 오브젝트 삭제
 		m_LeftClickSelectAction = nullptr;
 	}
+	
 	if (_leftClickActionClass != nullptr)
 	{		
 		m_LeftClickSelectAction = NewObject<UAbstractAction>(this, _leftClickActionClass);
@@ -66,7 +66,6 @@ void APlayerActions::SetSelectedActionWithNotify(const TSubclassOf<UAbstractActi
 
 	if (m_RightClickSelectAction)
 	{
-		m_RightClickSelectAction->ConditionalBeginDestroy();// 오브젝트 삭제
 		m_RightClickSelectAction = nullptr;
 	}
 

@@ -28,6 +28,9 @@ protected:
 #pragma region Widgets
 	UPROPERTY(Meta = (BindWidget))
 	TObjectPtr<UComboBoxString> ComboBox_Environment;
+
+	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UCheckBox> CheckBox_TacticalMode;
 	
 	UPROPERTY(Meta = (BindWidget))
 	TObjectPtr<UComboBoxString> ComboBox_GridShape;
@@ -93,6 +96,9 @@ private:
 
 	UFUNCTION()
 	void _OnEnvironmentSelectionChanged(FString _selectedItem, ESelectInfo::Type _selectedType);
+
+	UFUNCTION()
+	void _OnTacticalModeCheckStateChanged(bool _isChecked);
 	
 	UFUNCTION()
 	void _OnGridShapeSelectionChanged(FString _selectedItem, ESelectInfo::Type _selectionType);

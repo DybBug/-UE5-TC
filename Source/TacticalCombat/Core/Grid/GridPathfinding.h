@@ -28,9 +28,6 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 	TArray<FPathfindingNode> GetValidTileNeighborNodes(const FIntPoint& _index, bool _bIsDiagonalIncluded, const TArray<ETileType>& _validTypes);
 	TArray<FIntPoint> GetNeighborIndices(const FIntPoint& _index, bool _bIsDiagonalIncluded = false);
 

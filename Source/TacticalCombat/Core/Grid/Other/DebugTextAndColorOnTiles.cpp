@@ -57,10 +57,9 @@ void UDebugTextAndColorOnTiles::DestroyTextActor(const FIntPoint& _index)
 
 void UDebugTextAndColorOnTiles::ClearAllTextActors()
 {
-	for (auto it = m_SpawnedTextMap.CreateIterator(); it; ++it)
+	for (const auto& it : m_SpawnedTextMap)
 	{
-		TObjectPtr<ATextRenderActor>& actor = it.Value();
-		actor->Destroy();
+		it.Value->Destroy();
 	}
 	m_SpawnedTextMap.Empty();
 }
@@ -154,7 +153,7 @@ void UDebugTextAndColorOnTiles::UpdateTextOnTile(const FIntPoint& _index)
 			}
 
 			FTransform transform;
-			transform.SetLocation(pTileData->Transform.GetLocation() + FVector(0.0f, 0.0f, 1.0f));
+			transform.SetLocation(pTileData->Transform.GetLocation() + FVector(0.0f, 0.0f, 101.0f));
 			transform.SetRotation(FRotator(90.0f, 180.0f, 0.0f).Quaternion());
 			transform.SetScale3D(FVector(m_Grid->GetTileSize().Y / (longestTextLength * 30.0f)));
 			pTextActor->SetActorTransform(transform);

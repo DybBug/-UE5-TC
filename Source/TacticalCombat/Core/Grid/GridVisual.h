@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "TacticalCombat/Misc/Constants.h"
 #include "GridVisual.generated.h"
+
+using namespace Grid;
 
 class AGrid;
 class UGridInstancedStaticMeshComponent;
@@ -24,22 +27,24 @@ protected:
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 	void InitializeGridVisual(AGrid* _pGrid);
 
-	void SetZOffset(float _offset);
-	FORCEINLINE float GetZOffset() const {return m_ZOffset;}
+
 	
 	void DestroyGridVisual();
 	void UpdateTileVisual(const FTileData& _tileData);
 
-	void InitializeGridMeshInst(UStaticMesh* const _pMesh, UMaterialInstance* const _pMaterial, const FColor& _color, ECollisionEnabled::Type _collisionEnabled);
-	void AddInstance(const FIntPoint& _index, const FTransform& _transform, uint8 _tileStateMask);
-	void RemoveInstance(const FIntPoint& _index);
-	void ClearInstances();
+#pragma region Getter
+	FORCEINLINE bool IsTactical() const {return m_bIsTactical;}
+#pragma endregion
+
+#pragma region Setter
+	void SetZOffset(float _offset);
+	void SetIsTactical(bool _bIsTactical);
+	FORCEINLINE float GetZOffset() const {return m_ZOffset;}
+#pragma endregion
 	
 protected:
 #pragma region Components
@@ -48,12 +53,28 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Component", Meta = (DisplayName = "Grid Instanced StaticMesh Component"))
 	TObjectPtr<UGridInstancedStaticMeshComponent> m_GridInstancedStaticMeshComponent;
+
+	UPROPERTY(VisibleAnywhere, Category = "Component", Meta = (DisplayName = "Tactical Grid Instanced StaticMesh Component"))
+	TObjectPtr<UGridInstancedStaticMeshComponent> m_TacticalGridInstancedStaticMeshComponent;
 #pragma endregion
 
 #pragma region Properties
 	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Z-Offset"))
-	float m_ZOffset = 2.0f;	
+	float m_ZOffset = 2.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Is Tactical"))
+	bool m_bIsTactical;
 #pragma endregion
+
+#pragma region Internals
+	TWeakObjectPtr<AGrid> m_Grid;
+	int32 m_GridLowerZ = DEFAULT_GRID_LOWER_Z;
+	bool m_bIsNeedToReGenerateTacticalOnNextEnable;
+#pragma endregion
+
+private:
+	void _UpdateTileVisualTactical(const FTileData& _tileData);
+	void _SetGridLowerZ(int32 _z);
 
 };
 

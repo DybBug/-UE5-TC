@@ -2,14 +2,6 @@
 
 #pragma once
 
-enum 
-{
-	INVALID_POINT_VALUE = -999,
-	INVALID_SORTING_COST = -1,
-	DEFAULT_COST_TO_ENTER = 1,
-	DEFAULT_COST = 999999,
-};
-
 UENUM(BlueprintType)
 enum class EGridShape : uint8
 {

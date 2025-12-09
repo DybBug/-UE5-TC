@@ -1,8 +1,9 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-#include "TacticalCombat/Misc/Enums.h"
+#include "TacticalCombat/Misc/Constants.h"
 #include "PathfindingDatas.generated.h"
+using namespace GridPathfinding;
 
 USTRUCT(BlueprintType)
 struct FPathfindingNode

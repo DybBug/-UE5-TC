@@ -38,9 +38,6 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void Tick(float _deltaTime) override;
-
 	UFUNCTION()
 	void SpawnGrid(
 		const FVector& _centerLocation,
@@ -82,6 +79,7 @@ public:
 	FORCEINLINE float GetZOffset() { return m_GridVisual != nullptr ? m_GridVisual->GetZOffset() : 0.0f; }
 	FORCEINLINE const TMap<FIntPoint, FTileData>& GetGridTileMap() const { return m_GridTileMap; }
 	FORCEINLINE AGridPathfinding* GetGridPathfinding() const { return m_GridPathfinding.Get(); }
+	FORCEINLINE AGridVisual* GetGirdVisual() const { return m_GridVisual.Get(); }
 
 #pragma endregion
 	

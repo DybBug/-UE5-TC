@@ -25,11 +25,11 @@ void UGridTab::NativeConstruct()
 	_TrySetDefaultValues();
 
 	GetWorld()->GetTimerManager().ClearTimer(m_hSpawnTimer);
-	GetWorld()->GetTimerManager().ClearTimer(m_hDrawDebugTimer);
-	
+	GetWorld()->GetTimerManager().ClearTimer(m_hDrawDebugTimer);	
 	GetWorld()->GetTimerManager().SetTimer(m_hDrawDebugTimer, this, &UGridTab::_DrawDebugLine, DEBUG_DRAWING_DURATION, true);
 	
 	ComboBox_Environment->OnSelectionChanged.AddDynamic(this, &UGridTab::_OnEnvironmentSelectionChanged);
+	CheckBox_TacticalMode->OnCheckStateChanged.AddDynamic(this, &UGridTab::_OnTacticalModeCheckStateChanged);
 	ComboBox_GridShape->OnSelectionChanged.AddDynamic(this, &UGridTab::_OnGridShapeSelectionChanged);	
 	SpinBox_Location->OnValueChanged.AddDynamic(this, &UGridTab::_OnLocationChanged);
 	SpinBox_TileCount->OnValueChanged.AddDynamic(this, &UGridTab::_OnTileCountChanged);
@@ -50,9 +50,11 @@ bool UGridTab::_TrySetDefaultValues()
     const FVector& defaultTileSize = m_GridInWorld->GetTileSize();
 	float defaultZOffset = m_GridInWorld->GetZOffset();
 	EGridShape defaultGridShape = m_GridInWorld->GetGridShape();	
+	bool isTactical = m_GridInWorld->GetGirdVisual()->IsTactical();
 
 	ComboBox_Environment->SetSelectedOption(defaultLevelName.ToString());
-	ComboBox_GridShape->SetSelectedOption(StaticEnum<EGridShape>()->GetNameStringByValue((int64)defaultGridShape));
+	CheckBox_TacticalMode->SetIsChecked(isTactical);
+	ComboBox_GridShape->SetSelectedOption(StaticEnum<EGridShape>()->GetNameStringByValue((int32)defaultGridShape));
 	SpinBox_Location->SetValue(defaultLocation);
 	SpinBox_TileCount->SetValue(defaultTileCount);
 	SpinBox_TileSize->SetValue(defaultTileSize);
@@ -78,6 +80,11 @@ void UGridTab::_OnEnvironmentSelectionChanged(FString _selectedItem, ESelectInfo
 {	
 	ULevelLoadingSubsystem* pLevelLoadingSubsystem  =GetWorld()->GetGameInstance()->GetSubsystem<ULevelLoadingSubsystem>();
 	pLevelLoadingSubsystem->LoadLevel(FName(*_selectedItem));
+}
+
+void UGridTab::_OnTacticalModeCheckStateChanged(bool _isChecked)
+{
+	m_GridInWorld->GetGirdVisual()->SetIsTactical(_isChecked);
 }
 
 

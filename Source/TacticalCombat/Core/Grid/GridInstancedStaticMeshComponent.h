@@ -6,6 +6,9 @@
 #include "Components/InstancedStaticMeshComponent.h"
 #include "GridInstancedStaticMeshComponent.generated.h"
 
+enum class ETileType: uint8;
+struct FTileStateInfo;
+
 /**
  * 
  */
@@ -22,14 +25,20 @@ protected:
 	using UInstancedStaticMeshComponent::RemoveInstance;
 	
 public:
-	void AddInstance(const FIntPoint& _index, const FTransform& _transform, uint8 _tileStateMask);
+	void InitializeGridMeshInst(UStaticMesh* const _pMesh, UMaterialInstance* const _pMaterial, bool _IsColorBasedOnTileType, ECollisionEnabled::Type _collisionEnabled);
+	void AddInstance(const FIntPoint& _index, const FTransform& _transform, uint8 _tileStateMask, ETileType _tileType);
 	void RemoveInstance(const FIntPoint& _index);
 	virtual void ClearInstances() override;
 protected:
 	UPROPERTY(VisibleAnywhere, Category = "Property", Meta = (DisplayName = "Instance Indices"))
 	TArray<FIntPoint> m_InstanceIndices;
 
+	UPROPERTY(VisibleAnywhere, Category = "Internal")
+	bool m_bIsColorBasedOnTileType;
+
 private:
 	FColor _GetColorFromState(uint8 _tileStateMask);
+	FColor _GetColorFromType(ETileType _tileType);
+	
 	
 };

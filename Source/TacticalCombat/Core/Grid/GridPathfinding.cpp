@@ -7,7 +7,8 @@
 #include "TacticalCombat/Structure/GridDatas.h"
 #include "TacticalCombat/Libraries/UtilityLibrary.h"
 
-static TMap<ETileType, int> gs_TileTypeToCost = {
+static TMap<ETileType, int> s_TileTypeToCost =
+{
 	{ETileType::None, 0},
 	{ETileType::Normal, 1},
 	{ETileType::Obstacle, 0},
@@ -29,13 +30,6 @@ void AGridPathfinding::BeginPlay()
 {
 	Super::BeginPlay();
 	
-}
-
-// Called every frame
-void AGridPathfinding::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
 }
 
 TArray<FPathfindingNode> AGridPathfinding::GetValidTileNeighborNodes(const FIntPoint& _index, bool _bIsDiagonalIncluded, const TArray<ETileType>& _validTypes)
@@ -60,7 +54,7 @@ TArray<FPathfindingNode> AGridPathfinding::GetValidTileNeighborNodes(const FIntP
 				FPathfindingNode neighborNode;
 				neighborNode.Index = tempNeighborIndex;
 				neighborNode.PreviousIndex = _index;
-				neighborNode.CostToEnterTile = gs_TileTypeToCost[pTempNeighborTileData->Type];
+				neighborNode.CostToEnterTile = s_TileTypeToCost[pTempNeighborTileData->Type];
 				
 				neighborNodes.Add(neighborNode);
 			}

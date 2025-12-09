@@ -5,8 +5,9 @@
 
 #include "Grid.h"
 #include "GridInstancedStaticMeshComponent.h"
-#include "Components/InstancedStaticMeshComponent.h"
 #include "TacticalCombat/Misc/Defines.h"
+#include "Components/InstancedStaticMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AGridVisual::AGridVisual()
@@ -23,6 +24,14 @@ AGridVisual::AGridVisual()
 	m_GridInstancedStaticMeshComponent->SetCollisionResponseToChannel(GTC_Grid, ECollisionResponse::ECR_Block);
 	m_GridInstancedStaticMeshComponent->NumCustomDataFloats = 4;
 	RootComponent = m_GridInstancedStaticMeshComponent;
+
+	m_TacticalGridInstancedStaticMeshComponent = CreateDefaultSubobject<UGridInstancedStaticMeshComponent>(TEXT("TacticalGridInstancedStaticMeshComponent"));
+	m_TacticalGridInstancedStaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	m_TacticalGridInstancedStaticMeshComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldStatic);
+	m_TacticalGridInstancedStaticMeshComponent->SetCollisionResponseToChannel(GTC_Grid, ECollisionResponse::ECR_Block);
+	m_TacticalGridInstancedStaticMeshComponent->NumCustomDataFloats = 4;
+	RootComponent = m_TacticalGridInstancedStaticMeshComponent;
+	
 	SetActorLocation(FVector::ZeroVector);
 }
 
@@ -38,62 +47,94 @@ void AGridVisual::BeginPlay()
 	Super::BeginPlay();
 }
 
-// Called every frame
-void AGridVisual::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
 void AGridVisual::InitializeGridVisual(AGrid* _pGrid)
 {
-	FGridShapeData gridShapeData = _pGrid->GetGridShapeData();
-	InitializeGridMeshInst(gridShapeData.FlatMesh, gridShapeData.FlatMaterial, FColor(0.0f, 0.0f, 0.0f, 0.5f), ECollisionEnabled::Type::QueryOnly);
+	m_Grid = _pGrid;
+	FGridShapeData gridShapeData = m_Grid->GetGridShapeData();
+	m_GridInstancedStaticMeshComponent->InitializeGridMeshInst(gridShapeData.FlatMesh, gridShapeData.FlatMaterial, false, ECollisionEnabled::Type::QueryOnly);
+	m_TacticalGridInstancedStaticMeshComponent->InitializeGridMeshInst(gridShapeData.Mesh, gridShapeData.MeshMaterial, true, ECollisionEnabled::Type::QueryOnly);
 	SetActorLocation(FVector::ZeroVector);
-	SetZOffset(m_ZOffset);	
+	SetZOffset(m_ZOffset);
+	_SetGridLowerZ(DEFAULT_GRID_LOWER_Z);
+	SetIsTactical(m_bIsTactical);
+}
+
+void AGridVisual::DestroyGridVisual()
+{
+	m_GridInstancedStaticMeshComponent->ClearInstances();
+	m_TacticalGridInstancedStaticMeshComponent->ClearInstances();
+	_SetGridLowerZ(DEFAULT_GRID_LOWER_Z);
+}
+
+void AGridVisual::UpdateTileVisual(const FTileData& _tileData)
+{
+	m_GridInstancedStaticMeshComponent->RemoveInstance(_tileData.Index);
+	if (AGrid::IsWalkableTile(_tileData.Type))
+	{
+		m_GridInstancedStaticMeshComponent->AddInstance(_tileData.Index, _tileData.Transform, _tileData.StateMask, _tileData.Type);
+	}
+	
+	_UpdateTileVisualTactical(_tileData);
+}
+
+void AGridVisual::_UpdateTileVisualTactical(const FTileData& _tileData)
+{
+	if (_tileData.Transform.GetTranslation().Z < m_GridLowerZ)
+	{
+		_SetGridLowerZ(_tileData.Transform.GetTranslation().Z);
+	}
+
+	if (!m_bIsTactical)
+	{
+		m_bIsNeedToReGenerateTacticalOnNextEnable = true;
+		return;
+	}
+	
+	m_TacticalGridInstancedStaticMeshComponent->RemoveInstance(_tileData.Index);
+	if (_tileData.Type != ETileType::None)
+	{
+		FTransform tileTransform = _tileData.Transform;
+		FVector tileScale = tileTransform.GetScale3D();
+		tileScale .Z = (tileTransform.GetTranslation().Z - m_GridLowerZ) / m_Grid->GetGridShapeData().MeshSize.Z;
+		tileTransform.SetScale3D(tileScale);
+		m_TacticalGridInstancedStaticMeshComponent->AddInstance(_tileData.Index, tileTransform, _tileData.StateMask, _tileData.Type);
+	}
+}
+
+void AGridVisual::_SetGridLowerZ(int32 _z)
+{
+	m_GridLowerZ = _z;
+	m_bIsNeedToReGenerateTacticalOnNextEnable = true;
 }
 
 void AGridVisual::SetZOffset(float _offset)
 {
 	m_ZOffset = _offset;
 
+	m_GridInstancedStaticMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, m_ZOffset));
 	FVector visualLocation = GetActorLocation();
 	visualLocation.Z = m_ZOffset;
 	SetActorLocation(visualLocation);	
 }
 
-void AGridVisual::DestroyGridVisual()
+void AGridVisual::SetIsTactical(bool _bIsTactical)
 {
-	ClearInstances();
-}
+	m_bIsTactical = _bIsTactical;
+	m_TacticalGridInstancedStaticMeshComponent->SetHiddenInGame(!m_bIsTactical);
 
-void AGridVisual::UpdateTileVisual(const FTileData& _tileData)
-{
-	RemoveInstance(_tileData.Index);
-	if (AGrid::IsWalkableTile(_tileData.Type))
+	TArray<AActor*> actors;
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), TEXT("NotTactical"), actors);
+	for (AActor* pActor : actors)
 	{
-		AddInstance(_tileData.Index, _tileData.Transform, _tileData.StateMask);
+		pActor->SetActorHiddenInGame(m_bIsTactical);
 	}
-}
 
-void AGridVisual::InitializeGridMeshInst(UStaticMesh* const _pMesh, UMaterialInstance* const _pMaterial, const FColor& _color, ECollisionEnabled::Type _collisionEnabled)
-{
-	m_GridInstancedStaticMeshComponent->SetStaticMesh(_pMesh);
-	m_GridInstancedStaticMeshComponent->SetMaterial(0, _pMaterial);
-	m_GridInstancedStaticMeshComponent->SetColorParameterValueOnMaterials("Color", _color);
-	m_GridInstancedStaticMeshComponent->SetCollisionEnabled(_collisionEnabled);
-}
-
-void AGridVisual::AddInstance(const FIntPoint& _index, const FTransform& _transform, uint8 _tileStateMask)
-{
-	m_GridInstancedStaticMeshComponent->AddInstance(_index, _transform, _tileStateMask);
-}
-
-void AGridVisual::RemoveInstance(const FIntPoint& _index)
-{
-	m_GridInstancedStaticMeshComponent->RemoveInstance(_index);
-}
-
-void AGridVisual::ClearInstances()
-{
-	m_GridInstancedStaticMeshComponent->ClearInstances();
+	if (m_bIsTactical && m_bIsNeedToReGenerateTacticalOnNextEnable)
+	{
+		m_bIsNeedToReGenerateTacticalOnNextEnable = false;
+		for (const auto& it : m_Grid->GetGridTileMap())
+		{
+			UpdateTileVisual(it.Value);
+		}
+	}
 }
