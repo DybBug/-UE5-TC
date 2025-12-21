@@ -6,12 +6,13 @@
 #include "GridModifier.h"
 #include "GridVisual.h"
 #include "GameFramework/Actor.h"
-#include "Grid/Types/GridShapeData.h"
+#include "Table/Rows/GridShapeTableRow.h"
 #include "Grid/Types/TileData.h"
 #include "Grid.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnTileDataUpdated, const FIntPoint&);
 DECLARE_MULTICAST_DELEGATE(FOnGridDestroyed);
+DECLARE_MULTICAST_DELEGATE(FOnGridGenerated);
 
 class AGridVisual;
 class AGridPathfinding;
@@ -38,9 +39,15 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	
+public:
+	FOnTileDataUpdated OnTileDataUpdated;
+	FOnGridDestroyed OnGridDestroyed;
+	FOnGridGenerated OnGridGenerated;
+
 public:	
 	UFUNCTION()
-	void SpawnGrid(
+	void SpawnGridWithNotify(
 		const FVector& _centerLocation,
 		const FVector& _tileSize,
 		const FIntPoint& _tileCount,
@@ -50,7 +57,7 @@ public:
 	UFUNCTION()
 	void DestroyGrid();
 	
-	FGridShapeData GetGridShapeData() const;
+	FGridShapeTableRow GetGridShapeData() const;
 
 	FVector GetCursorLocationOnGrid(int _playerIndex);
 	FIntPoint GetTileIndexFromWorldLocation(const FVector& _location);
@@ -94,10 +101,6 @@ public:
 		}
 	}
 #pragma endregion
-
-public:
-	FOnTileDataUpdated OnTileDataUpdated;
-	FOnGridDestroyed OnGridDestroyed;
 	
 protected:
 #pragma region Component

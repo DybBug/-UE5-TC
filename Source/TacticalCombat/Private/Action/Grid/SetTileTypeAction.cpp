@@ -4,6 +4,7 @@
 #include "Action/Grid/SetTileTypeAction.h"
 
 #include "Core/PlayerActions.h"
+#include "Grid/Grid.h"
 
 void USetTileTypeAction::Execute(const FIntPoint& _index)
 {

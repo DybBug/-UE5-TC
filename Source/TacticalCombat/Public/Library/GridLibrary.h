@@ -17,5 +17,5 @@ class TACTICALCOMBAT_API UGridLibrary : public UBlueprintFunctionLibrary
 
 public:
 	UFUNCTION(BlueprintPure, Category = "GridLibrary")
-	static FGridShapeData GetGridShape(EGridShape _gridShape);
+	static FGridShapeTableRow GetGridShape(EGridShape _gridShape);
 };

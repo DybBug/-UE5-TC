@@ -6,7 +6,7 @@
 #include "Library/GridLibrary.h"
 #include "Shared/SharedDefines.h"
 #include "Shared/SharedEnums.h"
-#include "Grid/Types/GridShapeData.h"
+#include "Table/Rows/GridShapeTableRow.h"
 
 TMap<ETileType, FColor> AGridModifier::TileColorMap = {
 	{ETileType::None, FColor(0, 0, 0, 255)},
@@ -49,7 +49,7 @@ void AGridModifier::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	FGridShapeData gridShapeData = UGridLibrary::GetGridShape(m_Shape);
+	FGridShapeTableRow gridShapeData = UGridLibrary::GetGridShape(m_Shape);
 	m_StaticMeshComponent->SetStaticMesh(gridShapeData.Mesh.Get());
 
 	//MaterialInstanceDynamic* pDynamicMaterial = UMaterialInstanceDynamic::Create(gridShapeData.FlatMaterial,  this);

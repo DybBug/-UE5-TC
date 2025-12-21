@@ -10,7 +10,7 @@ struct FPathfindingNode
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FIntPoint Index = FIntPoint(GridPathfinding::INVALID_POINT_VALUE, GridPathfinding::INVALID_POINT_VALUE);
+	FIntPoint Index = FIntPoint(Grid::INVALID_POINT_VALUE, Grid::INVALID_POINT_VALUE);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 CostToEnterTile = GridPathfinding::DEFAULT_COST_TO_ENTER;
@@ -22,7 +22,7 @@ public:
 	int32 MinimumCostToTarget = GridPathfinding::DEFAULT_COST;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FIntPoint PreviousIndex = FIntPoint(GridPathfinding::INVALID_POINT_VALUE, GridPathfinding::INVALID_POINT_VALUE);
+	FIntPoint PreviousIndex = FIntPoint(Grid::INVALID_POINT_VALUE, Grid::INVALID_POINT_VALUE);
 };
 
 

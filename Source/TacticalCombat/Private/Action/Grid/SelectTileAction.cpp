@@ -4,6 +4,7 @@
 #include "Action/Grid/SelectTileAction.h"
 #include "Core/PlayerActions.h"
 #include "Shared/SharedEnums.h"
+#include "Grid/Grid.h"
 
 void USelectTileAction::Execute(const FIntPoint& _index)
 {

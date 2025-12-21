@@ -4,6 +4,7 @@
 #include "Action/Pathfinding/SelectTileWithCalculateMinCost.h"
 
 #include "Core/PlayerActions.h"
+#include "Grid/Grid.h"
 #include "Grid/GridPathfinding.h"
 #include "Grid/Types/PathfindingNode.h"
 

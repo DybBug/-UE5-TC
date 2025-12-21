@@ -72,7 +72,7 @@ bool UGridTab::_TrySpawnGrid()
 
 	FName gridShapeName = FName(*ComboBox_GridShape->GetSelectedOption());
 	EGridShape gridShape = static_cast<EGridShape>(StaticEnum<EGridShape>()->GetValueByName(gridShapeName));
-	m_GridInWorld->SpawnGrid(location, tileSize, tileCount, gridShape, CheckBox_UseEnvironment->IsChecked());
+	m_GridInWorld->SpawnGridWithNotify(location, tileSize, tileCount, gridShape, CheckBox_UseEnvironment->IsChecked());
 	return true;
 }
 

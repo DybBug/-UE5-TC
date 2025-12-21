@@ -3,6 +3,7 @@
 
 #include "Action/Grid/AddTileAction.h"
 #include "Core/PlayerActions.h"
+#include "Grid/Grid.h"
 
 void UAddTileAction::Execute(const FIntPoint& _index)
 {

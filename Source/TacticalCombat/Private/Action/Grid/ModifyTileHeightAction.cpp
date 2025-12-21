@@ -3,6 +3,8 @@
 
 #include "Action/Grid/ModifyTileHeightAction.h"
 #include "Core/PlayerActions.h"
+#include "Grid/Grid.h"
+#include "Grid/Types/TileData.h"
 
 void UModifyTileHeightAction::Execute(const FIntPoint& _index)
 {
@@ -26,6 +28,7 @@ void UModifyTileHeightAction::Execute(const FIntPoint& _index)
 		newTileData.Transform.SetRotation(pTileData->Transform.GetRotation());
 		newTileData.Transform.SetScale3D(pTileData->Transform.GetScale3D());
 		newTileData.StateMask =pTileData->StateMask;
+		newTileData.UnitOnTile = pTileData->UnitOnTile;
 
 		pGrid->AddGridTile(newTileData);
 	}

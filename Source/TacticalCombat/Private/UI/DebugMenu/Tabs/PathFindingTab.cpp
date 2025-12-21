@@ -6,6 +6,7 @@
 #include "Grid/Misc/DebugTextAndColorOnTiles.h"
 #include "Shared/SharedEnums.h"
 #include "Components/CheckBox.h"
+#include "UI/DebugMenu/Elements/UnitButtonList.h"
 
 void UPathFindingTab::NativeConstruct()
 {

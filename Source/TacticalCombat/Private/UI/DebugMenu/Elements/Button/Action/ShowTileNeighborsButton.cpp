@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/DebugMenu/Elements/Button/ShowTileNeighborsButton.h"
+#include "UI/DebugMenu/Elements/Button/Action/ShowTileNeighborsButton.h"
 #include "Core/PlayerActions.h"
 #include "Action/Pathfinding/ShowTileNeighborsAction.h"
 #include "Components/CheckBox.h"

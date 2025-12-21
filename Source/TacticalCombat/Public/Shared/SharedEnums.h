@@ -61,11 +61,11 @@ enum class EUnitAnimationState : uint8
 };
 
 UENUM(BlueprintType)
-enum class EUnitType : uint8
+enum class ETacticalUnitType : uint8
 {
 	Warrior UMETA(DisplayName = "Warrior"),
 	Ranger UMETA(DisplayName = "Ranger"),
 	Slime UMETA(DisplayName = "Slime"),
 	Max UMETA(Hidden)
 };
-ENUM_RANGE_BY_COUNT(EUnitType, EUnitType::Max)
+ENUM_RANGE_BY_COUNT(ETacticalUnitType, ETacticalUnitType::Max)

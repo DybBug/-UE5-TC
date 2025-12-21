@@ -50,7 +50,7 @@ void AGridVisual::BeginPlay()
 void AGridVisual::InitializeGridVisual(AGrid* _pGrid)
 {
 	m_Grid = _pGrid;
-	FGridShapeData gridShapeData = m_Grid->GetGridShapeData();
+	FGridShapeTableRow gridShapeData = m_Grid->GetGridShapeData();
 	m_GridInstancedStaticMeshComponent->InitializeGridMeshInst(gridShapeData.FlatMesh, gridShapeData.FlatMaterial, false, ECollisionEnabled::Type::QueryOnly);
 	m_TacticalGridInstancedStaticMeshComponent->InitializeGridMeshInst(gridShapeData.Mesh, gridShapeData.MeshMaterial, true, ECollisionEnabled::Type::QueryOnly);
 	SetActorLocation(FVector::ZeroVector);

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/DebugMenu/Elements/Button/ConsoleCommandButton.h"
+#include "UI/DebugMenu/Elements/Button/Action/ConsoleCommandButton.h"
 
 #include "Components/Button.h"
 #include "Components/TextBlock.h"

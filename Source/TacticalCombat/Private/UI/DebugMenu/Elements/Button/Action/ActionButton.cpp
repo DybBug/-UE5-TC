@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/DebugMenu/Elements/Button/ActionButton.h"
+#include "UI/DebugMenu/Elements/Button/Action/ActionButton.h"
 #include "Core/PlayerActions.h"
 #include "Action/AbstractAction.h"
 #include "Components/Button.h"
@@ -41,7 +41,7 @@ void UActionButton::NativePreConstruct()
 
 void UActionButton::OnSelectedActionsChanged(const UAbstractAction* const _leftClickAction, const UAbstractAction* const _rightClickAction)
 {
-	const UAbstractAction* pLeftAction = m_PlayerActions->GetLeftClickSelectAction();	
+	const UAbstractAction* pLeftAction = m_PlayerActions->GetLeftClickSelectAction();
 	const UAbstractAction* pRightAction = m_PlayerActions->GetRightClickSelectAction();
 	
 	bool isValidLeftAction = m_LeftClickActionClass == ((pLeftAction == nullptr) ? nullptr : pLeftAction->GetClass());

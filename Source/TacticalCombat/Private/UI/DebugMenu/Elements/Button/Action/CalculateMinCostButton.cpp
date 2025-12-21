@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/DebugMenu/Elements/Button/CalculateMinCostButton.h"
+#include "UI/DebugMenu/Elements/Button/Action/CalculateMinCostButton.h"
 
 #include "Core/PlayerActions.h"
 #include "Action/Pathfinding/SelectTileWithCalculateMinCost.h"

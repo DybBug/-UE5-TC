@@ -3,6 +3,8 @@
 #include "Shared/SharedEnums.h"
 #include "TileData.generated.h"
 
+class AUnit;
+
 USTRUCT(BlueprintType)
 struct FTileData
 {
@@ -18,7 +20,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTransform Transform;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)/*, Meta = (Bitmask, BitmaskEnum = "ETileStateFlags") */ 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (Bitflags, BitmaskEnum = "/Script/TacticalCombat.ETileStateFlags"))  
 	uint8 StateMask;
+	
+	UPROPERTY(EditAnywhere, blueprintReadWrite)
+	TWeakObjectPtr<AUnit> UnitOnTile;
 
 };

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/DebugMenu/Elements/Button/ModifyTileHeightButton.h"
+#include "UI/DebugMenu/Elements/Button/Action/ModifyTileHeightButton.h"
 
 #include "Core/PlayerActions.h"
 #include "Action/Grid/ModifyTileHeightAction.h"

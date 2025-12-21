@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/DebugMenu/Elements/Button/SetTileTypeActionButton.h"
+#include "UI/DebugMenu/Elements/Button/Action/SetTileTypeActionButton.h"
 #include "Core/PlayerActions.h"
 #include "Action/Grid/SetTileTypeAction.h"
 #include "Grid/Grid.h"

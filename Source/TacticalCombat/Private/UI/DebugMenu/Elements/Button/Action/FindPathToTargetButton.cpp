@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "UI/DebugMenu/Elements/Button/FindPathToTargetButton.h"
+#include "UI/DebugMenu/Elements/Button/Action/FindPathToTargetButton.h"
 #include "Core/PlayerActions.h"
 #include "Action/Pathfinding/FindPathToTargetAction.h"
 #include "Action/Pathfinding/ShowTileNeighborsAction.h"

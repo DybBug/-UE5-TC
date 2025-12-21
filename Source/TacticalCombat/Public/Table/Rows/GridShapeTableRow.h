@@ -1,10 +1,10 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
-#include "GridShapeData.generated.h"
+#include "GridShapeTableRow.generated.h"
 
 USTRUCT(BlueprintType)
-struct FGridShapeData : public FTableRowBase
+struct FGridShapeTableRow : public FTableRowBase
 {
 	GENERATED_BODY()
 

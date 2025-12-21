@@ -4,25 +4,25 @@
 #include "Library/GridLibrary.h"
 
 #include "Shared/SharedEnums.h"
-#include "Grid/Types/GridShapeData.h"
+#include "Table/Rows/GridShapeTableRow.h"
 
-FGridShapeData UGridLibrary::GetGridShape(EGridShape _gridShape)
+FGridShapeTableRow UGridLibrary::GetGridShape(EGridShape _gridShape)
 {
-	static UDataTable* pLoadedDataTable;
+	static UDataTable* pLoadedDataTable = nullptr;;
 	if (pLoadedDataTable == nullptr)
 	{
-		pLoadedDataTable = LoadObject<UDataTable>(nullptr, TEXT("/Game/Grids/GridShapes/DT_GridShape.DT_GridShape"));
+		pLoadedDataTable = LoadObject<UDataTable>(nullptr, TEXT("/Game/Tables/DT_GridShape.DT_GridShape"));
 	}
 	
 	// 성공적으로 로드됨
 	if (pLoadedDataTable)
 	{
 		FName girdShapeName = *(StaticEnum<EGridShape>()->GetNameStringByValue((uint8)_gridShape));
-		FGridShapeData* pGridShapeData = pLoadedDataTable->FindRow<FGridShapeData>(girdShapeName, TEXT("Data Table Lookup"));
+		FGridShapeTableRow* pGridShapeData = pLoadedDataTable->FindRow<FGridShapeTableRow>(girdShapeName, TEXT("Data Table Lookup"));
 		if (pGridShapeData != nullptr)
 		{
 			return *pGridShapeData;
 		}		
 	}
-	return FGridShapeData();
+	return FGridShapeTableRow();
 }

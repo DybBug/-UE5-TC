@@ -6,6 +6,8 @@
 #include "Blueprint/UserWidget.h"
 #include "PathFindingTab.generated.h"
 
+class UAddRemoveUnitButton;
+class UUnitButtonList;
 class UCheckBox;
 class UDebugTextAndColorOnTiles;
 /**
@@ -19,7 +21,7 @@ class TACTICALCOMBAT_API UPathFindingTab : public UUserWidget
 protected:
 	virtual void NativeConstruct() override;
 
-#pragma region  Widgets
+#pragma region  Widgets	
 	UPROPERTY(Meta = (BindWidget))
 	TObjectPtr<UCheckBox> CheckBox_IsShowIndicesOnTiles;
 
@@ -75,3 +77,5 @@ protected:
 	UFUNCTION()
 	void OnIsShowAnalyzedTilesCheckStateChanged(bool _bIsChecked);
 };
+
+

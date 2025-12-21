@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Grid/Grid.h"
 #include "PlayerActions.generated.h"
 
 class UAbstractAction;
+class AGrid;
+class ACombatSystem;
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSelectedActionsChanged, const UAbstractAction* const, const UAbstractAction* const);
 
@@ -38,6 +39,7 @@ public:
 	FORCEINLINE const FIntPoint& GetHoveredTileIndex() const { return m_HoveredTileIndex; }
 	FORCEINLINE const FIntPoint& GetSelectedTileIndex() const { return m_SelectedTileIndex; }
 	FORCEINLINE AGrid* const GetGrid() const { return m_Grid.Get(); }
+	FORCEINLINE ACombatSystem* const GetCombatSystem() const { return m_CombatSystem.Get(); }
 	FORCEINLINE UAbstractAction* const GetLeftClickSelectAction() const { return m_LeftClickSelectAction.Get(); }
 	FORCEINLINE UAbstractAction* const GetRightClickSelectAction() const { return m_RightClickSelectAction.Get(); }
 	FORCEINLINE bool IsLeftClickDown() const { return m_bIsLeftClickDown; }
@@ -66,6 +68,9 @@ protected:
 	
 	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Grid"))
 	TWeakObjectPtr<AGrid> m_Grid;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Combat System"))
+	TWeakObjectPtr<ACombatSystem> m_CombatSystem;
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Left Click Select Action"))
 	TObjectPtr<UAbstractAction> m_LeftClickSelectAction;

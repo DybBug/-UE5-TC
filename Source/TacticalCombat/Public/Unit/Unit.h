@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Unit.generated.h"
 
-enum class EUnitType : uint8;
+enum class ETacticalUnitType : uint8;
 class USceneComponent;
 class USkeletalMeshComponent;
 class USkeletalMesh;
@@ -21,24 +21,27 @@ class TACTICALCOMBAT_API AUnit : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AUnit();
-
+	
 	virtual void OnConstruction(const FTransform& _transform) override;
-
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+public:
+	void InitializeUnit(ETacticalUnitType _type);
+
+public:
+	FORCEINLINE const FIntPoint& GetIndex() const { return m_Index;}
+
+	FORCEINLINE void SetUnitType(ETacticalUnitType _type) { m_UnitType = _type; }
+	FORCEINLINE void SetIndex(const FIntPoint& _index) { m_Index = _index; }
+	
 
 protected:
 
 #pragma region Properties
 	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Unit Type"))
-	EUnitType m_UnitType;
-
-	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Unit Types To Skeletal Mesh"))
-	TMap<EUnitType, TObjectPtr<USkeletalMesh>> m_UnitTypesToSkeletalMesh;
-
-	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Unit TypesTo Anim Instance Class"))
-	TMap<EUnitType, TSubclassOf<UAnimInstance>> m_UnitTypesToAnimInstanceClass;
+	ETacticalUnitType m_UnitType;
 #pragma endregion
 
 
@@ -48,5 +51,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Component", Meta = (DisplayName = "Skeletal Mesh Component"))
 	TObjectPtr<USkeletalMeshComponent> m_SkeletalMeshComponent;
+#pragma endregion
+
+#pragma region Internals
+	UPROPERTY(VisibleInstanceOnly, Category = "Internals", Meta = (DisplayName = "Index"))
+	FIntPoint m_Index;
 #pragma endregion
 };

@@ -72,7 +72,7 @@ void AGrid::OnConstruction(const FTransform& Transform)
 	
 	m_GridPathfinding->SetGrid(this);
 	
-	SpawnGrid(GetActorLocation(), m_TileSize, m_TileCount, m_Shape, true);
+	SpawnGridWithNotify(GetActorLocation(), m_TileSize, m_TileCount, m_Shape, true);
 #endif
 }
 
@@ -86,10 +86,10 @@ void AGrid::BeginPlay()
 	
 	m_GridPathfinding->SetGrid(this);
 	
-	SpawnGrid(GetActorLocation(), m_TileSize, m_TileCount, m_Shape, true);
+	SpawnGridWithNotify(GetActorLocation(), m_TileSize, m_TileCount, m_Shape, true);
 }
 
-void AGrid::SpawnGrid(const FVector& _centerLocation, const FVector& _tileSize, const FIntPoint& _tileCount, EGridShape _shape, bool _bIsUseEnvironment)
+void AGrid::SpawnGridWithNotify(const FVector& _centerLocation, const FVector& _tileSize, const FIntPoint& _tileCount, EGridShape _shape, bool _bIsUseEnvironment)
 {	
 	m_CenterLocation = _centerLocation;
 	m_TileSize = _tileSize;
@@ -127,6 +127,11 @@ void AGrid::SpawnGrid(const FVector& _centerLocation, const FVector& _tileSize, 
 			AddGridTile(newTileData);		
 		}
 	}
+
+	if (OnGridGenerated.IsBound())
+	{
+		OnGridGenerated.Broadcast();
+	}
 	
 }
 
@@ -143,7 +148,7 @@ void AGrid::DestroyGrid()
 	}
 }
 
-FGridShapeData AGrid::GetGridShapeData() const
+FGridShapeTableRow AGrid::GetGridShapeData() const
 {
 	return UGridLibrary::GetGridShape(m_Shape);
 }

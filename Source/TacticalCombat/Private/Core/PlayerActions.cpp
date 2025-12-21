@@ -4,6 +4,7 @@
 #include "Core/PlayerActions.h"
 
 #include "Action/AbstractAction.h"
+#include "Combat/CombatSystem.h"
 #include "Grid/Grid.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -42,6 +43,9 @@ void APlayerActions::BeginPlay()
 	}
 	
 	m_Grid = Cast<AGrid>(UGameplayStatics::GetActorOfClass(GetWorld(), AGrid::StaticClass()));
+	m_CombatSystem = Cast<ACombatSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ACombatSystem::StaticClass()));
+	
+	UGameplayStatics::GetPlayerController(GetWorld(), 0)->InputEnabled();
 }
 
 // Called every frame
