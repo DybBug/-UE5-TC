@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Action/Grid/SetTileTypeAction.h"
-#include "FindPathToTargetAction.generated.h"
+#include "Action/Pathfinding/FindPathToTargetAction.h"
+#include "MoveUnitOnGridAction.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TACTICALCOMBAT_API UFindPathToTargetAction : public USetTileTypeAction
+class TACTICALCOMBAT_API UMoveUnitOnGridAction : public USetTileTypeAction
 {
 	GENERATED_BODY()
 
@@ -22,6 +22,7 @@ public:
 	FORCEINLINE void SetCanUseFlyingOnly(bool _bCanUseFlyingOnly) { m_bCanUseFlyingOnly = _bCanUseFlyingOnly; }
 	FORCEINLINE void SetDelayBetweenIterations(float _value) {m_DelayBetweenIterations = _value; }
 	FORCEINLINE void SetMaxMs(float _value) {m_MaxMs = _value; }
+	FORCEINLINE void SetMoveDurationPerTile(float _value) { m_MoveDurationPerTile = _value; }
 #pragma endregion
 
 protected:
@@ -29,8 +30,14 @@ protected:
 	bool m_bCanUseFlyingOnly;
 	float m_DelayBetweenIterations;
 	float m_MaxMs;
+	float m_MoveDurationPerTile;
+
+	TWeakObjectPtr<AUnit> m_CurrentUnit;
 private:
 	UFUNCTION()
 	void _HandlePathfindingCompleted(const TArray<FIntPoint>& _path);
-	
+
+	UFUNCTION()
+	void _HandleUnitFinishedWalking(AUnit* const _pUnit);
 };
+

@@ -12,7 +12,7 @@ void UUnitButton::NativePreConstruct()
 {
 	Super::NativeConstruct();
 
-	FUnitAssetsTableRow tableRow = UUnitsLibrary::GetDefaultUnitAssetsDataFromUnitType(m_UnitType);
+	FUnitTableRow tableRow = UUnitsLibrary::GetDefaultUnitAssetsDataFromUnitType(m_UnitType);
 	Image->SetBrushFromTexture(tableRow.Assets.Icon);
 	FVector2D renderScale = FVector2D( m_bIsLookingRight ? 1.0f : -1.0f, 1.0f);
 	Image->SetRenderScale(renderScale);

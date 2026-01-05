@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Action/Grid/SelectTileAction.h"
+#include "Action/Grid/SelectTileAndUnitAction.h"
 #include "SelectTileWithCalculateMinCost.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TACTICALCOMBAT_API USelectTileWithCalculateMinCost : public USelectTileAction
+class TACTICALCOMBAT_API USelectTileWithCalculateMinCost : public USelectTileAndUnitAction
 {
 	GENERATED_BODY()
 

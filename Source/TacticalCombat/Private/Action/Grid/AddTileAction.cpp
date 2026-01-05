@@ -23,5 +23,5 @@ void UAddTileAction::Execute(const FIntPoint& _index)
 	tileData.Transform.SetRotation((pGrid->GetTileRotationFromGridIndex(_index.X, _index.Y).Quaternion()));
 	tileData.Transform.SetScale3D(pGrid->GetTileScale());
 	
-	pGrid->AddGridTile(tileData);	
+	pGrid->AddGridTileWithNotify(tileData);	
 }

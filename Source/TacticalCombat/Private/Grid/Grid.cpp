@@ -96,7 +96,7 @@ void AGrid::SpawnGridWithNotify(const FVector& _centerLocation, const FVector& _
 	m_Shape = _shape;
 	m_TileCount = _tileCount;
 	
-	DestroyGrid();
+	DestroyGridWithNotify();
 
 	m_GridVisual->InitializeGridVisual(this);
 	
@@ -124,7 +124,7 @@ void AGrid::SpawnGridWithNotify(const FVector& _centerLocation, const FVector& _
 			}
 			
 			FTileData newTileData = FTileData{FIntPoint(row, col), tracedTileType, tileTransform};
-			AddGridTile(newTileData);		
+			AddGridTileWithNotify(newTileData);		
 		}
 	}
 
@@ -135,7 +135,7 @@ void AGrid::SpawnGridWithNotify(const FVector& _centerLocation, const FVector& _
 	
 }
 
-void AGrid::DestroyGrid()
+void AGrid::DestroyGridWithNotify()
 {
 	m_GridTileMap.Empty();
 	if (m_GridVisual)
@@ -243,7 +243,7 @@ FIntPoint AGrid::GetTileIndexUnderCursor(int _playerIndex)
 	return GetTileIndexFromWorldLocation(location);
 }
 
-void AGrid::AddGridTile(const FTileData& _tileData)
+void AGrid::AddGridTileWithNotify(const FTileData& _tileData)
 {
 	m_GridTileMap.Add(_tileData.Index, _tileData);
 	m_GridVisual->UpdateTileVisual(_tileData);
@@ -253,7 +253,7 @@ void AGrid::AddGridTile(const FTileData& _tileData)
 	}
 }
 
-void AGrid::RemoveGridTile(const FIntPoint& _tileIndex)
+void AGrid::RemoveGridTileWithNotify(const FIntPoint& _tileIndex)
 {
 	bool isRemove = m_GridTileMap.Remove(_tileIndex) > 0;
 	if (isRemove)
@@ -270,7 +270,7 @@ void AGrid::RemoveGridTile(const FIntPoint& _tileIndex)
 	}	
 }
 
-void AGrid::AddStateToTile(const FIntPoint& _tileIndex, const ETileStateFlags _stateFlag)
+void AGrid::AddStateToTileWithNotify(const FIntPoint& _tileIndex, const ETileStateFlags _stateFlag)
 {
 	FTileData* const pTileData =  m_GridTileMap.Find(_tileIndex);
 	if (pTileData)
@@ -283,14 +283,14 @@ void AGrid::AddStateToTile(const FIntPoint& _tileIndex, const ETileStateFlags _s
 		
 		m_GridVisual->UpdateTileVisual(*pTileData);
 
-		if (OnTileDataUpdated.IsBound())
+		if (OnTileStateUpdated.IsBound())
 		{
-			OnTileDataUpdated.Broadcast(_tileIndex);
+			OnTileStateUpdated.Broadcast(_tileIndex);
 		}
 	}
 }
 
-void AGrid::RemoveStateFromTile(const FIntPoint& _tileIndex, const ETileStateFlags _stateFlag)
+void AGrid::RemoveStateFromTileWithNotify(const FIntPoint& _tileIndex, const ETileStateFlags _stateFlag)
 {
 	FTileData* const pTileData =  m_GridTileMap.Find(_tileIndex);
 	if (pTileData)
@@ -303,9 +303,9 @@ void AGrid::RemoveStateFromTile(const FIntPoint& _tileIndex, const ETileStateFla
 		
 		m_GridVisual->UpdateTileVisual(*pTileData);
 
-		if (OnTileDataUpdated.IsBound())
+		if (OnTileStateUpdated.IsBound())
 		{
-			OnTileDataUpdated.Broadcast(_tileIndex);
+			OnTileStateUpdated.Broadcast(_tileIndex);
 		}
 	}
 }
@@ -416,7 +416,7 @@ void AGrid::ClearStateFromTiles(const ETileStateFlags _stateFlag)
 	TArray<FIntPoint> indices = GetAllTilesWithStateFlag(_stateFlag);
 	for (const FIntPoint& index : indices)
 	{
-		RemoveStateFromTile(index, _stateFlag);
+		RemoveStateFromTileWithNotify(index, _stateFlag);
 	}
 }
 

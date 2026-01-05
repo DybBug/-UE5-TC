@@ -16,17 +16,14 @@ void UShowTileNeighborsAction::Execute(const FIntPoint& _index)
 	AGrid* const pGrid =  m_PlayerActions->GetGrid();
 	pGrid->ClearStateFromTiles(ETileStateFlags::Neighbor);
 
-	TArray<ETileType> validTileTypes =
-	{
-		ETileType::Normal,
-		ETileType::DoubleCost,
-		ETileType::TripleCost,
-		ETileType::FlyingUnitsOnly
-	};
+	uint8 validTileTypeMask = static_cast<uint8>(ETileType::Normal)
+								| static_cast<uint8>(ETileType::DoubleCost)
+								| static_cast<uint8>(ETileType::TripleCost)
+								| static_cast<uint8>(ETileType::FlyingUnitsOnly);
 	
-	TArray<FPathfindingNode> neighborNodes = pGrid->GetGridPathfinding()->GetValidTileNeighborNodes(_index, m_bUseDiagonals, validTileTypes);
+	TArray<FPathfindingNode> neighborNodes = pGrid->GetGridPathfinding()->GetValidTileNeighborNodes(_index, m_bUseDiagonals, validTileTypeMask);
 	for (const FPathfindingNode& neighborNode : neighborNodes)
 	{
-		pGrid->AddStateToTile(neighborNode.Index, ETileStateFlags::Neighbor);
+		pGrid->AddStateToTileWithNotify(neighborNode.Index, ETileStateFlags::Neighbor);
 	}
 }

@@ -20,6 +20,6 @@ void USetTileTypeAction::Execute(const FIntPoint& _index)
 	{
 		FTileData newTileData = *pTileData;
 		newTileData.Type = m_TileType;
-		pGrid->AddGridTile(newTileData);
+		pGrid->AddGridTileWithNotify(newTileData);
 	}
 }

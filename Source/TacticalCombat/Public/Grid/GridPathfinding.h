@@ -28,23 +28,23 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	TArray<FPathfindingNode> GetValidTileNeighborNodes(const FIntPoint& _index, bool _bIsDiagonalIncluded, const TArray<ETileType>& _validTypes);
+	TArray<FPathfindingNode> GetValidTileNeighborNodes(const FIntPoint& _index, bool _bIsDiagonalIncluded, uint8 _validTileTypeMask);
 	TArray<FIntPoint> GetNeighborIndices(const FIntPoint& _index, bool _bIsDiagonalIncluded = false);
 
-	TArray<FIntPoint> FindPath(const FIntPoint& _start, const FIntPoint& _target, bool _bIsDiagonalIncluded, const TArray<ETileType>& _tileTypes, float _delayTime, float _maxMs);
+	TArray<FIntPoint> FindPathWithNotify(const FIntPoint& _start, const FIntPoint& _target, bool _bIsDiagonalIncluded, uint8 _tileTypesFlags, float _delayTime, float _maxMs);
 	bool IsInputDataValid();
-	void DiscoverNode(const FPathfindingNode& _node);
+	void DiscoverNodeWithNotify(const FPathfindingNode& _node);
 	int32 GetMinimumCostBetweenTwoNodes(const FIntPoint& _index1, const FIntPoint& _index2, bool _bIsDiagonalIncluded);
-	bool AnalyseNextDiscoveredNode();
+	bool AnalyseNextDiscoveredNodeWithNotify();
 	TArray<FIntPoint> GeneratePath();
 	FPathfindingNode PullCheapestNodeOutOfDiscoveredList();
 	bool DiscoverNextNeighbor();
 	void InsertNodeInDiscoveredArray(const FPathfindingNode& _node);
-	void ClearGeneratedData();
+	void ClearGeneratedDataWithNotify();
 	bool IsDiagonal(const FIntPoint& _index1, const FIntPoint& _index2);
 
 	UFUNCTION()
-	void FindPathWithDelay();
+	void FindPathWithDelayWithNotify();
 
 #pragma region Getter
 	FORCEINLINE const FPathfindingNode* FindPathFindingNode(const FIntPoint& _index) const { return m_PathfindingNodesByIndex.Find(_index); }
@@ -65,8 +65,7 @@ public:
 
 protected:
 #pragma region Properties
-	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Valid Tile Types"))
-	TArray<ETileType> m_ValidTileTypes;
+
 #pragma endregion
 
 private:
@@ -74,6 +73,9 @@ private:
 	
 	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Grid"))
 	TWeakObjectPtr<AGrid> m_Grid;
+
+	UPROPERTY(EditAnywhere, Category = "Internal", Meta = (DisplayName = "Valid Tile Types Flags", BitMask, BitmaskEnum = "/Script/TacticalCombat.ETileType"))
+	uint8 m_ValidTileTypeMask;
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Start Index"))
 	FIntPoint m_StartIndex;

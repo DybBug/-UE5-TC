@@ -9,6 +9,8 @@
 class AGrid;
 class AUnit;
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnUnitGridIndexChanged, AUnit* const)
+
 UCLASS()
 class TACTICALCOMBAT_API ACombatSystem : public AActor
 {
@@ -21,6 +23,11 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+public:
+#pragma region Events
+	FOnUnitGridIndexChanged OnUnitGridIndexChanged;
+#pragma endregion
 
 public:
 	void AddUnitInCombat(AUnit* _pUnit, const FIntPoint& _index);
@@ -43,11 +50,17 @@ public:
 #pragma endregion
 
 private:
-	void _SetUnitIndexOnGrid(AUnit* _pUnit, const FIntPoint& _index);
+	void _SetUnitIndexOnGridWithNotify(AUnit* _pUnit, const FIntPoint& _index, bool _bIsForce = false);
+
+#pragma region Event Handlers
+	UFUNCTION()
+	void _HandleGridGenerated();
 
 	UFUNCTION()
-	void _OnGridGenerated();
+	void _HandleTileDataUpdated(const FIntPoint& _index);
 
 	UFUNCTION()
-	void _OnTileDataUpdated(const FIntPoint& _index);
+	void _HandleUnitResearchedNewTile(AUnit* const _pUnit, const FIntPoint& _index);
+#pragma endregion
 };
+

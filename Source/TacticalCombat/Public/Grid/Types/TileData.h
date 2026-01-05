@@ -20,7 +20,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FTransform Transform;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (Bitflags, BitmaskEnum = "/Script/TacticalCombat.ETileStateFlags"))  
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BitMask, BitmaskEnum = "/Script/TacticalCombat.ETileStateFlags"))  
 	uint8 StateMask;
 	
 	UPROPERTY(EditAnywhere, blueprintReadWrite)

@@ -30,7 +30,7 @@ void UModifyTileHeightAction::Execute(const FIntPoint& _index)
 		newTileData.StateMask =pTileData->StateMask;
 		newTileData.UnitOnTile = pTileData->UnitOnTile;
 
-		pGrid->AddGridTile(newTileData);
+		pGrid->AddGridTileWithNotify(newTileData);
 	}
 	
 }

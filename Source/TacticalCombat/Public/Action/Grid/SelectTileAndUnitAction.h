@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Action/AbstractAction.h"
-#include "SelectTileAction.generated.h"
+#include "SelectTileAndUnitAction.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TACTICALCOMBAT_API USelectTileAction : public UAbstractAction
+class TACTICALCOMBAT_API USelectTileAndUnitAction : public UAbstractAction
 {
 	GENERATED_BODY()
 

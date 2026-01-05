@@ -44,6 +44,7 @@ public:
 	FOnTileDataUpdated OnTileDataUpdated;
 	FOnGridDestroyed OnGridDestroyed;
 	FOnGridGenerated OnGridGenerated;
+	FOnTileDataUpdated OnTileStateUpdated;
 
 public:	
 	UFUNCTION()
@@ -55,17 +56,17 @@ public:
 		bool _bIsUseEnvironment = true);
 
 	UFUNCTION()
-	void DestroyGrid();
+	void DestroyGridWithNotify();
 	
 	FGridShapeTableRow GetGridShapeData() const;
 
 	FVector GetCursorLocationOnGrid(int _playerIndex);
 	FIntPoint GetTileIndexFromWorldLocation(const FVector& _location);
 	FIntPoint GetTileIndexUnderCursor(int _playerIndex);
-	void AddGridTile(const FTileData& _tileData);
-	void RemoveGridTile(const FIntPoint& _tileIndex);
-	void AddStateToTile(const FIntPoint& _tileIndex, const ETileStateFlags _stateFlag);
-	void RemoveStateFromTile(const FIntPoint& _tileIndex, const ETileStateFlags _stateFlag);
+	void AddGridTileWithNotify(const FTileData& _tileData);
+	void RemoveGridTileWithNotify(const FIntPoint& _tileIndex);
+	void AddStateToTileWithNotify(const FIntPoint& _tileIndex, const ETileStateFlags _stateFlag);
+	void RemoveStateFromTileWithNotify(const FIntPoint& _tileIndex, const ETileStateFlags _stateFlag);
 	bool IsIndexValid(const FIntPoint& _tileIndex);
 	FVector TraceForGround(const FVector& _location, ETileType& _hitTileType);
 

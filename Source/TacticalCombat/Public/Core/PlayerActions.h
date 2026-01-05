@@ -8,6 +8,7 @@
 
 class UAbstractAction;
 class AGrid;
+class AUnit;
 class ACombatSystem;
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSelectedActionsChanged, const UAbstractAction* const, const UAbstractAction* const);
@@ -30,6 +31,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void SetSelectedActionWithNotify(const TSubclassOf<UAbstractAction>& _leftClickActionClass, const TSubclassOf<UAbstractAction>& _rightClickActionClass);
+	void SelectTileAndUnit(const FIntPoint& _index, bool _isForce = false);
 
 #pragma region Delegate
 	FOnSelectedActionsChanged OnSelectedActionsChanged;
@@ -44,6 +46,7 @@ public:
 	FORCEINLINE UAbstractAction* const GetRightClickSelectAction() const { return m_RightClickSelectAction.Get(); }
 	FORCEINLINE bool IsLeftClickDown() const { return m_bIsLeftClickDown; }
 	FORCEINLINE bool IsRightClickDown() const { return m_bIsRightClickDown; }
+	FORCEINLINE AUnit* const GetSelectedUnit() const { return m_SelectedUnit.Get(); }
 #pragma endregion
 
 #pragma region Setter
@@ -65,6 +68,12 @@ protected:
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Selected Tile Index"))
 	FIntPoint m_SelectedTileIndex;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Hovered Unit"))
+	TWeakObjectPtr<AUnit> m_HoveredUnit;
+
+	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Selected Unit"))
+	TWeakObjectPtr<AUnit> m_SelectedUnit;
 	
 	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Grid"))
 	TWeakObjectPtr<AGrid> m_Grid;
@@ -88,18 +97,31 @@ protected:
 
 private:
 	void _UpdateHoveredTile();
+	void _UpdateHoveredUnit();
+	AUnit* _FindUnitUnderCursor(uint8 _playerIndex);
 
 	void _OnHoveredTileChanged();
 
+#pragma region Event Handlers
 	UFUNCTION()
-	void _OnLeftClickPressed();
+	void _HandleLeftClickPressed();
 
 	UFUNCTION()
-	void _OnLeftClickReleased();
+	void _HandleLeftClickReleased();
 
 	UFUNCTION()
-	void _OnRightClickPressed();
+	void _HandleRightClickPressed();
 
 	UFUNCTION()
-	void _OnRightClickReleased();
+	void _HandleRightClickReleased();
+
+	UFUNCTION()
+	void _HandleGridGenerated();
+
+	UFUNCTION()
+	void _HandleTileDataUpdated(const FIntPoint& _index);
+
+	UFUNCTION()
+	void _HandleUnitGridIndexChanged(AUnit* const _pUnit);
+#pragma endregion
 };

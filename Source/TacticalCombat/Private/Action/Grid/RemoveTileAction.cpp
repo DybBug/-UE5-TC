@@ -18,5 +18,5 @@ void URemoveTileAction::Execute(const FIntPoint& _index)
 	if (!pGrid->IsIndexValid(_index))
 		return;
 
-	pGrid->RemoveGridTile(_index);
+	pGrid->RemoveGridTileWithNotify(_index);
 }

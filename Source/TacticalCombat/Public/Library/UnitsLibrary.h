@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Table/Rows/UnitAssetsTableRow.h"
+#include "Table/Rows/UnitTableRow.h"
 #include "UnitsLibrary.generated.h"
 
 enum class EUnitType: uint8;
@@ -17,5 +17,5 @@ class TACTICALCOMBAT_API UUnitsLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	static FUnitAssetsTableRow GetDefaultUnitAssetsDataFromUnitType(ETacticalUnitType _unitType);
+	static FUnitTableRow GetDefaultUnitAssetsDataFromUnitType(ETacticalUnitType _unitType);
 };

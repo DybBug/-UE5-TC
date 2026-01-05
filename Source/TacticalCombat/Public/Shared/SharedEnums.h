@@ -9,15 +9,15 @@ enum class EGridShape : uint8
 	Triangle UMETA(DisplayName = "Triangle"),
 };
 
-UENUM(BlueprintType)
+UENUM(BlueprintType, Meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class ETileType : uint8
 {
-	None UMETA(DisplayName = "None"),
-	Normal UMETA(DisplayName = "Normal"),
-	Obstacle UMETA(DisplayName = "Obstacle"),
-	DoubleCost UMETA(DisplayName = "Double Cost"),
-	TripleCost UMETA(DisplayName = "Triple Cost"),
-	FlyingUnitsOnly UMETA(DisplayName = "Flying Units Only"),
+	None = 0					UMETA(DisplayName = "None"),
+	Normal = 1 << 0				UMETA(DisplayName = "Normal"),
+	Obstacle = 1 << 1			UMETA(DisplayName = "Obstacle"),
+	DoubleCost = 1 << 2			UMETA(DisplayName = "Double Cost"),
+	TripleCost = 1 << 3			UMETA(DisplayName = "Triple Cost"),
+	FlyingUnitsOnly = 1 << 4	UMETA(DisplayName = "Flying Units Only"),
 	Max UMETA(Hidden)
 };
 ENUM_RANGE_BY_COUNT(ETileType, ETileType::Max)

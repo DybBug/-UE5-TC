@@ -21,20 +21,21 @@ void ACombatSystem::BeginPlay()
 {
 	Super::BeginPlay();
 
-	m_Grid->OnGridGenerated.AddUObject(this, &ACombatSystem::_OnGridGenerated);
-	m_Grid->OnTileDataUpdated.AddUObject(this, &ACombatSystem::_OnTileDataUpdated);
+	m_Grid->OnGridGenerated.AddUObject(this, &ACombatSystem::_HandleGridGenerated);
+	m_Grid->OnTileDataUpdated.AddUObject(this, &ACombatSystem::_HandleTileDataUpdated);
 }
 
 void ACombatSystem::AddUnitInCombat(AUnit* _pUnit, const FIntPoint& _index)
 {
 	m_UnitsInCombat.Add(_pUnit);
-	_SetUnitIndexOnGrid(_pUnit, _index);
+	_SetUnitIndexOnGridWithNotify(_pUnit, _index, false);
+	_pUnit->OnUnitResearchedNewTile.AddUObject(this, &ACombatSystem::_HandleUnitResearchedNewTile);
 }
 
 void ACombatSystem::RemoveUnitFromCombat(AUnit* _pUnit, bool _bIsUnitDestroyed)
 {
 	m_UnitsInCombat.Remove(_pUnit);
-	_SetUnitIndexOnGrid(_pUnit, Grid::INVALID_POINT_VALUE);
+	_SetUnitIndexOnGridWithNotify(_pUnit, Grid::INVALID_POINT_VALUE, false);
 
 	if (_bIsUnitDestroyed)
 	{
@@ -43,23 +44,23 @@ void ACombatSystem::RemoveUnitFromCombat(AUnit* _pUnit, bool _bIsUnitDestroyed)
 }
 
 #pragma region Privete Methods
-void ACombatSystem::_SetUnitIndexOnGrid(AUnit* _pUnit, const FIntPoint& _index)
+void ACombatSystem::_SetUnitIndexOnGridWithNotify(AUnit* _pUnit, const FIntPoint& _index, bool _bIsForce)
 {
 	const FIntPoint& unitIndexOnGird = _pUnit->GetIndex();
-	if (unitIndexOnGird != _index)
+	if (_bIsForce || unitIndexOnGird != _index)
 	{
 		const auto& gridTileMap = m_Grid->GetGridTileMap();
-
+		
 		if (const FTileData* pOldTile = gridTileMap.Find(unitIndexOnGird))
 		{
 			if (pOldTile->UnitOnTile == _pUnit)
 			{
-				FTileData newTile = (*pOldTile);
-				newTile.UnitOnTile = nullptr;
-				m_Grid->AddGridTile(newTile);
+				FTileData tempOldTile = (*pOldTile);
+				tempOldTile.UnitOnTile = nullptr;
+				m_Grid->AddGridTileWithNotify(tempOldTile);
 			}
-		}	
-		
+		}			
+
 		_pUnit->SetIndex(_index);
 		if (_index != FIntPoint(Grid::INVALID_POINT_VALUE))
 		{
@@ -67,22 +68,28 @@ void ACombatSystem::_SetUnitIndexOnGrid(AUnit* _pUnit, const FIntPoint& _index)
 			{
 				FTileData newTile = (*pTile);
 				newTile.UnitOnTile = _pUnit;
-				m_Grid->AddGridTile(newTile);
+				m_Grid->AddGridTileWithNotify(newTile);
 			}
 		}
-	}
-	const auto& gridTileMap = m_Grid->GetGridTileMap();
-	if (const FTileData* pTile = gridTileMap.Find(_index))
-	{
-		_pUnit->SetActorLocation(pTile->Transform.GetLocation());
-	}
-	else
-	{
-		_pUnit->SetActorLocation(FVector(Unit::INVALID_UNIT_LOCATION_VALUE));		
-	}	
-}
+		
+		if (const FTileData* pTile = gridTileMap.Find(_index))
+		{
+			_pUnit->SetActorLocation(pTile->Transform.GetLocation());
+		}
+		else
+		{
+			_pUnit->SetActorLocation(FVector(Unit::INVALID_UNIT_LOCATION_VALUE));		
+		}
 
-void ACombatSystem::_OnGridGenerated()
+		if (OnUnitGridIndexChanged.IsBound())
+		{
+			OnUnitGridIndexChanged.Broadcast(_pUnit);
+		}
+	}
+}
+#pragma endregion
+#pragma region Event Handlers
+void ACombatSystem::_HandleGridGenerated()
 {
 	for (int i = m_UnitsInCombat.Num() - 1; i >= 0; --i)
 	{
@@ -96,12 +103,12 @@ void ACombatSystem::_OnGridGenerated()
 		}
 		else
 		{
-			_SetUnitIndexOnGrid(pUnit, pUnit->GetIndex());
+			_SetUnitIndexOnGridWithNotify(pUnit, pUnit->GetIndex(), true);
 		}
 	}
 }
 
-void ACombatSystem::_OnTileDataUpdated(const FIntPoint& _index)
+void ACombatSystem::_HandleTileDataUpdated(const FIntPoint& _index)
 {
 	for (int i = m_UnitsInCombat.Num() - 1; i >= 0; --i)
 	{
@@ -117,9 +124,15 @@ void ACombatSystem::_OnTileDataUpdated(const FIntPoint& _index)
 		}
 		else
 		{
-			_SetUnitIndexOnGrid(pUnit, pUnit->GetIndex());
+			_SetUnitIndexOnGridWithNotify(pUnit, pUnit->GetIndex(), false);
 			break;
 		}
 	}
 }
+
+void ACombatSystem::_HandleUnitResearchedNewTile(AUnit* const _pUnit, const FIntPoint& _index)
+{
+	_SetUnitIndexOnGridWithNotify(_pUnit, _index, false);
+}
+
 #pragma endregion

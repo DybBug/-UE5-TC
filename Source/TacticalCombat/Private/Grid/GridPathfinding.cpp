@@ -32,7 +32,7 @@ void AGridPathfinding::BeginPlay()
 	
 }
 
-TArray<FPathfindingNode> AGridPathfinding::GetValidTileNeighborNodes(const FIntPoint& _index, bool _bIsDiagonalIncluded, const TArray<ETileType>& _validTypes)
+TArray<FPathfindingNode> AGridPathfinding::GetValidTileNeighborNodes(const FIntPoint& _index, bool _bIsDiagonalIncluded, uint8 _validTileTypeMask)
 {
 	TArray<FPathfindingNode> neighborNodes;
 	const FTileData* pInputTileData = m_Grid->GetGridTileMap().Find(_index);
@@ -45,19 +45,21 @@ TArray<FPathfindingNode> AGridPathfinding::GetValidTileNeighborNodes(const FIntP
 	for (const FIntPoint& tempNeighborIndex : tempNeighborIndices)
 	{
 		const FTileData* pTempNeighborTileData = m_Grid->GetGridTileMap().Find(tempNeighborIndex);
-		if (pTempNeighborTileData && _validTypes.Contains(pTempNeighborTileData->Type))
+		if (!pTempNeighborTileData) continue;
+		if (pTempNeighborTileData->UnitOnTile.IsValid()) continue;
+		if ((_validTileTypeMask & static_cast<uint8>(pTempNeighborTileData->Type)) == 0) continue;
+
+		float inputTileHeight = pInputTileData->Transform.GetLocation().Z;
+		float tempNeighborTileHeight = pTempNeighborTileData->Transform.GetLocation().Z;
+		if (FMath::Abs(inputTileHeight - tempNeighborTileHeight) <= m_Grid->GetTileSize().Z)
 		{
-			float inputTileHeight = pInputTileData->Transform.GetLocation().Z;
-			float tempNeighborTileHeight = pTempNeighborTileData->Transform.GetLocation().Z;
-			if (FMath::Abs(inputTileHeight - tempNeighborTileHeight) <= m_Grid->GetTileSize().Z)
-			{
-				FPathfindingNode neighborNode;
-				neighborNode.Index = tempNeighborIndex;
-				neighborNode.PreviousIndex = _index;
-				neighborNode.CostToEnterTile = s_TileTypeToCost[pTempNeighborTileData->Type];
-				
-				neighborNodes.Add(neighborNode);
-			}
+			FPathfindingNode neighborNode;
+			neighborNode.Index = tempNeighborIndex;
+			neighborNode.PreviousIndex = _index;
+			neighborNode.CostToEnterTile = s_TileTypeToCost[pTempNeighborTileData->Type];
+			
+			neighborNodes.Add(neighborNode);
+			
 		}
 	}
 	return neighborNodes;
@@ -75,14 +77,14 @@ TArray<FIntPoint> AGridPathfinding::GetNeighborIndices(const FIntPoint& _index, 
 	}
 }
 
-TArray<FIntPoint> AGridPathfinding::FindPath(const FIntPoint& _start, const FIntPoint& _target, bool _bIsDiagonalIncluded, const TArray<ETileType>& _tileTypes, float _delayTime, float _maxMs)
+TArray<FIntPoint> AGridPathfinding::FindPathWithNotify(const FIntPoint& _start, const FIntPoint& _target, bool _bIsDiagonalIncluded, uint8 _tileTypesMask, float _delayTime, float _maxMs)
 {
 	TArray<FIntPoint> path;
 	
 	m_StartIndex = _start;
 	m_TargetIndex = _target;
 	m_bIsDiagonalIncluded = _bIsDiagonalIncluded;
-	m_ValidTileTypes = _tileTypes;
+	m_ValidTileTypeMask = _tileTypesMask;
 	m_DelayBetweenIterations = _delayTime;
 	m_MaxMsPerFrame = _maxMs;
 
@@ -90,7 +92,7 @@ TArray<FIntPoint> AGridPathfinding::FindPath(const FIntPoint& _start, const FInt
 	LatentActionManager.RemoveActionsForObject(m_LatentInfo_FindPathWithDelay.CallbackTarget);
 	m_LatentInfo_FindPathWithDelay.CallbackTarget = nullptr;
 	
-	ClearGeneratedData();
+	ClearGeneratedDataWithNotify();
 
 	if (IsInputDataValid())
 	{
@@ -99,17 +101,17 @@ TArray<FIntPoint> AGridPathfinding::FindPath(const FIntPoint& _start, const FInt
 		node.CostToEnterTile = 1;
 		node.CostFromStart = 0;
 		node.MinimumCostToTarget = GetMinimumCostBetweenTwoNodes(m_StartIndex, m_TargetIndex, m_bIsDiagonalIncluded);
-		DiscoverNode(node);
+		DiscoverNodeWithNotify(node);
 
 		if (m_DelayBetweenIterations > 0.0f)
 		{
-			FindPathWithDelay();
+			FindPathWithDelayWithNotify();
 			return path;
 		}
 		
 		while (m_DiscoveredNodeIndices.Num() > 0)		
 		{
-			if (AnalyseNextDiscoveredNode())
+			if (AnalyseNextDiscoveredNodeWithNotify())
 			{
 				path = GeneratePath();
 				if (OnPathfindingCompleted.IsBound())
@@ -136,11 +138,12 @@ bool AGridPathfinding::IsInputDataValid()
 
 	const FTileData* pTile = m_Grid->GetGridTileMap().Find(m_TargetIndex);
 	if (pTile == nullptr) return false;
+	if (pTile->UnitOnTile.IsValid()) return false;
 	
 	return true;
 }
 
-void AGridPathfinding::DiscoverNode(const FPathfindingNode& _node)
+void AGridPathfinding::DiscoverNodeWithNotify(const FPathfindingNode& _node)
 {
 	m_PathfindingNodesByIndex.Add(_node.Index, _node);
 	InsertNodeInDiscoveredArray(_node);
@@ -229,7 +232,7 @@ int32 AGridPathfinding::GetMinimumCostBetweenTwoNodes(const FIntPoint& _index1, 
 
 }
 
-bool AGridPathfinding::AnalyseNextDiscoveredNode()
+bool AGridPathfinding::AnalyseNextDiscoveredNodeWithNotify()
 {
 	m_CurrentDiscoveredNode = PullCheapestNodeOutOfDiscoveredList();
 
@@ -238,7 +241,7 @@ bool AGridPathfinding::AnalyseNextDiscoveredNode()
 		OnPathfindingNodeUpdated.Broadcast(m_CurrentDiscoveredNode.Index);
 	}
 	
-	m_CurrentNeighborNodes = GetValidTileNeighborNodes(m_CurrentDiscoveredNode.Index, m_bIsDiagonalIncluded, m_ValidTileTypes);
+	m_CurrentNeighborNodes = GetValidTileNeighborNodes(m_CurrentDiscoveredNode.Index, m_bIsDiagonalIncluded, m_ValidTileTypeMask);
 
 	while (m_CurrentNeighborNodes.Num() > 0)
 	{
@@ -262,9 +265,9 @@ TArray<FIntPoint> AGridPathfinding::GeneratePath()
 	}
 	
 	TArray<FIntPoint> path;
-	for (const FIntPoint& invertedPathIndex: invertedPath)
+	for (int i = invertedPath.Num() - 1; i >= 0; --i)
 	{
-		path.Add(invertedPathIndex);
+		path.Add(invertedPath[i]);
 	}
 
 	return path;
@@ -300,7 +303,7 @@ bool AGridPathfinding::DiscoverNextNeighbor()
 		node.CostFromStart = costFromStart;
 		node.MinimumCostToTarget = GetMinimumCostBetweenTwoNodes(m_CurrentNeighborNode.Index, m_TargetIndex, m_bIsDiagonalIncluded);
 		node.PreviousIndex = m_CurrentDiscoveredNode.Index;
-		DiscoverNode(node);
+		DiscoverNodeWithNotify(node);
 
 		return (m_CurrentNeighborNode.Index == m_TargetIndex); 
 	}
@@ -317,7 +320,7 @@ bool AGridPathfinding::DiscoverNextNeighbor()
 		node.CostFromStart = costFromStart;
 		node.MinimumCostToTarget = GetMinimumCostBetweenTwoNodes(m_CurrentNeighborNode.Index, m_TargetIndex, m_bIsDiagonalIncluded);
 		node.PreviousIndex = m_CurrentDiscoveredNode.Index;
-		DiscoverNode(node);
+		DiscoverNodeWithNotify(node);
 
 		return (m_CurrentNeighborNode.Index == m_TargetIndex); 
 	}
@@ -358,7 +361,7 @@ void AGridPathfinding::InsertNodeInDiscoveredArray(const FPathfindingNode& _node
 	}
 }
 
-void AGridPathfinding::ClearGeneratedData()
+void AGridPathfinding::ClearGeneratedDataWithNotify()
 {
 	m_PathfindingNodesByIndex.Empty();
 	m_DiscoveredNodeSortingCosts.Empty();
@@ -377,13 +380,13 @@ bool AGridPathfinding::IsDiagonal(const FIntPoint& _index1, const FIntPoint& _in
 	return !neighborIndices.Contains(_index2);
 }
 
-void AGridPathfinding::FindPathWithDelay()
+void AGridPathfinding::FindPathWithDelayWithNotify()
 {
 	m_LoopStartDateTime = FDateTime::Now();
 	
 	while (m_DiscoveredNodeIndices.Num() > 0)		
 	{
-		if (AnalyseNextDiscoveredNode())
+		if (AnalyseNextDiscoveredNodeWithNotify())
 		{
 			TArray<FIntPoint> path = GeneratePath();
 			if (OnPathfindingCompleted.IsBound())
@@ -490,4 +493,3 @@ int32 AGridPathfinding::_GetTileSortingCost(const FPathfindingNode& _node)
 	const int32 diagonalCost = IsDiagonal(_node.Index, _node.PreviousIndex) ? 1 : 0;
 	return (_node.CostFromStart + _node.MinimumCostToTarget) * 2 + diagonalCost;
 }
-

@@ -25,10 +25,8 @@ void UAddRemoveUnitAction::Execute(const FIntPoint& _index)
 					m_PlayerActions->GetCombatSystem()->RemoveUnitFromCombat(pTile->UnitOnTile.Get(), true);
 				}
 			}	
-			
-			AUnit* pSpawnedUnit = GetWorld()->SpawnActor<AUnit>(AUnit::StaticClass());
-			pSpawnedUnit->InitializeUnit(m_UnitType);
 
+			AUnit* pSpawnedUnit = AUnit::Spawn(GetWorld(), m_UnitType, m_PlayerActions->GetGrid());
 			m_PlayerActions->GetCombatSystem()->AddUnitInCombat(pSpawnedUnit, _index);
 		}
 	}

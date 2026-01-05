@@ -17,7 +17,7 @@ void USelectTileWithCalculateMinCost::Execute(const FIntPoint& _index)
 	AGrid* pGrid = m_PlayerActions->GetGrid();
 	AGridPathfinding* pGridPathfinding = pGrid->GetGridPathfinding();
 	
-	pGridPathfinding->ClearGeneratedData();
+	pGridPathfinding->ClearGeneratedDataWithNotify();
 
 	TArray<FIntPoint> path;
 	pGrid->GetGridTileMap().GetKeys(path);
@@ -31,7 +31,7 @@ void USelectTileWithCalculateMinCost::Execute(const FIntPoint& _index)
 		pathfindingNode.CostToEnterTile = 1;
 		pathfindingNode.CostFromStart = 0;
 		pathfindingNode.MinimumCostToTarget = minimumCostToTarget;
-		pGridPathfinding->DiscoverNode(pathfindingNode);
+		pGridPathfinding->DiscoverNodeWithNotify(pathfindingNode);
 	}
 	
 }

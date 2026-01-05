@@ -21,8 +21,11 @@ UDebugTextAndColorOnTiles::UDebugTextAndColorOnTiles()
 void UDebugTextAndColorOnTiles::Initialize()
 {
 	m_Grid = Cast<AGrid>(UGameplayStatics::GetActorOfClass(GetWorld(), AGrid::StaticClass()));
+	
 	m_Grid->OnTileDataUpdated.AddUObject(this, &UDebugTextAndColorOnTiles::UpdateTextOnTile);
+	m_Grid->OnTileStateUpdated.AddUObject(this, &UDebugTextAndColorOnTiles::UpdateTextOnTile);
 	m_Grid->OnGridDestroyed.AddUObject(this, &UDebugTextAndColorOnTiles::ClearAllTextActors);
+	
 	m_Grid->GetGridPathfinding()->OnPathfindingNodeUpdated.AddUObject(this, &UDebugTextAndColorOnTiles::UpdateStateOnTile);
 	m_Grid->GetGridPathfinding()->OnPathfindingNodeCleared.AddUObject(this, &UDebugTextAndColorOnTiles::UpdateStateOnAllTiles);
 	m_Grid->GetGridPathfinding()->OnPathfindingNodeUpdated.AddUObject(this, &UDebugTextAndColorOnTiles::UpdateTextOnTile);
@@ -188,16 +191,16 @@ void UDebugTextAndColorOnTiles::UpdateStateOnTile(const FIntPoint& _index)
 		int32 discoveredNodeIndex = m_Grid->GetGridPathfinding()->FindDiscoveredNodeIndex(_index);
 		if (discoveredNodeIndex != INDEX_NONE)
 		{
-			m_Grid->AddStateToTile(_index, ETileStateFlags::Discovered);
+			m_Grid->AddStateToTileWithNotify(_index, ETileStateFlags::Discovered);
 		}
 		else
 		{
-			m_Grid->RemoveStateFromTile(_index, ETileStateFlags::Discovered);
+			m_Grid->RemoveStateFromTileWithNotify(_index, ETileStateFlags::Discovered);
 		}
 	}
 	else
 	{
-		m_Grid->RemoveStateFromTile(_index, ETileStateFlags::Discovered);
+		m_Grid->RemoveStateFromTileWithNotify(_index, ETileStateFlags::Discovered);
 	}
 	
 
@@ -206,16 +209,16 @@ void UDebugTextAndColorOnTiles::UpdateStateOnTile(const FIntPoint& _index)
 		int32 analysedNodeIndex = m_Grid->GetGridPathfinding()->FindAnalysedNodeIndex(_index);
 		if (analysedNodeIndex != INDEX_NONE)
 		{
-			m_Grid->AddStateToTile(_index, ETileStateFlags::Analyzed);
+			m_Grid->AddStateToTileWithNotify(_index, ETileStateFlags::Analyzed);
 		}
 		else
 		{
-			m_Grid->RemoveStateFromTile(_index, ETileStateFlags::Analyzed);
+			m_Grid->RemoveStateFromTileWithNotify(_index, ETileStateFlags::Analyzed);
 		}
 	}
 	else
 	{
-		m_Grid->RemoveStateFromTile(_index, ETileStateFlags::Analyzed);
+		m_Grid->RemoveStateFromTileWithNotify(_index, ETileStateFlags::Analyzed);
 	}
 }
 
