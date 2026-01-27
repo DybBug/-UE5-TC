@@ -88,10 +88,10 @@ public:
 	FORCEINLINE float GetZOffset() { return m_GridVisual != nullptr ? m_GridVisual->GetZOffset() : 0.0f; }
 	FORCEINLINE const TMap<FIntPoint, FTileData>& GetGridTileMap() const { return m_GridTileMap; }
 	FORCEINLINE AGridPathfinding* GetGridPathfinding() const { return m_GridPathfinding.Get(); }
+	FORCEINLINE AGridPathfinding* GetReachablesPathfinding() const { return m_ReachablesPathfinding.Get(); }
 	FORCEINLINE AGridVisual* GetGirdVisual() const { return m_GridVisual.Get(); }
 
-#pragma endregion
-	
+#pragma endregion	
 
 #pragma region Setter
 	FORCEINLINE void SetZOffset(float _offset) 
@@ -112,7 +112,10 @@ protected:
 	TObjectPtr<UChildActorComponent> m_ChildActorGridVisual;
 	
 	UPROPERTY(EditAnywhere, Category = "Component", Meta = (DisplayName = "Grid Pathfinding"))
-	TObjectPtr<UChildActorComponent> m_ChildActorGridPathFinding;
+	TObjectPtr<UChildActorComponent> m_ChildActorGridPathfinding;
+
+	UPROPERTY(EditAnywhere, Category = "Component", Meta = (DisplayName = "Grid Recahables Pathfinding"))
+	TObjectPtr<UChildActorComponent> m_ChildActorReachablesPathfinding;
 #pragma endregion
 
 #pragma region Properties
@@ -139,6 +142,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Grid Pathfinding"))
 	TObjectPtr<AGridPathfinding> m_GridPathfinding;
+
+	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Reachables Pathfinding"))
+	TObjectPtr<AGridPathfinding> m_ReachablesPathfinding;
 #pragma endregion
 
 #pragma region Internals

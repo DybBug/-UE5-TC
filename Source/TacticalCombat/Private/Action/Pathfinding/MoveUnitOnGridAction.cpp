@@ -28,7 +28,15 @@ void UMoveUnitOnGridAction::Execute(const FIntPoint& _index)
 
 	const FUnitTableRow& unitData = m_CurrentUnit->GetUnitData();
 	m_bCanUseDiagonals = unitData.Stats.bCanDiagonalMove;
-	TArray<FIntPoint> neighborIndices =  pGrid->GetGridPathfinding()->FindPathWithNotify(start, target, m_bCanUseDiagonals, unitData.Stats.ValidTileTypeMask, m_DelayBetweenIterations, m_MaxMs);
+	FPathFindingOptions options = {
+		.bIsDiagonalIncluded = m_bCanUseDiagonals,
+		.ValidTileTypeMask = unitData.Stats.ValidTileTypeFlags,
+		.DelayBetweenIterations = m_DelayBetweenIterations,
+		.MaxMsPerFrame = m_MaxMs,
+		.bIsReturnReachableTiles = false,
+		.MaxPathLength = unitData.Stats.CurrentMovePoint
+	};
+	TArray<FIntPoint> neighborIndices =  pGrid->GetGridPathfinding()->FindPathWithNotify(start, target, options);
 	
 }
 
@@ -46,7 +54,7 @@ void UMoveUnitOnGridAction::_HandlePathfindingCompleted(const TArray<FIntPoint>&
 		}
 
 		m_CurrentUnit->SetMoveDurationPerTile(m_MoveDurationPerTile);
-		m_CurrentUnit->FollowPath(_path);
+		m_CurrentUnit->FollowPathWithNotify(_path);
 	}
 }
 

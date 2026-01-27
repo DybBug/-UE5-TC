@@ -10,8 +10,11 @@ struct FUnitStats
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BitMask, BitmaskEnum = "/Script/TacticalCombat.ETileType"))  
-	uint8 ValidTileTypeMask;
+	uint8 ValidTileTypeFlags;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanDiagonalMove;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	uint8 CurrentMovePoint = 3;
 };

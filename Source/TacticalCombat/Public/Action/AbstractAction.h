@@ -19,7 +19,7 @@ public:
 public:
 	virtual void BeginDestroy() override;
 	
-	virtual void Initialize(APlayerActions* const _playerActions);
+	virtual void Initialize(APlayerActions* const _pPlayerActions);
 	
 	// 순수 가상 함수(virtual void Execute() = 0)를 정의하면 C++에서는 추상 클래스로 인식되지만,
 	// 언리얼의 GENERATED_BODY() 매크로는 일부 내부 구현을 요구하기 때문에

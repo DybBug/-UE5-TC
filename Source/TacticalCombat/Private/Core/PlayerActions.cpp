@@ -101,12 +101,21 @@ void APlayerActions::SelectTileAndUnit(const FIntPoint& _index, bool _isForce)
 		
 		SetSelectedTileIndex(_index);
 		m_Grid->AddStateToTileWithNotify(_index, ETileStateFlags::Selected);
+		if (OnSelectedTileChanged.IsBound())
+		{
+			OnSelectedTileChanged.Broadcast(GetSelectedTileIndex());
+		}
 	}
 	else
 	{
 		m_Grid->RemoveStateFromTileWithNotify(m_SelectedTileIndex, ETileStateFlags::Selected);
 		SetSelectedTileIndex(FIntPoint(INVALID_POINT_VALUE));
+		if (OnSelectedTileChanged.IsBound())
+		{
+			OnSelectedTileChanged.Broadcast(GetSelectedTileIndex());
+		}
 	}
+	
 
 	// 유닛 선택
 	const FTileData* pSelectedTileData= m_Grid->GetGridTileMap().Find(m_SelectedTileIndex);

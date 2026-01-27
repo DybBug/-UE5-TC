@@ -33,6 +33,7 @@ enum class ETileStateFlags : uint8
 	InPath = 1 << 3 UMETA(DisplayName = "InPath"),
 	Discovered = 1 << 4 UMETA(DisplayName = "Discovered"),
 	Analyzed = 1 << 5 UMETA(DisplayName = "Analyzed"),
+	Reachable = 1 << 6 UMETA(DisplayName = "Reachable"),
 };
 
 UENUM(BlueprintType, Meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))

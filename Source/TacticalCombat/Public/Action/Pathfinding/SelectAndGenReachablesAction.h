@@ -3,27 +3,26 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Action/Grid/SetTileTypeAction.h"
-#include "FindPathToTargetAction.generated.h"
+#include "Action/Grid/SelectTileAndUnitAction.h"
+#include "SelectAndGenReachablesAction.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TACTICALCOMBAT_API UFindPathToTargetAction : public USetTileTypeAction
+class TACTICALCOMBAT_API USelectAndGenReachablesAction : public USelectTileAndUnitAction
 {
 	GENERATED_BODY()
 
 public:
-	virtual void Initialize(APlayerActions* const _pPlayerActions) override;
 	virtual void Execute(const FIntPoint& _index) override;
 
 #pragma region Setter
-	FORCEINLINE void SetCanUseDiagonals(bool _bCanUseDiagonals) { m_bCanUseDiagonals = _bCanUseDiagonals; }
-	FORCEINLINE void SetCanUseFlyingOnly(bool _bCanUseFlyingOnly) { m_bCanUseFlyingOnly = _bCanUseFlyingOnly; }
+	FORCEINLINE void SetCanUseDiagonals(bool _value) { m_bCanUseDiagonals = _value; }
+	FORCEINLINE void SetCanUseFlyingOnly(bool _value) { m_bCanUseFlyingOnly = _value; }
 	FORCEINLINE void SetDelayBetweenIterations(float _value) { m_DelayBetweenIterations = _value; }
 	FORCEINLINE void SetMaxMs(float _value) { m_MaxMs = _value; }
-	FORCEINLINE void SetMaxPathLength(int32 _value) { m_MaxPathLength = _value; }
+	FORCEINLINE void SetMaxPathLength(int32 _value) { m_MaxPathLength = _value; }	
 #pragma endregion
 
 protected:
@@ -32,11 +31,19 @@ protected:
 	float m_DelayBetweenIterations;
 	float m_MaxMs;
 	int32 m_MaxPathLength;
+
 private:
+	void _GenerateReachable();
+	
+#pragma region Event Handlers
 	UFUNCTION()
 	void _HandlePathfindingCompleted(const TArray<FIntPoint>& _path);
 
 	UFUNCTION()
-	void _HandleSelectedTileChanged(const FIntPoint& _index);
-	
+	void _HandleUnitStartedWalking(AUnit* const _pUnit);
+
+	UFUNCTION()
+	void _HandleUnitFinishedWalking(AUnit* const _pUnit);
+#pragma endregion 
+
 };

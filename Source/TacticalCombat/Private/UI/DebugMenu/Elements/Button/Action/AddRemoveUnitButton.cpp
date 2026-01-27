@@ -24,32 +24,36 @@ void UAddRemoveUnitButton::OnSelectedActionsChanged(const UAbstractAction* const
 
 void UAddRemoveUnitButton::_UpdateWidget(ETacticalUnitType _unitType)
 {
-	Button_UnitList->SetVisibility(ESlateVisibility::Collapsed);
-
-	// 좌클릭
+	if (IsCurrentSelectedAction())
 	{
-		UAbstractAction* pLeftAction = m_PlayerActions->GetLeftClickSelectAction();
-		UAddRemoveUnitAction* pAddRemoveUnitAction = Cast<UAddRemoveUnitAction>(pLeftAction);
-		if (pAddRemoveUnitAction)
+		// 좌클릭
 		{
-			pAddRemoveUnitAction->SetIsAddingUnit(true);
-			pAddRemoveUnitAction->SetUnitType(_unitType);
-			Button_UnitList->SetVisibility(ESlateVisibility::Visible);
+			UAbstractAction* pLeftAction = m_PlayerActions->GetLeftClickSelectAction();
+			UAddRemoveUnitAction* pAddRemoveUnitAction = Cast<UAddRemoveUnitAction>(pLeftAction);
+			if (pAddRemoveUnitAction)
+			{
+				pAddRemoveUnitAction->SetIsAddingUnit(true);
+				pAddRemoveUnitAction->SetUnitType(_unitType);
+				Button_UnitList->SetVisibility(ESlateVisibility::Visible);
 
+			}
+		}
+
+		// 우클릭
+		{		
+			UAbstractAction* pRightAction = m_PlayerActions->GetRightClickSelectAction();
+			UAddRemoveUnitAction* pAddRemoveUnitAction = Cast<UAddRemoveUnitAction>(pRightAction);
+			if (pAddRemoveUnitAction)
+			{
+				pAddRemoveUnitAction->SetIsAddingUnit(false);
+				Button_UnitList->SetVisibility(ESlateVisibility::Visible);
+			}
 		}
 	}
-
-	// 우클릭
-	{		
-		UAbstractAction* pRightAction = m_PlayerActions->GetRightClickSelectAction();
-		UAddRemoveUnitAction* pAddRemoveUnitAction = Cast<UAddRemoveUnitAction>(pRightAction);
-		if (pAddRemoveUnitAction)
-		{
-			pAddRemoveUnitAction->SetIsAddingUnit(false);
-			Button_UnitList->SetVisibility(ESlateVisibility::Visible);
-		}
-	}
-	
+	else
+	{
+		Button_UnitList->SetVisibility(ESlateVisibility::Collapsed);
+	}	
 }
 
 

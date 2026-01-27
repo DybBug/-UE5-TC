@@ -16,7 +16,7 @@ void UAbstractAction::BeginDestroy()
 	Execute(FIntPoint(-999, -999));
 }
 
-void UAbstractAction::Initialize(APlayerActions* const _playerActions)
+void UAbstractAction::Initialize(APlayerActions* const _pPlayerActions)
 {
-	m_PlayerActions = _playerActions;
+	m_PlayerActions = _pPlayerActions;
 }

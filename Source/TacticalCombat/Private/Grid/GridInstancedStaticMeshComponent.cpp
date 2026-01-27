@@ -18,7 +18,8 @@ static TMap<ETileStateFlags, FTileStateInfo> s_TileStateFlagsToInfo =
 	{ETileStateFlags::Neighbor,	{FColor(169, 7, 228), 3}},
 	{ETileStateFlags::InPath,		{FColor(0,0,255), 4}},
 	{ETileStateFlags::Discovered, {FColor(179, 27, 77), 5}},
-	{ETileStateFlags::Analyzed,	{FColor(248, 112, 158), 6}}	
+	{ETileStateFlags::Analyzed,	{FColor(248, 112, 158), 6}},
+	{ETileStateFlags::Reachable,	{FColor(125,225,125), 7}}
 };
 
 static TMap<ETileType, FColor> s_TileTypeToColor =

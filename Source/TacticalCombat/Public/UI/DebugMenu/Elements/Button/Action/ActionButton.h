@@ -24,6 +24,9 @@ public:
 protected:
 	virtual void NativePreConstruct() override;
 
+public:
+	bool IsCurrentSelectedAction();
+
 protected:
 #pragma region Widgets
 	UPROPERTY(Meta = (BindWidget))

@@ -118,7 +118,7 @@ void AUnit::UpdateVisual()
 	m_SkeletalMeshComponent->SetVectorParameterValueOnMaterials(TEXT("ColorMultiply"), colorMultiply);
 }
 
-void AUnit::FollowPath(const TArray<FIntPoint>& _path)
+void AUnit::FollowPathWithNotify(const TArray<FIntPoint>& _path)
 {
 	if (_path.Num() <= 0)
 	{
@@ -131,6 +131,14 @@ void AUnit::FollowPath(const TArray<FIntPoint>& _path)
 	}
 
 	m_CurrentPathToFollow = _path;
+
+	// 걷기 시작 이벤트 호출
+	if (OnUnitStartedWalking.IsBound())
+	{
+		OnUnitStartedWalking.Broadcast(this);
+	}
+
+	// 걷기 시작
 	_SetAnimationState(EUnitAnimationState::Walk);
 
 	m_PreviousTransform = GetActorTransform();
@@ -203,7 +211,7 @@ void AUnit::_HandleUnitMovementTimelineFinishedWithNotify()
 		OnUnitResearchedNewTile.Broadcast(this, m_CurrentPathToFollow[0]);
 	}
 	m_CurrentPathToFollow.RemoveAt(0);
-	FollowPath(m_CurrentPathToFollow);
+	FollowPathWithNotify(m_CurrentPathToFollow);
 }
 
 #pragma endregion

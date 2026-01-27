@@ -51,9 +51,13 @@ AGrid::AGrid()
 	m_ChildActorGridVisual->SetChildActorClass(AGridVisual::StaticClass());
 	m_ChildActorGridVisual->SetupAttachment(m_SceneComponent);
 	
-	m_ChildActorGridPathFinding = CreateDefaultSubobject<UChildActorComponent>("Grid Pathfinding ChildActor Component");
-    m_ChildActorGridPathFinding->SetChildActorClass(AGridPathfinding::StaticClass());
-    m_ChildActorGridPathFinding->SetupAttachment(m_SceneComponent);
+	m_ChildActorGridPathfinding = CreateDefaultSubobject<UChildActorComponent>("Grid Pathfinding ChildActor Component");
+    m_ChildActorGridPathfinding->SetChildActorClass(AGridPathfinding::StaticClass());
+    m_ChildActorGridPathfinding->SetupAttachment(m_SceneComponent);
+	
+	m_ChildActorReachablesPathfinding = CreateDefaultSubobject<UChildActorComponent>("Reachables Pathfinding ChildActor Component");
+	m_ChildActorReachablesPathfinding->SetChildActorClass(AGridPathfinding::StaticClass());
+	m_ChildActorReachablesPathfinding->SetupAttachment(m_SceneComponent);
 }
 
 void AGrid::OnConstruction(const FTransform& Transform)
@@ -63,14 +67,15 @@ void AGrid::OnConstruction(const FTransform& Transform)
 #if WITH_EDITOR
 	// 에디터 전용 미리보기
 	m_GridVisual = Cast<AGridVisual>(m_ChildActorGridVisual->GetChildActor());
-	if (m_GridVisual == nullptr)
-		return;
+	check(m_GridVisual);
 	
-	m_GridPathfinding = Cast<AGridPathfinding>(m_ChildActorGridPathFinding->GetChildActor());
-	if (m_GridPathfinding == nullptr)
-		return;
-	
+	m_GridPathfinding = Cast<AGridPathfinding>(m_ChildActorGridPathfinding->GetChildActor());
+	check(m_GridPathfinding);	
 	m_GridPathfinding->SetGrid(this);
+
+	m_ReachablesPathfinding = Cast<AGridPathfinding>(m_ChildActorReachablesPathfinding->GetChildActor());
+	check(m_ReachablesPathfinding);	
+	m_ReachablesPathfinding->SetGrid(this);
 	
 	SpawnGridWithNotify(GetActorLocation(), m_TileSize, m_TileCount, m_Shape, true);
 #endif
@@ -82,9 +87,11 @@ void AGrid::BeginPlay()
 	Super::BeginPlay();
 	
 	m_GridVisual = Cast<AGridVisual>(m_ChildActorGridVisual->GetChildActor());
-	m_GridPathfinding = Cast<AGridPathfinding>(m_ChildActorGridPathFinding->GetChildActor());
-	
+	m_GridPathfinding = Cast<AGridPathfinding>(m_ChildActorGridPathfinding->GetChildActor());	
 	m_GridPathfinding->SetGrid(this);
+
+	m_ReachablesPathfinding = Cast<AGridPathfinding>(m_ChildActorReachablesPathfinding->GetChildActor());	
+	m_ReachablesPathfinding->SetGrid(this);
 	
 	SpawnGridWithNotify(GetActorLocation(), m_TileSize, m_TileCount, m_Shape, true);
 }
@@ -275,7 +282,7 @@ void AGrid::AddStateToTileWithNotify(const FIntPoint& _tileIndex, const ETileSta
 	FTileData* const pTileData =  m_GridTileMap.Find(_tileIndex);
 	if (pTileData)
 	{
-		pTileData->StateMask |= static_cast<int32>(_stateFlag);
+		pTileData->StateFlags |= static_cast<int32>(_stateFlag);
 
 		TArray<FIntPoint> allTilesWithStateFlag  = GetAllTilesWithStateFlag(_stateFlag);
 		allTilesWithStateFlag.Add(_tileIndex);
@@ -295,7 +302,7 @@ void AGrid::RemoveStateFromTileWithNotify(const FIntPoint& _tileIndex, const ETi
 	FTileData* const pTileData =  m_GridTileMap.Find(_tileIndex);
 	if (pTileData)
 	{
-		pTileData->StateMask &= ~static_cast<int32>(_stateFlag);
+		pTileData->StateFlags &= ~static_cast<int32>(_stateFlag);
 
 		TArray<FIntPoint> allTilesWithStateFlag  = GetAllTilesWithStateFlag(_stateFlag);
 		allTilesWithStateFlag.Remove(_tileIndex);

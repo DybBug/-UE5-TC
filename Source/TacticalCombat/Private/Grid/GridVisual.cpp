@@ -71,7 +71,7 @@ void AGridVisual::UpdateTileVisual(const FTileData& _tileData)
 	m_GridInstancedStaticMeshComponent->RemoveInstance(_tileData.Index);
 	if (AGrid::IsWalkableTile(_tileData.Type))
 	{
-		m_GridInstancedStaticMeshComponent->AddInstance(_tileData.Index, _tileData.Transform, _tileData.StateMask, _tileData.Type);
+		m_GridInstancedStaticMeshComponent->AddInstance(_tileData.Index, _tileData.Transform, _tileData.StateFlags, _tileData.Type);
 	}
 	
 	_UpdateTileVisualTactical(_tileData);
@@ -97,7 +97,7 @@ void AGridVisual::_UpdateTileVisualTactical(const FTileData& _tileData)
 		FVector tileScale = tileTransform.GetScale3D();
 		tileScale .Z = (tileTransform.GetTranslation().Z - m_GridLowerZ) / m_Grid->GetGridShapeData().MeshSize.Z;
 		tileTransform.SetScale3D(tileScale);
-		m_TacticalGridInstancedStaticMeshComponent->AddInstance(_tileData.Index, tileTransform, _tileData.StateMask, _tileData.Type);
+		m_TacticalGridInstancedStaticMeshComponent->AddInstance(_tileData.Index, tileTransform, _tileData.StateFlags, _tileData.Type);
 	}
 }
 

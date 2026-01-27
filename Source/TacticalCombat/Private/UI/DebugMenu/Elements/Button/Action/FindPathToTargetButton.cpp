@@ -4,6 +4,7 @@
 #include "UI/DebugMenu/Elements/Button/Action/FindPathToTargetButton.h"
 #include "Core/PlayerActions.h"
 #include "Action/Pathfinding/FindPathToTargetAction.h"
+#include "Action/Pathfinding/SelectAndGenReachablesAction.h"
 #include "Action/Pathfinding/ShowTileNeighborsAction.h"
 #include "UI/DebugMenu/Elements/SpinBox/WithNameSpinBox.h"
 #include "Components/CheckBox.h"
@@ -11,10 +12,11 @@
 void UFindPathToTargetButton::NativeConstruct()
 {
 	Super::NativeConstruct();
-	CheckBox_CanUseDiagonals->OnCheckStateChanged.AddDynamic(this, &UFindPathToTargetButton::OnCanUseDiagonalsCheckBoxStateChanged);
-	CheckBox_CanUseFlyingOnly->OnCheckStateChanged.AddDynamic(this, &UFindPathToTargetButton::OnCanUseFlyingOnlyCheckBoxStateChanged);
-	SpinBox_Delay->OnValueChanged.AddDynamic(this, &UFindPathToTargetButton::OnDelaySpinBoxValueChanged);
-	SpinBox_MaxMs->OnValueChanged.AddDynamic(this, &UFindPathToTargetButton::OnMaxMsSpinBoxValueChanged);
+	CheckBox_CanUseDiagonals->OnCheckStateChanged.AddDynamic(this, &UFindPathToTargetButton::HandleCanUseDiagonalsCheckBoxStateChanged);
+	CheckBox_CanUseFlyingOnly->OnCheckStateChanged.AddDynamic(this, &UFindPathToTargetButton::HandleCanUseFlyingOnlyCheckBoxStateChanged);
+	SpinBox_Length->OnValueChanged.AddDynamic(this, &UFindPathToTargetButton::HandleLengthSpinBoxValueChange);
+	SpinBox_Delay->OnValueChanged.AddDynamic(this, &UFindPathToTargetButton::HandleDelaySpinBoxValueChanged);
+	SpinBox_MaxMs->OnValueChanged.AddDynamic(this, &UFindPathToTargetButton::HandleMaxMsSpinBoxValueChanged);
 }
 
 void UFindPathToTargetButton::NativePreConstruct()
@@ -30,62 +32,120 @@ void UFindPathToTargetButton::NativePreConstruct()
 void UFindPathToTargetButton::OnSelectedActionsChanged(const UAbstractAction* const _leftClickAction, const UAbstractAction* const _rightClickAction)
 {
 	Super::OnSelectedActionsChanged(_leftClickAction, _rightClickAction);
-
-	UFindPathToTargetAction* pFindPathToTargetAction = Cast<UFindPathToTargetAction>(m_PlayerActions->GetRightClickSelectAction());
-	bool isVisible = (pFindPathToTargetAction != nullptr);
-	_UpdateAllElementVisibility(isVisible);
+	
+	_UpdateAllElementVisibility(IsCurrentSelectedAction());
 }
 
-void UFindPathToTargetButton::OnCanUseDiagonalsCheckBoxStateChanged(bool _bIsChecked)
+void UFindPathToTargetButton::HandleCanUseDiagonalsCheckBoxStateChanged(bool _bIsChecked)
 {
-	UFindPathToTargetAction* pFindPathToTargetAction = Cast<UFindPathToTargetAction>(m_PlayerActions->GetRightClickSelectAction());
-	if (!pFindPathToTargetAction)
+	if (IsCurrentSelectedAction())
+	{
+		CheckBox_CanUseDiagonals->SetVisibility(ESlateVisibility::Visible);
+		
+		if (USelectAndGenReachablesAction* pSelectAndGenReachableAction = Cast<USelectAndGenReachablesAction>(m_PlayerActions->GetLeftClickSelectAction()))
+		{
+			pSelectAndGenReachableAction->SetCanUseDiagonals(_bIsChecked);
+		}
+		
+		if (UFindPathToTargetAction* pFindPathToTargetAction = Cast<UFindPathToTargetAction>(m_PlayerActions->GetRightClickSelectAction()))
+		{		
+			pFindPathToTargetAction->SetCanUseDiagonals(_bIsChecked);
+		}
+	}
+	else
 	{
 		CheckBox_CanUseDiagonals->SetVisibility(ESlateVisibility::Collapsed);
-		return;
 	}
-
-	pFindPathToTargetAction->SetCanUseDiagonals(_bIsChecked);
-	CheckBox_CanUseDiagonals->SetVisibility(ESlateVisibility::Visible);
 }
 
-void UFindPathToTargetButton::OnCanUseFlyingOnlyCheckBoxStateChanged(bool _bIsChecked)
+void UFindPathToTargetButton::HandleCanUseFlyingOnlyCheckBoxStateChanged(bool _bIsChecked)
 {
-	UFindPathToTargetAction* pFindPathToTargetAction = Cast<UFindPathToTargetAction>(m_PlayerActions->GetRightClickSelectAction());
-	if (!pFindPathToTargetAction)
+	if (IsCurrentSelectedAction())
+	{
+		CheckBox_CanUseFlyingOnly->SetVisibility(ESlateVisibility::Visible);
+		
+		if (USelectAndGenReachablesAction* pSelectAndGenReachableAction = Cast<USelectAndGenReachablesAction>(m_PlayerActions->GetLeftClickSelectAction()))
+		{
+			pSelectAndGenReachableAction->SetCanUseFlyingOnly(_bIsChecked);
+		}
+		
+		if (UFindPathToTargetAction* pFindPathToTargetAction = Cast<UFindPathToTargetAction>(m_PlayerActions->GetRightClickSelectAction()))
+		{
+			pFindPathToTargetAction->SetCanUseFlyingOnly(_bIsChecked);
+		}
+	}
+	else
 	{
 		CheckBox_CanUseFlyingOnly->SetVisibility(ESlateVisibility::Collapsed);
-		return;
 	}
-
-	pFindPathToTargetAction->SetCanUseFlyingOnly(_bIsChecked);
-	CheckBox_CanUseFlyingOnly->SetVisibility(ESlateVisibility::Visible);
 }
 
-void UFindPathToTargetButton::OnDelaySpinBoxValueChanged(float _value)
+void UFindPathToTargetButton::HandleLengthSpinBoxValueChange(float _value)
 {
-	UFindPathToTargetAction* pFindPathToTargetAction = Cast<UFindPathToTargetAction>(m_PlayerActions->GetRightClickSelectAction());
-	if (!pFindPathToTargetAction)
+	if (IsCurrentSelectedAction())
+	{
+		SpinBox_Length->SetVisibility(ESlateVisibility::Visible);
+		
+		if (USelectAndGenReachablesAction* pSelectAndGenReachableAction = Cast<USelectAndGenReachablesAction>(m_PlayerActions->GetLeftClickSelectAction()))
+		{
+			pSelectAndGenReachableAction->SetMaxPathLength(FMath::TruncToInt32(_value));
+		}
+		
+		if (UFindPathToTargetAction* pFindPathToTargetAction = Cast<UFindPathToTargetAction>(m_PlayerActions->GetRightClickSelectAction()))
+		{
+			pFindPathToTargetAction->SetMaxPathLength(FMath::TruncToInt32(_value));
+		}
+	}
+	else
+	{
+		SpinBox_Length->SetVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
+
+void UFindPathToTargetButton::HandleDelaySpinBoxValueChanged(float _value)
+{
+	if (IsCurrentSelectedAction())
+	{
+		SpinBox_Delay->SetVisibility(ESlateVisibility::Visible);
+
+		if (USelectAndGenReachablesAction* pSelectAndGenReachableAction = Cast<USelectAndGenReachablesAction>(m_PlayerActions->GetLeftClickSelectAction()))
+		{
+			pSelectAndGenReachableAction->SetDelayBetweenIterations(_value);
+		}
+
+		if (UFindPathToTargetAction* pFindPathToTargetAction = Cast<UFindPathToTargetAction>(m_PlayerActions->GetRightClickSelectAction()))
+		{
+			pFindPathToTargetAction->SetDelayBetweenIterations(_value);	
+		}
+	}
+	else
 	{
 		SpinBox_Delay->SetVisibility(ESlateVisibility::Collapsed);
-		return;
 	}
-
-	pFindPathToTargetAction->SetDelayBetweenIterations(_value);
-	SpinBox_Delay->SetVisibility(ESlateVisibility::Visible);
 }
 
-void UFindPathToTargetButton::OnMaxMsSpinBoxValueChanged(float _value)
+void UFindPathToTargetButton::HandleMaxMsSpinBoxValueChanged(float _value)
 {
-	UFindPathToTargetAction* pFindPathToTargetAction = Cast<UFindPathToTargetAction>(m_PlayerActions->GetRightClickSelectAction());
-	if (!pFindPathToTargetAction)
+	if (IsCurrentSelectedAction())
+	{
+		SpinBox_MaxMs->SetVisibility(ESlateVisibility::Visible);
+
+		if (USelectAndGenReachablesAction* pSelectAndGenReachableAction = Cast<USelectAndGenReachablesAction>(m_PlayerActions->GetLeftClickSelectAction()))
+		{
+			pSelectAndGenReachableAction->SetMaxMs(_value);
+		}
+
+		if (UFindPathToTargetAction* pFindPathToTargetAction = Cast<UFindPathToTargetAction>(m_PlayerActions->GetRightClickSelectAction()))
+		{
+			pFindPathToTargetAction->SetMaxMs(_value);
+		}
+	}
+	else
 	{
 		SpinBox_MaxMs->SetVisibility(ESlateVisibility::Collapsed);
-		return;
 	}
 
-	pFindPathToTargetAction->SetMaxMs(_value);
-	SpinBox_MaxMs->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UFindPathToTargetButton::_UpdateAllElementVisibility(bool _isVisible)
@@ -94,6 +154,7 @@ void UFindPathToTargetButton::_UpdateAllElementVisibility(bool _isVisible)
 	{
 		CheckBox_CanUseDiagonals->SetVisibility(ESlateVisibility::Visible);
 		CheckBox_CanUseFlyingOnly->SetVisibility(ESlateVisibility::Visible);
+		SpinBox_Length->SetVisibility(ESlateVisibility::Visible);
 		SpinBox_Delay->SetVisibility(ESlateVisibility::Visible);
 		SpinBox_MaxMs->SetVisibility(ESlateVisibility::Visible);	
 	}
@@ -101,6 +162,7 @@ void UFindPathToTargetButton::_UpdateAllElementVisibility(bool _isVisible)
 	{
 		CheckBox_CanUseDiagonals->SetVisibility(ESlateVisibility::Collapsed);
 		CheckBox_CanUseFlyingOnly->SetVisibility(ESlateVisibility::Collapsed);
+		SpinBox_Length->SetVisibility(ESlateVisibility::Collapsed);
 		SpinBox_Delay->SetVisibility(ESlateVisibility::Collapsed);
 		SpinBox_MaxMs->SetVisibility(ESlateVisibility::Collapsed);
 	}

@@ -21,7 +21,7 @@ public:
 	FTransform Transform;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (BitMask, BitmaskEnum = "/Script/TacticalCombat.ETileStateFlags"))  
-	uint8 StateMask;
+	uint8 StateFlags;
 	
 	UPROPERTY(EditAnywhere, blueprintReadWrite)
 	TWeakObjectPtr<AUnit> UnitOnTile;

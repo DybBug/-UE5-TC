@@ -96,7 +96,8 @@ void ACombatSystem::_HandleGridGenerated()
 		AUnit* pUnit = m_UnitsInCombat[i].Get();
 		if (!pUnit) continue;
 
-		bool shouldRemove = !m_Grid->IsWalkableTile(pUnit->GetIndex());
+		const FIntPoint& index = pUnit->GetIndex();				
+		bool shouldRemove = (pUnit->GetUnitData().Stats.ValidTileTypeFlags & static_cast<uint8>(m_Grid->GetGridTileMap()[index].Type)) == 0;
 		if (shouldRemove)
 		{
 			RemoveUnitFromCombat(pUnit, true);
@@ -115,8 +116,9 @@ void ACombatSystem::_HandleTileDataUpdated(const FIntPoint& _index)
 		AUnit* pUnit = m_UnitsInCombat[i].Get();
 		if (pUnit->GetIndex() != _index)
 			continue;
-		
-		bool shouldRemove = !m_Grid->IsWalkableTile(pUnit->GetIndex());
+
+		const FIntPoint& index = pUnit->GetIndex();				
+		bool shouldRemove = (pUnit->GetUnitData().Stats.ValidTileTypeFlags & static_cast<uint8>(m_Grid->GetGridTileMap()[index].Type)) == 0;
 		if (shouldRemove)
 		{
 			RemoveUnitFromCombat(pUnit, true);

@@ -29,7 +29,7 @@ void UMoveUnitOnGridButton::_UpdateSpinBoxMaxMsVisual()
 {
 	if (!m_PlayerActions.IsValid()) return;
 	
-	if (UMoveUnitOnGridAction* pMoveUnitOnGridAction = Cast<UMoveUnitOnGridAction>( m_PlayerActions->GetRightClickSelectAction()))
+	if (IsCurrentSelectedAction())
 	{
 		SpinBox_MoveDurationPerTile->SetVisibility(ESlateVisibility::Visible);
 	}

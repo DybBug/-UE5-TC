@@ -22,25 +22,26 @@ void UShowTileNeighborsButton::OnSelectedActionsChanged(const UAbstractAction* c
 {
 	Super::OnSelectedActionsChanged(_leftClickAction, _rightClickAction);
 
-	UShowTileNeighborsAction* pShowTileNeighborsAction = Cast<UShowTileNeighborsAction>(m_PlayerActions->GetLeftClickSelectAction());
-	if (!pShowTileNeighborsAction)
+	if (IsCurrentSelectedAction())
+	{
+		CheckBox_UseDiagonals->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
 	{
 		CheckBox_UseDiagonals->SetVisibility(ESlateVisibility::Collapsed);
-		return;
 	}
-	
-	CheckBox_UseDiagonals->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UShowTileNeighborsButton::OnUseDiagonalsCheckBoxStateChanged(bool _bIsChecked)
 {
-	UShowTileNeighborsAction* pShowTileNeighborsAction = Cast<UShowTileNeighborsAction>(m_PlayerActions->GetLeftClickSelectAction());
-	if (!pShowTileNeighborsAction)
+	if (IsCurrentSelectedAction())
+	{
+		UShowTileNeighborsAction* pShowTileNeighborsAction = Cast<UShowTileNeighborsAction>(m_PlayerActions->GetLeftClickSelectAction());
+		pShowTileNeighborsAction->SetUseDiagonals(_bIsChecked);
+		CheckBox_UseDiagonals->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
 	{
 		CheckBox_UseDiagonals->SetVisibility(ESlateVisibility::Collapsed);
-		return;
 	}
-
-	pShowTileNeighborsAction->SetUseDiagonals(_bIsChecked);
-	CheckBox_UseDiagonals->SetVisibility(ESlateVisibility::Visible);
 }

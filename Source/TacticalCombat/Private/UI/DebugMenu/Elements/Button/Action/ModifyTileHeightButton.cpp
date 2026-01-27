@@ -10,13 +10,16 @@
 void UModifyTileHeightButton::OnSelectedActionsChanged(const UAbstractAction* const _leftClickAction, const UAbstractAction* const rightClickAction)
 {
 	Super::OnSelectedActionsChanged(_leftClickAction, rightClickAction);
-	if (UModifyTileHeightAction* pModifyTileHeightAction = Cast<UModifyTileHeightAction>(m_PlayerActions->GetLeftClickSelectAction()))
+	if (IsCurrentSelectedAction())
 	{
-		pModifyTileHeightAction->SetIsIncrease(true);
+		if (UModifyTileHeightAction* pModifyTileHeightAction = Cast<UModifyTileHeightAction>(m_PlayerActions->GetLeftClickSelectAction()))
+		{
+			pModifyTileHeightAction->SetIsIncrease(true);
+		}
+		
+		if (UModifyTileHeightAction* pModifyTileHeightAction = Cast<UModifyTileHeightAction>(m_PlayerActions->GetRightClickSelectAction()))
+	    {
+    		pModifyTileHeightAction->SetIsIncrease(false);
+	    }	
 	}
-	
-	if (UModifyTileHeightAction* pModifyTileHeightAction = Cast<UModifyTileHeightAction>(m_PlayerActions->GetRightClickSelectAction()))
-    {
-    	pModifyTileHeightAction->SetIsIncrease(false);
-    }
 }

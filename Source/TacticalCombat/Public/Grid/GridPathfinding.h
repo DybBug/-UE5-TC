@@ -14,6 +14,18 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnPathfindingCompleted, const TArray<FIntPo
 
 class AGrid;
 
+USTRUCT(BlueprintType)
+struct FPathFindingOptions
+{
+	GENERATED_BODY()
+	bool bIsDiagonalIncluded;
+	uint8 ValidTileTypeMask;
+	float DelayBetweenIterations;
+	float MaxMsPerFrame;
+	bool bIsReturnReachableTiles;
+	int32 MaxPathLength;
+};
+
 UCLASS()
 class TACTICALCOMBAT_API AGridPathfinding : public AActor
 {
@@ -31,7 +43,8 @@ public:
 	TArray<FPathfindingNode> GetValidTileNeighborNodes(const FIntPoint& _index, bool _bIsDiagonalIncluded, uint8 _validTileTypeMask);
 	TArray<FIntPoint> GetNeighborIndices(const FIntPoint& _index, bool _bIsDiagonalIncluded = false);
 
-	TArray<FIntPoint> FindPathWithNotify(const FIntPoint& _start, const FIntPoint& _target, bool _bIsDiagonalIncluded, uint8 _tileTypesFlags, float _delayTime, float _maxMs);
+	TArray<FIntPoint> FindPathWithNotify(const FIntPoint& _start, const FIntPoint& _target, const FPathFindingOptions& _options);
+	
 	bool IsInputDataValid();
 	void DiscoverNodeWithNotify(const FPathfindingNode& _node);
 	int32 GetMinimumCostBetweenTwoNodes(const FIntPoint& _index1, const FIntPoint& _index2, bool _bIsDiagonalIncluded);
@@ -72,10 +85,7 @@ private:
 #pragma region Internals
 	
 	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Grid"))
-	TWeakObjectPtr<AGrid> m_Grid;
-
-	UPROPERTY(EditAnywhere, Category = "Internal", Meta = (DisplayName = "Valid Tile Types Flags", BitMask, BitmaskEnum = "/Script/TacticalCombat.ETileType"))
-	uint8 m_ValidTileTypeMask;
+	TWeakObjectPtr<AGrid> m_Grid;	
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Start Index"))
 	FIntPoint m_StartIndex;
@@ -83,9 +93,9 @@ private:
 	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "End Index"))
 	FIntPoint m_TargetIndex;
 
-	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Is Diagonal Included"))
-	bool m_bIsDiagonalIncluded;
-
+	UPROPERTY(VisibleInstanceOnly , Category = "Internal", Meta = (DisplayName = "Path Finding Options"))
+	FPathFindingOptions m_PathFindingOptions;
+	
 	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Discovered Node Indices"))
 	TArray<FIntPoint> m_DiscoveredNodeIndices;
 	
@@ -105,13 +115,7 @@ private:
     FPathfindingNode m_CurrentDiscoveredNode;
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Current Neighbor Node"))
-	FPathfindingNode m_CurrentNeighborNode;
-
-	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName = "Delay Between Iterations"))
-	float m_DelayBetweenIterations;
-
-	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName ="Max Ms Per Frame"))
-	float m_MaxMsPerFrame;
+	FPathfindingNode m_CurrentNeighborNode;	
 
 	UPROPERTY(VisibleInstanceOnly, Category = "Internal", Meta = (DisplayName ="Max Ms Per Frame"))
 	FDateTime m_LoopStartDateTime;

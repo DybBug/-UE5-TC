@@ -21,10 +21,12 @@ void USetTileTypeActionButton::NativePreConstruct()
 	Super::NativePreConstruct();
 
 	ComboBoxString->ClearOptions();
-	
-	for (ETileType tileType : TEnumRange<ETileType>())
+
+	uint8 flag = 0;
+	while (flag < static_cast<int32>(ETileType::Max))
 	{
-		ComboBoxString->AddOption(StaticEnum<ETileType>()->GetNameStringByValue((uint8)tileType));
+		ComboBoxString->AddOption(StaticEnum<ETileType>()->GetNameStringByValue(flag));
+		flag = (flag == 0) ? 1 : flag << 1;
 	}
 	ComboBoxString->SetSelectedIndex(0);	
 }
@@ -45,17 +47,21 @@ void USetTileTypeActionButton::_OnComboBoxTileTypeSelectionChanged(FString _sele
 
 void USetTileTypeActionButton::_SetTileType()
 {
-	ComboBoxString->SetVisibility(ESlateVisibility::Collapsed);
-	if (USetTileTypeAction* pSetTileTypeAction = Cast<USetTileTypeAction>(m_PlayerActions->GetLeftClickSelectAction()))
-	{
-		int32 selectedIndex = ComboBoxString->GetSelectedIndex();
-		pSetTileTypeAction->SetTileType((ETileType)selectedIndex);
-		ComboBoxString->SetVisibility(ESlateVisibility::Visible);
-	}
-		
-	if (USetTileTypeAction* pSetTileTypeAction = Cast<USetTileTypeAction>(m_PlayerActions->GetRightClickSelectAction()))
-	{
-		pSetTileTypeAction->SetTileType(ETileType::Normal);
-		ComboBoxString->SetVisibility(ESlateVisibility::Visible);
+	if (IsCurrentSelectedAction())
+	{		
+		ComboBoxString->SetVisibility(ESlateVisibility::Collapsed);
+		if (USetTileTypeAction* pSetTileTypeAction = Cast<USetTileTypeAction>(m_PlayerActions->GetLeftClickSelectAction()))
+		{
+			int32 selectedIndex = ComboBoxString->GetSelectedIndex();
+			ETileType type = (ETileType)(selectedIndex == 0 ? 0 : (1 << (selectedIndex - 1)));
+			pSetTileTypeAction->SetTileType(type);
+			ComboBoxString->SetVisibility(ESlateVisibility::Visible);
+		}
+			
+		if (USetTileTypeAction* pSetTileTypeAction = Cast<USetTileTypeAction>(m_PlayerActions->GetRightClickSelectAction()))
+		{
+			pSetTileTypeAction->SetTileType(ETileType::Normal);
+			ComboBoxString->SetVisibility(ESlateVisibility::Visible);
+		}
 	}
 }

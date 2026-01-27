@@ -24,25 +24,26 @@ void UCalculateMinCostButton::OnSelectedActionsChanged(const UAbstractAction* co
 {
 	Super::OnSelectedActionsChanged(_leftClickAction, _rightClickAction);
 
-	USelectTileWithCalculateMinCost* pSelectTileWithCalculateMinCost = Cast<USelectTileWithCalculateMinCost>(m_PlayerActions->GetLeftClickSelectAction());
-	if (!pSelectTileWithCalculateMinCost)
+	if (IsCurrentSelectedAction())
+	{
+		CheckBox_UseDiagonals->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
 	{
 		CheckBox_UseDiagonals->SetVisibility(ESlateVisibility::Collapsed);
-		return;
 	}
-	
-	CheckBox_UseDiagonals->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UCalculateMinCostButton::OnUseDiagonalsCheckBoxStateChanged(bool _bIsChecked)
 {
-	USelectTileWithCalculateMinCost* pSelectTileWithCalculateMinCost = Cast<USelectTileWithCalculateMinCost>(m_PlayerActions->GetLeftClickSelectAction());
-	if (!pSelectTileWithCalculateMinCost)
+	if (IsCurrentSelectedAction())
+	{
+		USelectTileWithCalculateMinCost* pSelectTileWithCalculateMinCost = Cast<USelectTileWithCalculateMinCost>(m_PlayerActions->GetLeftClickSelectAction());
+		pSelectTileWithCalculateMinCost->SetUseDiagonals(_bIsChecked);
+		CheckBox_UseDiagonals->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
 	{
 		CheckBox_UseDiagonals->SetVisibility(ESlateVisibility::Collapsed);
-		return;
 	}
-
-	pSelectTileWithCalculateMinCost->SetUseDiagonals(_bIsChecked);
-	CheckBox_UseDiagonals->SetVisibility(ESlateVisibility::Visible);
 }

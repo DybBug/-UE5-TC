@@ -77,16 +77,14 @@ TArray<FIntPoint> AGridPathfinding::GetNeighborIndices(const FIntPoint& _index, 
 	}
 }
 
-TArray<FIntPoint> AGridPathfinding::FindPathWithNotify(const FIntPoint& _start, const FIntPoint& _target, bool _bIsDiagonalIncluded, uint8 _tileTypesMask, float _delayTime, float _maxMs)
+TArray<FIntPoint> AGridPathfinding::FindPathWithNotify(const FIntPoint& _start, const FIntPoint& _target, const FPathFindingOptions& _options)
 {
 	TArray<FIntPoint> path;
 	
 	m_StartIndex = _start;
 	m_TargetIndex = _target;
-	m_bIsDiagonalIncluded = _bIsDiagonalIncluded;
-	m_ValidTileTypeMask = _tileTypesMask;
-	m_DelayBetweenIterations = _delayTime;
-	m_MaxMsPerFrame = _maxMs;
+	
+	m_PathFindingOptions = _options;
 
 	FLatentActionManager& LatentActionManager = GetWorld()->GetLatentActionManager();
 	LatentActionManager.RemoveActionsForObject(m_LatentInfo_FindPathWithDelay.CallbackTarget);
@@ -100,10 +98,10 @@ TArray<FIntPoint> AGridPathfinding::FindPathWithNotify(const FIntPoint& _start, 
 		node.Index = m_StartIndex;
 		node.CostToEnterTile = 1;
 		node.CostFromStart = 0;
-		node.MinimumCostToTarget = GetMinimumCostBetweenTwoNodes(m_StartIndex, m_TargetIndex, m_bIsDiagonalIncluded);
+		node.MinimumCostToTarget = GetMinimumCostBetweenTwoNodes(m_StartIndex, m_TargetIndex, m_PathFindingOptions.bIsDiagonalIncluded);
 		DiscoverNodeWithNotify(node);
 
-		if (m_DelayBetweenIterations > 0.0f)
+		if (m_PathFindingOptions.DelayBetweenIterations > 0.0f)
 		{
 			FindPathWithDelayWithNotify();
 			return path;
@@ -123,6 +121,11 @@ TArray<FIntPoint> AGridPathfinding::FindPathWithNotify(const FIntPoint& _start, 
 		}				
 	}
 	
+	if (m_PathFindingOptions.bIsReturnReachableTiles)
+	{
+		path = m_AnalysedNodeIndices;
+	}
+	
 	if (OnPathfindingCompleted.IsBound())
 	{
 		OnPathfindingCompleted.Broadcast(path);
@@ -132,13 +135,19 @@ TArray<FIntPoint> AGridPathfinding::FindPathWithNotify(const FIntPoint& _start, 
 
 bool AGridPathfinding::IsInputDataValid()
 {
-	if (m_StartIndex == m_TargetIndex)			return false;
+	if (m_StartIndex == m_TargetIndex) return false;
 	if (!m_Grid->IsWalkableTile(m_StartIndex))	return false;
-	if (!m_Grid->IsWalkableTile(m_TargetIndex)) return false;
+	if (!m_PathFindingOptions.bIsReturnReachableTiles)
+	{		
+		
+		if (!m_Grid->IsWalkableTile(m_TargetIndex)) return false;
+		if (GetMinimumCostBetweenTwoNodes(m_StartIndex, m_TargetIndex, m_PathFindingOptions.bIsDiagonalIncluded) > m_PathFindingOptions.MaxPathLength)
+			return false;
 
-	const FTileData* pTile = m_Grid->GetGridTileMap().Find(m_TargetIndex);
-	if (pTile == nullptr) return false;
-	if (pTile->UnitOnTile.IsValid()) return false;
+		const FTileData* pTile = m_Grid->GetGridTileMap().Find(m_TargetIndex);
+		if (pTile == nullptr) return false;
+		if (pTile->UnitOnTile.IsValid()) return false;
+	}
 	
 	return true;
 }
@@ -241,7 +250,7 @@ bool AGridPathfinding::AnalyseNextDiscoveredNodeWithNotify()
 		OnPathfindingNodeUpdated.Broadcast(m_CurrentDiscoveredNode.Index);
 	}
 	
-	m_CurrentNeighborNodes = GetValidTileNeighborNodes(m_CurrentDiscoveredNode.Index, m_bIsDiagonalIncluded, m_ValidTileTypeMask);
+	m_CurrentNeighborNodes = GetValidTileNeighborNodes(m_CurrentDiscoveredNode.Index, m_PathFindingOptions.bIsDiagonalIncluded, m_PathFindingOptions.ValidTileTypeMask);
 
 	while (m_CurrentNeighborNodes.Num() > 0)
 	{
@@ -294,6 +303,11 @@ bool AGridPathfinding::DiscoverNextNeighbor()
 	}
 
 	int32 costFromStart = m_CurrentDiscoveredNode.CostFromStart + m_CurrentNeighborNode.CostToEnterTile;
+	if (costFromStart > m_PathFindingOptions.MaxPathLength)
+	{
+		return false;
+	}
+	
 	int32 indexInDiscovered = m_DiscoveredNodeIndices.Find(m_CurrentNeighborNode.Index);
 	if (indexInDiscovered == -1)
 	{
@@ -301,7 +315,7 @@ bool AGridPathfinding::DiscoverNextNeighbor()
 		node.Index = m_CurrentNeighborNode.Index;
 		node.CostToEnterTile = m_CurrentNeighborNode.CostToEnterTile;
 		node.CostFromStart = costFromStart;
-		node.MinimumCostToTarget = GetMinimumCostBetweenTwoNodes(m_CurrentNeighborNode.Index, m_TargetIndex, m_bIsDiagonalIncluded);
+		node.MinimumCostToTarget = GetMinimumCostBetweenTwoNodes(m_CurrentNeighborNode.Index, m_TargetIndex, m_PathFindingOptions.bIsDiagonalIncluded);
 		node.PreviousIndex = m_CurrentDiscoveredNode.Index;
 		DiscoverNodeWithNotify(node);
 
@@ -318,7 +332,7 @@ bool AGridPathfinding::DiscoverNextNeighbor()
 		node.Index = m_CurrentNeighborNode.Index;
 		node.CostToEnterTile = m_CurrentNeighborNode.CostToEnterTile;
 		node.CostFromStart = costFromStart;
-		node.MinimumCostToTarget = GetMinimumCostBetweenTwoNodes(m_CurrentNeighborNode.Index, m_TargetIndex, m_bIsDiagonalIncluded);
+		node.MinimumCostToTarget = GetMinimumCostBetweenTwoNodes(m_CurrentNeighborNode.Index, m_TargetIndex, m_PathFindingOptions.bIsDiagonalIncluded);
 		node.PreviousIndex = m_CurrentDiscoveredNode.Index;
 		DiscoverNodeWithNotify(node);
 
@@ -396,10 +410,10 @@ void AGridPathfinding::FindPathWithDelayWithNotify()
 			return;
 		}
 
-		if (m_MaxMsPerFrame > 0.0f)
+		if (m_PathFindingOptions.MaxMsPerFrame > 0.0f)
 		{
 			float deltaMs = (FDateTime::Now() - m_LoopStartDateTime).GetTotalMilliseconds();
-			if (deltaMs < m_MaxMsPerFrame)
+			if (deltaMs < m_PathFindingOptions.MaxMsPerFrame)
 			{
 				continue;
 			}
@@ -412,7 +426,7 @@ void AGridPathfinding::FindPathWithDelayWithNotify()
 			m_LatentInfo_FindPathWithDelay.ExecutionFunction = "FindPathWithDelay";
 			m_LatentInfo_FindPathWithDelay.Linkage = 0;	
 		}
-		UKismetSystemLibrary::RetriggerableDelay(GetWorld(), m_DelayBetweenIterations, m_LatentInfo_FindPathWithDelay);
+		UKismetSystemLibrary::RetriggerableDelay(GetWorld(), m_PathFindingOptions.DelayBetweenIterations, m_LatentInfo_FindPathWithDelay);
 		return;
 	}
 	

@@ -39,15 +39,19 @@ void UActionButton::NativePreConstruct()
 	Text->SetText(FText::FromString(m_ActionText));
 }
 
-void UActionButton::OnSelectedActionsChanged(const UAbstractAction* const _leftClickAction, const UAbstractAction* const _rightClickAction)
+bool UActionButton::IsCurrentSelectedAction()
 {
 	const UAbstractAction* pLeftAction = m_PlayerActions->GetLeftClickSelectAction();
-	const UAbstractAction* pRightAction = m_PlayerActions->GetRightClickSelectAction();
+	const UAbstractAction* pRightAction = m_PlayerActions->GetRightClickSelectAction();	
 	
 	bool isValidLeftAction = m_LeftClickActionClass == ((pLeftAction == nullptr) ? nullptr : pLeftAction->GetClass());
 	bool isValidRightAction = m_RightClickActionClass == ((pRightAction == nullptr) ? nullptr : pRightAction->GetClass());
-	
-	if ( isValidLeftAction && isValidRightAction)
+	return (isValidLeftAction && isValidRightAction);
+}
+
+void UActionButton::OnSelectedActionsChanged(const UAbstractAction* const _leftClickAction, const UAbstractAction* const _rightClickAction)
+{	
+	if (IsCurrentSelectedAction())
 	{
 		Button->SetBackgroundColor(FColor::Blue);
 	}
@@ -60,13 +64,7 @@ void UActionButton::OnSelectedActionsChanged(const UAbstractAction* const _leftC
 
 void UActionButton::_OnButtonClicked()
 {
-	const UAbstractAction* pLeftAction = m_PlayerActions->GetLeftClickSelectAction();
-	const UAbstractAction* pRightAction = m_PlayerActions->GetRightClickSelectAction();
-	
-	bool isValidLeftAction = m_LeftClickActionClass == ((pLeftAction == nullptr) ? nullptr : pLeftAction->GetClass());
-	bool isValidRightAction = m_RightClickActionClass == ((pRightAction == nullptr) ? nullptr : pRightAction->GetClass());
-	
-	if ( isValidLeftAction && isValidRightAction)
+	if (IsCurrentSelectedAction())
 	{
 		m_PlayerActions->SetSelectedActionWithNotify(nullptr, nullptr);
 	}

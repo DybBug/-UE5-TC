@@ -27,7 +27,7 @@ void UModifyTileHeightAction::Execute(const FIntPoint& _index)
 		newTileData.Transform.SetLocation(pTileData->Transform.GetLocation() + tileLocationOffset);
 		newTileData.Transform.SetRotation(pTileData->Transform.GetRotation());
 		newTileData.Transform.SetScale3D(pTileData->Transform.GetScale3D());
-		newTileData.StateMask =pTileData->StateMask;
+		newTileData.StateFlags =pTileData->StateFlags;
 		newTileData.UnitOnTile = pTileData->UnitOnTile;
 
 		pGrid->AddGridTileWithNotify(newTileData);

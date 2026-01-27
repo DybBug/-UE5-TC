@@ -6,6 +6,12 @@
 #include "Grid/Grid.h"
 #include "Grid/GridPathfinding.h"
 
+void UFindPathToTargetAction::Initialize(APlayerActions* const _pPlayerActions)
+{
+	Super::Initialize(_pPlayerActions);
+	_pPlayerActions->OnSelectedTileChanged.AddUObject(this, &UFindPathToTargetAction::_HandleSelectedTileChanged);
+}
+
 void UFindPathToTargetAction::Execute(const FIntPoint& _index)
 {
 	if (!m_PlayerActions.IsValid())
@@ -20,17 +26,23 @@ void UFindPathToTargetAction::Execute(const FIntPoint& _index)
 	FIntPoint start = m_PlayerActions->GetSelectedTileIndex();
 	FIntPoint target = _index;
 
-	uint8 validTileTypeMask = static_cast<uint8>(ETileType::Normal)
+	FPathFindingOptions options = {
+		.bIsDiagonalIncluded = m_bCanUseDiagonals,
+		.ValidTileTypeMask = static_cast<uint8>(ETileType::Normal)
 							| static_cast<uint8>(ETileType::DoubleCost)
-							| static_cast<uint8>(ETileType::TripleCost);
+							| static_cast<uint8>(ETileType::TripleCost),
+		.DelayBetweenIterations = m_DelayBetweenIterations,
+		.MaxMsPerFrame = m_MaxMs,
+		.bIsReturnReachableTiles = true,
+		.MaxPathLength = m_MaxPathLength
+	};
 
-	
 	if (m_bCanUseFlyingOnly)
 	{
-		validTileTypeMask = validTileTypeMask | static_cast<uint8>(ETileType::FlyingUnitsOnly);
-	}
+		options.ValidTileTypeMask = options.ValidTileTypeMask | static_cast<uint8>(ETileType::FlyingUnitsOnly);
+	};
 	
-	TArray<FIntPoint> neighborIndices =  pGrid->GetGridPathfinding()->FindPathWithNotify(start, target, m_bCanUseDiagonals, validTileTypeMask, m_DelayBetweenIterations, m_MaxMs);
+	TArray<FIntPoint> neighborIndices =  pGrid->GetGridPathfinding()->FindPathWithNotify(start, target, options);
 }
 
 void UFindPathToTargetAction::_HandlePathfindingCompleted(const TArray<FIntPoint>& _path)
@@ -40,4 +52,9 @@ void UFindPathToTargetAction::_HandlePathfindingCompleted(const TArray<FIntPoint
 	{
 		pGrid->AddStateToTileWithNotify(neighborIndex, ETileStateFlags::InPath);
 	}
+}
+
+void UFindPathToTargetAction::_HandleSelectedTileChanged(const FIntPoint& _index)
+{
+	Execute(FIntPoint(INVALID_POINT_VALUE));
 }

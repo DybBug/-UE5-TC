@@ -17,6 +17,7 @@ class UAnimInstance;
 class AGrid;
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnUnitResearchedNewTile, AUnit* const, const FIntPoint&);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnUnitStartedWalking, AUnit* const);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnUnitFinishedWalking, AUnit* const);
 
 UCLASS()
@@ -39,6 +40,7 @@ protected:
 public:
 #pragma region Events
 	FOnUnitResearchedNewTile OnUnitResearchedNewTile;
+	FOnUnitStartedWalking OnUnitStartedWalking;
 	FOnUnitFinishedWalking OnUnitFinishedWalking;
 #pragma endregion 
 
@@ -46,7 +48,7 @@ public:
 	void InitializeUnit(ETacticalUnitType _type, AGrid* _pGrid);
 	void UpdateVisual();
 
-	void FollowPath(const TArray<FIntPoint>& _path);
+	void FollowPathWithNotify(const TArray<FIntPoint>& _path);
 	
 public:
 	FORCEINLINE const FIntPoint& GetIndex() const { return m_Index;}
