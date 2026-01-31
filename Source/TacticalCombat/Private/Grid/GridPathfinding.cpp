@@ -197,7 +197,7 @@ int32 AGridPathfinding::GetMinimumCostBetweenTwoNodes(const FIntPoint& _index1, 
 			{
 				int32 dx = FMath::Abs(_index1.X - _index2.X);
 				int32 dy = FMath::Abs(_index1.Y - _index2.Y);
-				return dx + dy;		
+				return (dx + dy) * 0.5f;		
 			}
 			else
 			{
