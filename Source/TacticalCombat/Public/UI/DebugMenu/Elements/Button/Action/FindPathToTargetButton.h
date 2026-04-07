@@ -9,6 +9,8 @@
 class UWithNameSpinBox;
 class UCheckBox;
 class UAbstractAction;
+class USelectAndGenReachablesAction;
+
 /**
  * 
  */
@@ -23,6 +25,7 @@ public:
 	virtual void NativePreConstruct() override;
 
 protected:
+#pragma region Widgets
 	UPROPERTY(Meta = (BindWidget))
 	TObjectPtr<UCheckBox> CheckBox_CanUseDiagonals;
 
@@ -37,6 +40,11 @@ protected:
 
 	UPROPERTY(Meta = (BindWidget))
 	TObjectPtr<UWithNameSpinBox> SpinBox_MaxMs;
+#pragma endregion
+
+	FTimerHandle m_hGenReachablesTimer;
+
+	
 protected:
 	virtual void OnSelectedActionsChanged(const UAbstractAction* const _leftClickAction, const UAbstractAction* const _rightClickAction) override;
 
@@ -57,5 +65,7 @@ protected:
 
 private:
 	void _UpdateAllElementVisibility(bool _isVisible);
+	void _GenReachablesTimerSetting(USelectAndGenReachablesAction* const _pSelectAndGenReachableAction);
+
 	
 };

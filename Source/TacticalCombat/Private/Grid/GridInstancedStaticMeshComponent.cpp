@@ -2,6 +2,8 @@
 
 
 #include "Grid/GridInstancedStaticMeshComponent.h"
+
+#include "Grid/Types/TileData.h"
 #include "Shared/SharedEnums.h"
 
 struct FTileStateInfo
@@ -14,12 +16,13 @@ static TMap<ETileStateFlags, FTileStateInfo> s_TileStateFlagsToInfo =
 {
 	{ETileStateFlags::None,		{FColor(0, 0, 0, 0), 999 }},
 	{ETileStateFlags::Selected,	{FColor(255,0,0), 1}},
-	{ETileStateFlags::Hovered,	{FColor(255,255,0), 2}},
+{ETileStateFlags::Hovered,			{FColor(255,255,0), 2}},
 	{ETileStateFlags::Neighbor,	{FColor(169, 7, 228), 3}},
 	{ETileStateFlags::InPath,		{FColor(0,0,255), 4}},
-	{ETileStateFlags::Discovered, {FColor(179, 27, 77), 5}},
+	{ETileStateFlags::Discovered,  {FColor(179, 27, 77), 5}},
 	{ETileStateFlags::Analyzed,	{FColor(248, 112, 158), 6}},
-	{ETileStateFlags::Reachable,	{FColor(125,225,125), 7}}
+	{ETileStateFlags::Reachable,	{FColor(125,225,125), 7}},
+	{ETileStateFlags::SpellRange,  {FColor(255, 120, 100, 255)}}
 };
 
 static TMap<ETileType, FColor> s_TileTypeToColor =

@@ -17,3 +17,10 @@ namespace Unit
 {
 	inline constexpr float INVALID_UNIT_LOCATION_VALUE = -99999.0f;
 }
+
+namespace Tile
+{
+	inline constexpr float DEFAULT_TILE_SIZE_X = 100.0f;
+	inline constexpr float DEFAULT_TILE_SIZE_Y = 100.0f;
+	inline constexpr float DEFAULT_TILE_SIZE_Z = 100.0f;
+}

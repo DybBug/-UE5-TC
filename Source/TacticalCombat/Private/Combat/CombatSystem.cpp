@@ -2,8 +2,11 @@
 
 
 #include "Combat/CombatSystem.h"
+
+#include "Combat/Spells/SpellAnimation.h"
 #include "Components/SceneComponent.h"
 #include "Grid/Grid.h"
+#include "Library/SpellLibrary.h"
 #include "Unit/Unit.h"
 
 // Sets default values
@@ -40,6 +43,35 @@ void ACombatSystem::RemoveUnitFromCombat(AUnit* _pUnit, bool _bIsUnitDestroyed)
 	if (_bIsUnitDestroyed)
 	{
 		_pUnit->Destroy();
+	}
+}
+
+TArray<FIntPoint> ACombatSystem::GetSpellRangeIndices(const FIntPoint& _originIndex, const FSpellCast& _cast) const
+{	
+	TArray<FIntPoint> rangeIndices = USpellLibrary::GetIndicesFromPatternAndRange(
+		_originIndex,
+		m_Grid->GetGridShape(),
+		_cast.RangePattern,
+		_cast.RangeBounds);	
+	return rangeIndices;
+}
+
+void ACombatSystem::CastSpell(ESpellType _spellType, const FIntPoint& _originIndex, const TArray<FIntPoint>& _targetIndices)
+{
+	if (_spellType == ESpellType::None)
+		return;
+	
+	FSpellTableRow spellRowData = USpellLibrary::GetSpellRowDataFromType(_spellType);	
+
+	const TArray<FIntPoint>& spellRangeIndices = GetSpellRangeIndices(_originIndex, spellRowData.SpellCast);
+	for (const FIntPoint& targetIndex : _targetIndices)
+	{
+		if (spellRangeIndices.Contains(targetIndex))
+		{
+			ASpellAnimation* pSpellAnimation = GetWorld()->SpawnActor<ASpellAnimation>(spellRowData.SpellAsset.SpellAnimationClass);
+			pSpellAnimation->PostSpawnInitialize(m_Grid.Get(), _originIndex, _targetIndices);
+			break;
+		}
 	}
 }
 
@@ -88,6 +120,7 @@ void ACombatSystem::_SetUnitIndexOnGridWithNotify(AUnit* _pUnit, const FIntPoint
 	}
 }
 #pragma endregion
+
 #pragma region Event Handlers
 void ACombatSystem::_HandleGridGenerated()
 {

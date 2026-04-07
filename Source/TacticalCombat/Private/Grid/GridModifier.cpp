@@ -3,6 +3,7 @@
 
 #include "Grid/GridModifier.h"
 
+#include "Grid/Grid.h"
 #include "Library/GridLibrary.h"
 #include "Shared/SharedDefines.h"
 #include "Shared/SharedEnums.h"

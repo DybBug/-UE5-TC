@@ -12,31 +12,37 @@ bool UDebugMenu::Initialize()
 
 	_UpdateAllButtonTabs();
 	
-	Button_Tab1->OnClicked.AddDynamic(this, &UDebugMenu::_OnClicked_Tab1);
-	Button_Tab2->OnClicked.AddDynamic(this, &UDebugMenu::_OnClicked_Tab2);
-	Button_Tab3->OnClicked.AddDynamic(this, &UDebugMenu::_OnClicked_Tab3);	
-	Button_Tab4->OnClicked.AddDynamic(this, &UDebugMenu::_OnClicked_Tab4);	
+	Button_Tab1->OnClicked.AddDynamic(this, &UDebugMenu::_HandleClicked_Tab1);
+	Button_Tab2->OnClicked.AddDynamic(this, &UDebugMenu::_HandleClicked_Tab2);
+	Button_Tab3->OnClicked.AddDynamic(this, &UDebugMenu::_HandleClicked_Tab3);	
+	Button_Tab4->OnClicked.AddDynamic(this, &UDebugMenu::_HandleClicked_Tab4);	
+	Button_Tab5->OnClicked.AddDynamic(this, &UDebugMenu::_HandleClicked_Tab5);	
 	return result;
 }
 
-void UDebugMenu::_OnClicked_Tab1()
+void UDebugMenu::_HandleClicked_Tab1()
 {
 	_ToggleTabIndex(1);
 }
 
-void UDebugMenu::_OnClicked_Tab2()
+void UDebugMenu::_HandleClicked_Tab2()
 {
 	_ToggleTabIndex(2);
 }
 
-void UDebugMenu::_OnClicked_Tab3()
+void UDebugMenu::_HandleClicked_Tab3()
 {
 	_ToggleTabIndex(3);
 }
 
-void UDebugMenu::_OnClicked_Tab4()
+void UDebugMenu::_HandleClicked_Tab4()
 {
 	_ToggleTabIndex(4);
+}
+
+void UDebugMenu::_HandleClicked_Tab5()
+{
+	_ToggleTabIndex(5);
 }
 
 void UDebugMenu::_ToggleTabIndex(int32 _tabIndex)

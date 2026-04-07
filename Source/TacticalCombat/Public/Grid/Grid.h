@@ -74,8 +74,8 @@ public:
 	FRotator GetTileRotationFromGridIndex(int _row, int _col);
 	FVector GetTileScale();
 
-	TArray<FIntPoint> GetAllTilesWithStateFlag(const ETileStateFlags _stateFlag);
-	void ClearStateFromTiles(const ETileStateFlags _stateFlag);
+	TArray<FIntPoint> GetAllTilesWithStateFlag(ETileStateFlags _stateFlag);
+	void ClearStateFromTiles(ETileStateFlags _stateFlag);
 
 	bool IsWalkableTile(const FIntPoint& _index);
 
@@ -123,7 +123,7 @@ protected:
 	FVector m_CenterLocation;
 
 	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Tile Size"))
-	FVector m_TileSize = FVector(200.0f, 200.0f, 100.0f);;
+	FVector m_TileSize = FVector(200.0f, 200.0f, Tile::DEFAULT_TILE_SIZE_Z);
 
 	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Tile Count"))
 	FIntPoint m_TileCount = FIntPoint(10, 10);

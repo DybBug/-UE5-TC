@@ -10,20 +10,6 @@ enum class EGridShape : uint8
 };
 
 UENUM(BlueprintType, Meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
-enum class ETileType : uint8
-{
-	None = 0					UMETA(DisplayName = "None"),
-	Normal = 1 << 0				UMETA(DisplayName = "Normal"),
-	Obstacle = 1 << 1			UMETA(DisplayName = "Obstacle"),
-	DoubleCost = 1 << 2			UMETA(DisplayName = "Double Cost"),
-	TripleCost = 1 << 3			UMETA(DisplayName = "Triple Cost"),
-	FlyingUnitsOnly = 1 << 4	UMETA(DisplayName = "Flying Units Only"),
-	Max UMETA(Hidden)
-};
-ENUM_RANGE_BY_COUNT(ETileType, ETileType::Max)
-
-
-UENUM(BlueprintType, Meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
 enum class ETileStateFlags : uint8
 {
 	None = 0		 UMETA(DisplayName = "None"),
@@ -34,6 +20,7 @@ enum class ETileStateFlags : uint8
 	Discovered = 1 << 4 UMETA(DisplayName = "Discovered"),
 	Analyzed = 1 << 5 UMETA(DisplayName = "Analyzed"),
 	Reachable = 1 << 6 UMETA(DisplayName = "Reachable"),
+	SpellRange = 1 << 7 UMETA(DisplayName = "InSpellRange"),
 };
 
 UENUM(BlueprintType, Meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))

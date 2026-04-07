@@ -3,6 +3,7 @@
 
 #include "Library/GridLibrary.h"
 
+#include "Library/UtilityLibrary.h"
 #include "Shared/SharedEnums.h"
 #include "Table/Rows/GridShapeTableRow.h"
 
@@ -25,4 +26,9 @@ FGridShapeTableRow UGridLibrary::GetGridShape(EGridShape _gridShape)
 		}		
 	}
 	return FGridShapeTableRow();
+}
+
+bool UGridLibrary::IsTriangleTileFacingUp(const FIntPoint& _index)
+{
+	return UUtilityLibrary::IsIntEven(_index.X) == UUtilityLibrary::IsIntEven(_index.Y);
 }

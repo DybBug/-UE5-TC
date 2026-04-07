@@ -32,8 +32,8 @@ protected:
 	float m_MaxMs;
 	int32 m_MaxPathLength;
 
-private:
-	void _GenerateReachable();
+public:
+	void GenerateReachable();
 	
 #pragma region Event Handlers
 	UFUNCTION()

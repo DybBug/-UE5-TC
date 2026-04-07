@@ -12,10 +12,10 @@
 void USelectAndGenReachablesAction::Execute(const FIntPoint& _index)
 {
 	Super::Execute(_index);
-	_GenerateReachable();	
+	GenerateReachable();	
 }
 
-void USelectAndGenReachablesAction::_GenerateReachable()
+void USelectAndGenReachablesAction::GenerateReachable()
 {
 	if (!m_PlayerActions.IsValid())
 		return;
@@ -85,7 +85,7 @@ void USelectAndGenReachablesAction::_HandleUnitStartedWalking(AUnit* const _pUni
 
 void USelectAndGenReachablesAction::_HandleUnitFinishedWalking(AUnit* const _pUnit)
 {
-	_GenerateReachable();
+	GenerateReachable();
 }
 
 #pragma endregion

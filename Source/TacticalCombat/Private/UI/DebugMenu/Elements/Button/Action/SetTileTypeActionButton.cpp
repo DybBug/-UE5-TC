@@ -7,15 +7,6 @@
 #include "Grid/Grid.h"
 #include "Components/ComboBoxString.h"
 
-
-void USetTileTypeActionButton::NativeConstruct()
-{
-	Super::NativeConstruct();
-
-	ComboBoxString->OnSelectionChanged.AddDynamic(this, &USetTileTypeActionButton::_OnComboBoxTileTypeSelectionChanged);
-	_SetTileType();
-}
-
 void USetTileTypeActionButton::NativePreConstruct()
 {
 	Super::NativePreConstruct();
@@ -29,6 +20,14 @@ void USetTileTypeActionButton::NativePreConstruct()
 		flag = (flag == 0) ? 1 : flag << 1;
 	}
 	ComboBoxString->SetSelectedIndex(0);	
+}
+
+void USetTileTypeActionButton::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	ComboBoxString->OnSelectionChanged.AddDynamic(this, &USetTileTypeActionButton::_OnComboBoxTileTypeSelectionChanged);
+	_SetTileType();
 }
 
 void USetTileTypeActionButton::OnSelectedActionsChanged(const UAbstractAction* const _leftClickAction, const UAbstractAction* const _rightClickAction)
@@ -47,9 +46,9 @@ void USetTileTypeActionButton::_OnComboBoxTileTypeSelectionChanged(FString _sele
 
 void USetTileTypeActionButton::_SetTileType()
 {
+	ComboBoxString->SetVisibility(ESlateVisibility::Collapsed);
 	if (IsCurrentSelectedAction())
 	{		
-		ComboBoxString->SetVisibility(ESlateVisibility::Collapsed);
 		if (USetTileTypeAction* pSetTileTypeAction = Cast<USetTileTypeAction>(m_PlayerActions->GetLeftClickSelectAction()))
 		{
 			int32 selectedIndex = ComboBoxString->GetSelectedIndex();

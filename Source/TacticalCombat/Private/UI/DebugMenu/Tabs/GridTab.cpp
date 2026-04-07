@@ -13,6 +13,7 @@
 #include "Components/CheckBox.h"
 #include "Components/ComboBoxString.h"
 #include "Components/TextBlock.h"
+#include "Shared/SharedConstants.h"
 #include "Kismet/GameplayStatics.h"
 
 const float DEBUG_DRAWING_DURATION = 0.1f;
@@ -156,7 +157,7 @@ void UGridTab::_DrawDebugLine()
 	if (CheckBox_GridCenter->IsChecked())
 	{
 		const FVector& center = gridCenterLocation;
-		constexpr float radius = 100.0f;
+		constexpr float radius = Tile::DEFAULT_TILE_SIZE_Z;
 		constexpr int32 segments = 3;
 		const FColor color = FColor::Orange;
 		constexpr float thickness = 10.0f;
@@ -166,7 +167,7 @@ void UGridTab::_DrawDebugLine()
 	if (CheckBox_GridBottomLeft->IsChecked())
 	{
 		const FVector& center = gridBottomLeftLocation;
-		constexpr float radius = 100.0f;
+		constexpr float radius = Tile::DEFAULT_TILE_SIZE_Z;
 		constexpr int32 segments = 3;
 		const FColor color = FColor::Red;
 		constexpr float thickness = 10.0f;

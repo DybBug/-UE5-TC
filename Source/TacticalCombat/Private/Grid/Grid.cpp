@@ -409,7 +409,7 @@ FVector AGrid::GetTileScale()
 	return m_TileSize / GetGridShapeData().MeshSize;
 }
 
-TArray<FIntPoint> AGrid::GetAllTilesWithStateFlag(const ETileStateFlags _stateFlag)
+TArray<FIntPoint> AGrid::GetAllTilesWithStateFlag(ETileStateFlags _stateFlag)
 {
 	TArray<FIntPoint>* pIndices = m_TileIndicesByStateFlag.Find(_stateFlag);
 	if (pIndices == nullptr)
@@ -418,7 +418,7 @@ TArray<FIntPoint> AGrid::GetAllTilesWithStateFlag(const ETileStateFlags _stateFl
 	return *pIndices;
 }
 
-void AGrid::ClearStateFromTiles(const ETileStateFlags _stateFlag)
+void AGrid::ClearStateFromTiles(ETileStateFlags _stateFlag)
 {
 	TArray<FIntPoint> indices = GetAllTilesWithStateFlag(_stateFlag);
 	for (const FIntPoint& index : indices)

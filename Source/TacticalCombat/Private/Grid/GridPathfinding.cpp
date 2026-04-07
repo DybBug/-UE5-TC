@@ -6,6 +6,7 @@
 #include "Grid/Types/PathfindingNode.h"
 #include "Library/UtilityLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Library/GridLibrary.h"
 
 static TMap<ETileType, int> s_TileTypeToCost =
 {
@@ -204,7 +205,7 @@ int32 AGridPathfinding::GetMinimumCostBetweenTwoNodes(const FIntPoint& _index1, 
 				int32 dx = FMath::Abs(_index1.X - _index2.X);
 				int32 dy = FMath::Abs(_index1.Y - _index2.Y);
 
-				bool isStartingTileFacingUp = UUtilityLibrary::IsIntEven(_index1.X) == UUtilityLibrary::IsIntEven(_index1.Y);
+				bool isStartingTileFacingUp = UGridLibrary::IsTriangleTileFacingUp(_index1);
 		
 				bool isPartOfTheNormalZone = isStartingTileFacingUp
 											? (_index2.X < _index1.X) ? ((dx - 1) <= dy) : (dx <= dy)
@@ -216,7 +217,7 @@ int32 AGridPathfinding::GetMinimumCostBetweenTwoNodes(const FIntPoint& _index1, 
 				}
 				else
 				{
-					bool isTileFacingUp = UUtilityLibrary::IsIntEven(dx) == UUtilityLibrary::IsIntEven(dy);
+					bool isTileFacingUp = UGridLibrary::IsTriangleTileFacingUp(FIntPoint(dx, dy));
 					if (isTileFacingUp)
 					{
 						return dx * 2;
@@ -473,7 +474,7 @@ TArray<FIntPoint> AGridPathfinding::_GetNeighborIndicesForTriangle(const FIntPoi
 	neighbors.Add(_index + FIntPoint(0, -1));
 	neighbors.Add(_index + FIntPoint(0, 1));
 
-	bool bIsUpwardTriangle = UUtilityLibrary::IsIntEven(_index.X) == UUtilityLibrary::IsIntEven(_index.Y);
+	bool bIsUpwardTriangle = UGridLibrary::IsTriangleTileFacingUp(_index);
 	if (bIsUpwardTriangle)
 	{
 		neighbors.Add(_index + FIntPoint(-1, 0));

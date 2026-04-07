@@ -17,5 +17,6 @@ class TACTICALCOMBAT_API UUnitsLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintPure, Category = "UnitsLibrary")
 	static FUnitTableRow GetDefaultUnitAssetsDataFromUnitType(ETacticalUnitType _unitType);
 };

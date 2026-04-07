@@ -45,6 +45,7 @@ void UFindPathToTargetButton::HandleCanUseDiagonalsCheckBoxStateChanged(bool _bI
 		if (USelectAndGenReachablesAction* pSelectAndGenReachableAction = Cast<USelectAndGenReachablesAction>(m_PlayerActions->GetLeftClickSelectAction()))
 		{
 			pSelectAndGenReachableAction->SetCanUseDiagonals(_bIsChecked);
+			_GenReachablesTimerSetting(pSelectAndGenReachableAction);
 		}
 		
 		if (UFindPathToTargetAction* pFindPathToTargetAction = Cast<UFindPathToTargetAction>(m_PlayerActions->GetRightClickSelectAction()))
@@ -67,6 +68,7 @@ void UFindPathToTargetButton::HandleCanUseFlyingOnlyCheckBoxStateChanged(bool _b
 		if (USelectAndGenReachablesAction* pSelectAndGenReachableAction = Cast<USelectAndGenReachablesAction>(m_PlayerActions->GetLeftClickSelectAction()))
 		{
 			pSelectAndGenReachableAction->SetCanUseFlyingOnly(_bIsChecked);
+			_GenReachablesTimerSetting(pSelectAndGenReachableAction);
 		}
 		
 		if (UFindPathToTargetAction* pFindPathToTargetAction = Cast<UFindPathToTargetAction>(m_PlayerActions->GetRightClickSelectAction()))
@@ -89,6 +91,7 @@ void UFindPathToTargetButton::HandleLengthSpinBoxValueChange(float _value)
 		if (USelectAndGenReachablesAction* pSelectAndGenReachableAction = Cast<USelectAndGenReachablesAction>(m_PlayerActions->GetLeftClickSelectAction()))
 		{
 			pSelectAndGenReachableAction->SetMaxPathLength(FMath::TruncToInt32(_value));
+			_GenReachablesTimerSetting(pSelectAndGenReachableAction);
 		}
 		
 		if (UFindPathToTargetAction* pFindPathToTargetAction = Cast<UFindPathToTargetAction>(m_PlayerActions->GetRightClickSelectAction()))
@@ -112,6 +115,7 @@ void UFindPathToTargetButton::HandleDelaySpinBoxValueChanged(float _value)
 		if (USelectAndGenReachablesAction* pSelectAndGenReachableAction = Cast<USelectAndGenReachablesAction>(m_PlayerActions->GetLeftClickSelectAction()))
 		{
 			pSelectAndGenReachableAction->SetDelayBetweenIterations(_value);
+			_GenReachablesTimerSetting(pSelectAndGenReachableAction);
 		}
 
 		if (UFindPathToTargetAction* pFindPathToTargetAction = Cast<UFindPathToTargetAction>(m_PlayerActions->GetRightClickSelectAction()))
@@ -134,6 +138,7 @@ void UFindPathToTargetButton::HandleMaxMsSpinBoxValueChanged(float _value)
 		if (USelectAndGenReachablesAction* pSelectAndGenReachableAction = Cast<USelectAndGenReachablesAction>(m_PlayerActions->GetLeftClickSelectAction()))
 		{
 			pSelectAndGenReachableAction->SetMaxMs(_value);
+			_GenReachablesTimerSetting(pSelectAndGenReachableAction);
 		}
 
 		if (UFindPathToTargetAction* pFindPathToTargetAction = Cast<UFindPathToTargetAction>(m_PlayerActions->GetRightClickSelectAction()))
@@ -166,6 +171,20 @@ void UFindPathToTargetButton::_UpdateAllElementVisibility(bool _isVisible)
 		SpinBox_Delay->SetVisibility(ESlateVisibility::Collapsed);
 		SpinBox_MaxMs->SetVisibility(ESlateVisibility::Collapsed);
 	}
+}
+
+void UFindPathToTargetButton::_GenReachablesTimerSetting(USelectAndGenReachablesAction* const _pSelectAndGenReachableAction)
+{
+	FTimerManager& timerManager = GetWorld()->GetTimerManager();
+
+	if (timerManager.IsTimerActive(m_hGenReachablesTimer)) 
+	{
+		timerManager.ClearTimer(m_hGenReachablesTimer);
+	};
+
+	timerManager.SetTimer(m_hGenReachablesTimer, [_pSelectAndGenReachableAction]() {
+		_pSelectAndGenReachableAction->GenerateReachable();
+		}, 0.1f, false);
 }
 
 

@@ -3,24 +3,22 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ActionButton.h"
-#include "SetTileTypeActionButton.generated.h"
+#include "UI/DebugMenu/Elements/Button/Action/ActionButton.h"
+#include "CastSpellActionButton.generated.h"
 
 class UComboBoxString;
-
 /**
  * 
  */
 UCLASS()
-class TACTICALCOMBAT_API USetTileTypeActionButton : public UActionButton
+class TACTICALCOMBAT_API UCastSpellActionButton : public UActionButton
 {
 	GENERATED_BODY()
 
-public:
-	virtual void NativePreConstruct() override;
 protected:
 	virtual void NativeConstruct() override;
-
+public:
+	virtual void NativePreConstruct() override;
 
 protected:
 #pragma region Widgets
@@ -28,12 +26,14 @@ protected:
 	TObjectPtr<UComboBoxString> ComboBoxString;
 #pragma endregion
 
+	FTimerHandle m_hDelayTimer;
+
 protected:
 	virtual void OnSelectedActionsChanged(const UAbstractAction* const _leftClickAction, const UAbstractAction* const _rightClickAction) override;
 
 private:
 	UFUNCTION()
-	void _OnComboBoxTileTypeSelectionChanged(FString _selectedItem, ESelectInfo::Type _selectionType);
+	void _OnComboBoxSpellTypeSelectionChanged(FString _selectedItem, ESelectInfo::Type _selectionType);
 
-	void _SetTileType();
+	void _ApplySelectedSpellType();
 };

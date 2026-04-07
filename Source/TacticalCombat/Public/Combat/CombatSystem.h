@@ -8,6 +8,8 @@
 
 class AGrid;
 class AUnit;
+struct FSpellCast;
+enum class ESpellType: uint8;
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnUnitGridIndexChanged, AUnit* const)
 
@@ -33,17 +35,22 @@ public:
 	void AddUnitInCombat(AUnit* _pUnit, const FIntPoint& _index);
 	void RemoveUnitFromCombat(AUnit* _pUnit, bool _bIsUnitDestroyed);
 
+	TArray<FIntPoint> GetSpellRangeIndices(const FIntPoint& _originIndex, const FSpellCast& _cast) const;
+	void CastSpell(ESpellType _spellType, const FIntPoint& _originIndex, const TArray<FIntPoint>& _targetIndices);
+
 public:
 #pragma region Properties
 	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Grid"))
 	TWeakObjectPtr<AGrid> m_Grid;
 #pragma endregion
 
+protected:
 #pragma region Components
 	UPROPERTY(VisibleAnywhere, Category = "Component", Meta = (DisplayName = "Root"))
 	TObjectPtr<USceneComponent> m_SceneComponent;
 #pragma endregion
 
+private:
 #pragma region Internals
 	UPROPERTY(VisibleAnywhere, Category = "Internal", Meta = (DisplayName = "Units In Combat"))
 	TArray<TWeakObjectPtr<AUnit>> m_UnitsInCombat;

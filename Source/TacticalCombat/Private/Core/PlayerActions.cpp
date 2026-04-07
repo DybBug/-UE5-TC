@@ -118,9 +118,16 @@ void APlayerActions::SelectTileAndUnit(const FIntPoint& _index, bool _isForce)
 	
 
 	// 유닛 선택
-	const FTileData* pSelectedTileData= m_Grid->GetGridTileMap().Find(m_SelectedTileIndex);
+	const FTileData* pSelectedTileData = m_Grid->GetGridTileMap().Find(m_SelectedTileIndex);
 	if (_isForce || pSelectedTileData)
 	{
+		if (!pSelectedTileData)
+		{
+			m_SelectedUnit->SetIsSelected(false);
+			m_SelectedUnit = nullptr;
+			return;
+		}
+		
 		if (m_SelectedUnit != pSelectedTileData->UnitOnTile)
 		{
 			if (m_SelectedUnit.IsValid())

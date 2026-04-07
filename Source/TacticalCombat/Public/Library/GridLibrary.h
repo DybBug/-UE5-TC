@@ -18,4 +18,7 @@ class TACTICALCOMBAT_API UGridLibrary : public UBlueprintFunctionLibrary
 public:
 	UFUNCTION(BlueprintPure, Category = "GridLibrary")
 	static FGridShapeTableRow GetGridShape(EGridShape _gridShape);
+
+	UFUNCTION(BlueprintPure, Category = "GridLibrary")
+	static bool IsTriangleTileFacingUp(const FIntPoint& _index);
 };

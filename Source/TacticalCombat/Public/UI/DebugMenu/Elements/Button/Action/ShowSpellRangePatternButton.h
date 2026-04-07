@@ -4,18 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "ActionButton.h"
-#include "SetTileTypeActionButton.generated.h"
+#include "ShowSpellRangePatternButton.generated.h"
 
+class UVector2DWithNameSpinBox;
 class UComboBoxString;
-
 /**
  * 
  */
 UCLASS()
-class TACTICALCOMBAT_API USetTileTypeActionButton : public UActionButton
+class TACTICALCOMBAT_API UShowSpellRangePatternButton : public UActionButton
 {
 	GENERATED_BODY()
-
+	
 public:
 	virtual void NativePreConstruct() override;
 protected:
@@ -26,14 +26,23 @@ protected:
 #pragma region Widgets
 	UPROPERTY(Meta = (BindWidget))
 	TObjectPtr<UComboBoxString> ComboBoxString;
+
+	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UVector2DWithNameSpinBox> SpinBox_Range;
 #pragma endregion
+	
+	FTimerHandle m_hDelayTimer;
+
 
 protected:
 	virtual void OnSelectedActionsChanged(const UAbstractAction* const _leftClickAction, const UAbstractAction* const _rightClickAction) override;
 
 private:
 	UFUNCTION()
-	void _OnComboBoxTileTypeSelectionChanged(FString _selectedItem, ESelectInfo::Type _selectionType);
+	void _HandleSpellRangePatternComboBoxSelectionChanged(FString _selectedItem, ESelectInfo::Type _selectionType);
 
-	void _SetTileType();
+	UFUNCTION()
+	void _HandleRangeChanged(const FVector2D& _value);
+
+	void _SetSpellRangePattern();
 };

@@ -38,20 +38,26 @@ protected:
 	TObjectPtr<UButton> Button_Tab4;
 
 	UPROPERTY(Meta = (BindWidget))
+	TObjectPtr<UButton> Button_Tab5;
+
+	UPROPERTY(Meta = (BindWidget))
 	TObjectPtr<UWidgetSwitcher> WidgetSwitcher;
 
 private:
 	UFUNCTION()
-	void _OnClicked_Tab1();
+	void _HandleClicked_Tab1();
 
 	UFUNCTION()
-	void _OnClicked_Tab2();
+	void _HandleClicked_Tab2();
 
 	UFUNCTION()
-	void _OnClicked_Tab3();
+	void _HandleClicked_Tab3();
 
 	UFUNCTION()
-	void _OnClicked_Tab4();
+	void _HandleClicked_Tab4();
+
+	UFUNCTION()
+	void _HandleClicked_Tab5();
 
 private:
 	void _ToggleTabIndex(int32 _tabIndex);
