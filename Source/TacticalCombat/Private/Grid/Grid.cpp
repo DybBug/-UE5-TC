@@ -4,6 +4,7 @@
 #include "Grid/Grid.h"
 
 #include "Grid/GridModifier.h"
+#include "Subsystem/LevelLoadingSubsystem.h"
 #include "Grid/GridPathfinding.h"
 #include "Grid/GridVisual.h"
 #include "Kismet/GameplayStatics.h"
@@ -76,8 +77,9 @@ void AGrid::OnConstruction(const FTransform& Transform)
 	m_ReachablesPathfinding = Cast<AGridPathfinding>(m_ChildActorReachablesPathfinding->GetChildActor());
 	check(m_ReachablesPathfinding);	
 	m_ReachablesPathfinding->SetGrid(this);
-	
+
 	SpawnGridWithNotify(GetActorLocation(), m_TileSize, m_TileCount, m_Shape, true);
+
 #endif
 }
 
@@ -92,6 +94,12 @@ void AGrid::BeginPlay()
 
 	m_ReachablesPathfinding = Cast<AGridPathfinding>(m_ChildActorReachablesPathfinding->GetChildActor());	
 	m_ReachablesPathfinding->SetGrid(this);
+
+	ULevelLoadingSubsystem* pLevelLoader = GetWorld()->GetGameInstance()->GetSubsystem<ULevelLoadingSubsystem>();
+	if (pLevelLoader)
+	{
+		pLevelLoader->BindLevelLoaded(this, &AGrid::_HandleLevelLoaded);
+	}
 	
 	SpawnGridWithNotify(GetActorLocation(), m_TileSize, m_TileCount, m_Shape, true);
 }
@@ -467,4 +475,9 @@ void AGrid::_CalculateCenterAndBottomLeft(FVector& _center, FVector& _bottomLeft
 			break;
 		}
 	}	
+}
+
+void AGrid::_HandleLevelLoaded()
+{
+	SpawnGridWithNotify(GetActorLocation(), m_TileSize, m_TileCount, m_Shape, true);
 }

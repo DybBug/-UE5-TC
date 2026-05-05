@@ -148,4 +148,7 @@ protected:
 
 private:
 	void _CalculateCenterAndBottomLeft(FVector& _center, FVector& _bottomLeft);
+
+	UFUNCTION()
+	void _HandleLevelLoaded();
 };

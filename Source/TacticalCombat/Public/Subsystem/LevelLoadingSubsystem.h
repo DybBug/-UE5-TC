@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "Dispatcher/LevelLoadingDispatcher.h"
 #include "LevelLoadingSubsystem.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TACTICALCOMBAT_API ULevelLoadingSubsystem : public UGameInstanceSubsystem
+class TACTICALCOMBAT_API ULevelLoadingSubsystem : public UGameInstanceSubsystem, public LevelLoadingDispatcher
 {
 	GENERATED_BODY()
 
@@ -19,5 +20,11 @@ public:
 
 private:
 	FName m_LoadedLevelName;
+
+	FTimerHandle m_LevelLoadedTimerHandle;
+
+private:
+	UFUNCTION()
+	void _OnLevelLoaded();
 	
 };
