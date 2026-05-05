@@ -22,14 +22,15 @@ void UDebugTextAndColorOnTiles::Initialize()
 {
 	m_Grid = Cast<AGrid>(UGameplayStatics::GetActorOfClass(GetWorld(), AGrid::StaticClass()));
 	
-	m_Grid->OnTileDataUpdated.AddUObject(this, &UDebugTextAndColorOnTiles::UpdateTextOnTile);
-	m_Grid->OnTileStateUpdated.AddUObject(this, &UDebugTextAndColorOnTiles::UpdateTextOnTile);
-	m_Grid->OnGridDestroyed.AddUObject(this, &UDebugTextAndColorOnTiles::ClearAllTextActors);
+	m_Grid->BindTileDataChanged(this, &UDebugTextAndColorOnTiles::UpdateTextOnTile);
+	m_Grid->BindTileStateChanged(this, &UDebugTextAndColorOnTiles::UpdateTextOnTile);
+	m_Grid->BindGridDestroyed(this, &UDebugTextAndColorOnTiles::ClearAllTextActors);
 	
-	m_Grid->GetGridPathfinding()->OnPathfindingNodeUpdated.AddUObject(this, &UDebugTextAndColorOnTiles::UpdateStateOnTile);
-	m_Grid->GetGridPathfinding()->OnPathfindingNodeCleared.AddUObject(this, &UDebugTextAndColorOnTiles::UpdateStateOnAllTiles);
-	m_Grid->GetGridPathfinding()->OnPathfindingNodeUpdated.AddUObject(this, &UDebugTextAndColorOnTiles::UpdateTextOnTile);
-	m_Grid->GetGridPathfinding()->OnPathfindingNodeCleared.AddUObject(this, &UDebugTextAndColorOnTiles::UpdateTextOnAllTiles);
+	m_Grid->GetGridPathfinding()->BindPathfindingNodeUpdated(this, &UDebugTextAndColorOnTiles::UpdateStateOnTile);
+	m_Grid->GetGridPathfinding()->BindPathfindingNodeCleared(this, &UDebugTextAndColorOnTiles::UpdateStateOnAllTiles);
+
+	m_Grid->GetGridPathfinding()->BindPathfindingNodeUpdated(this, &UDebugTextAndColorOnTiles::UpdateTextOnTile);
+	m_Grid->GetGridPathfinding()->BindPathfindingNodeCleared(this, &UDebugTextAndColorOnTiles::UpdateTextOnAllTiles);
 }
 
 ATextRenderActor* UDebugTextAndColorOnTiles::GetTextActor(const FIntPoint& _index)

@@ -11,4 +11,5 @@ void AEntryLevelScriptActor::BeginPlay()
 
 	ULevelLoadingSubsystem* pLevelLoader = GetWorld()->GetGameInstance()->GetSubsystem<ULevelLoadingSubsystem>();
 	pLevelLoader->LoadLevel(m_LevelName);
+
 }

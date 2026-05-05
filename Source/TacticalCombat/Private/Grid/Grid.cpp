@@ -134,11 +134,8 @@ void AGrid::SpawnGridWithNotify(const FVector& _centerLocation, const FVector& _
 			AddGridTileWithNotify(newTileData);		
 		}
 	}
-
-	if (OnGridGenerated.IsBound())
-	{
-		OnGridGenerated.Broadcast();
-	}
+	
+	BroadcastGridCreated();
 	
 }
 
@@ -148,10 +145,7 @@ void AGrid::DestroyGridWithNotify()
 	if (m_GridVisual)
 	{
 		m_GridVisual->DestroyGridVisual();
-		if (OnGridDestroyed.IsBound())
-		{
-			OnGridDestroyed.Broadcast();
-		}
+		BroadcastGridDestroyed();
 	}
 }
 
@@ -166,13 +160,13 @@ FVector AGrid::GetCursorLocationOnGrid(int _playerIndex)
 	if (pPlayerController)
 	{
 		FHitResult hitResult;
-		bool isSucceeded = pPlayerController->GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(GTC_Grid), true, hitResult);
+		bool isSucceeded = pPlayerController->GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Grid), true, hitResult);
 		if (isSucceeded)
 		{
 			return hitResult.ImpactPoint;
 		}
 
-		isSucceeded = pPlayerController->GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(GTC_GroundAndGridModifier), true, hitResult);
+		isSucceeded = pPlayerController->GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_GroundAndGridModifier), true, hitResult);
 		if (isSucceeded)
 		{
 			return hitResult.ImpactPoint;
@@ -254,10 +248,8 @@ void AGrid::AddGridTileWithNotify(const FTileData& _tileData)
 {
 	m_GridTileMap.Add(_tileData.Index, _tileData);
 	m_GridVisual->UpdateTileVisual(_tileData);
-	if (OnTileDataUpdated.IsBound())
-	{
-		OnTileDataUpdated.Broadcast(_tileData.Index);
-	}
+
+	BroadcastTileDataChanged(_tileData.Index);
 }
 
 void AGrid::RemoveGridTileWithNotify(const FIntPoint& _tileIndex)
@@ -270,10 +262,7 @@ void AGrid::RemoveGridTileWithNotify(const FIntPoint& _tileIndex)
 		tileData.Type = ETileType::None;
 		m_GridVisual->UpdateTileVisual(tileData);
 
-		if (OnTileDataUpdated.IsBound())
-		{
-			OnTileDataUpdated.Broadcast(_tileIndex);
-		}
+		BroadcastTileDataChanged(_tileIndex);		
 	}	
 }
 
@@ -290,10 +279,7 @@ void AGrid::AddStateToTileWithNotify(const FIntPoint& _tileIndex, const ETileSta
 		
 		m_GridVisual->UpdateTileVisual(*pTileData);
 
-		if (OnTileStateUpdated.IsBound())
-		{
-			OnTileStateUpdated.Broadcast(_tileIndex);
-		}
+		BroadcastTileStateChanged(_tileIndex);		
 	}
 }
 
@@ -309,11 +295,8 @@ void AGrid::RemoveStateFromTileWithNotify(const FIntPoint& _tileIndex, const ETi
 		m_TileIndicesByStateFlag.Add(_stateFlag, allTilesWithStateFlag);	
 		
 		m_GridVisual->UpdateTileVisual(*pTileData);
-
-		if (OnTileStateUpdated.IsBound())
-		{
-			OnTileStateUpdated.Broadcast(_tileIndex);
-		}
+	
+		BroadcastTileStateChanged(_tileIndex);		
 	}
 }
 
@@ -328,7 +311,7 @@ FVector AGrid::TraceForGround(const FVector& _location, ETileType& _hitTileType)
 	const FVector& startLocation = _location + FVector(0.0f, 0.0f, 1000.0f);
 	const FVector& endLocation = _location + FVector(0.0f, 0.0f, -1000.0f);
 	const float radius = m_TileSize.X / (m_Shape == EGridShape::Triangle ? 5.0f : 3.0f);
-	ETraceTypeQuery traceChannel = UEngineTypes::ConvertToTraceType(GTC_GroundAndGridModifier);
+	ETraceTypeQuery traceChannel = UEngineTypes::ConvertToTraceType(ECC_GroundAndGridModifier);
 	TArray<AActor*> ignoreActors = TArray<AActor*>();
 	EDrawDebugTrace::Type drawDebugType = EDrawDebugTrace::None;
 	

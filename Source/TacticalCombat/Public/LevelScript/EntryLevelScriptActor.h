@@ -23,5 +23,5 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, Category = "Property", Meta = (DisplayName = "Level Name"))
 	FName m_LevelName;
-	
+
 };

@@ -4,14 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "../../Dispatcher/AnimatedShapeDispatcher.h"
 #include "AnimatedShape.generated.h"
 
 class UTimelineComponent;
 
-DECLARE_MULTICAST_DELEGATE(FOnAnimatedShapeFinished)
-
 UCLASS()
-class TACTICALCOMBAT_API AAnimatedShape : public AActor
+class TACTICALCOMBAT_API AAnimatedShape : public AActor, public AnimatedShapeDispatcher
 {
 	GENERATED_BODY()
 	
@@ -34,10 +33,6 @@ public:
 	};
 	void PostSpawnInitialize(const FPostSpawnInitializeParam& _param);
 
-
-public:
-	FOnAnimatedShapeFinished OnAnimatedShapeFinished;
-	
 
 private:
     void _InitializeAnimatedShapeComponent();

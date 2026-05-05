@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Dispatcher/CombatDispatcher.h"
 #include "CombatSystem.generated.h"
 
 class AGrid;
@@ -11,10 +12,9 @@ class AUnit;
 struct FSpellCast;
 enum class ESpellType: uint8;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnUnitGridIndexChanged, AUnit* const)
 
 UCLASS()
-class TACTICALCOMBAT_API ACombatSystem : public AActor
+class TACTICALCOMBAT_API ACombatSystem : public AActor, public CombatDispatcher
 {
 	GENERATED_BODY()
 	
@@ -27,16 +27,14 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-#pragma region Events
-	FOnUnitGridIndexChanged OnUnitGridIndexChanged;
-#pragma endregion
-
-public:
 	void AddUnitInCombat(AUnit* _pUnit, const FIntPoint& _index);
 	void RemoveUnitFromCombat(AUnit* _pUnit, bool _bIsUnitDestroyed);
 
 	TArray<FIntPoint> GetSpellRangeIndices(const FIntPoint& _originIndex, const FSpellCast& _cast) const;
 	void CastSpell(ESpellType _spellType, const FIntPoint& _originIndex, const TArray<FIntPoint>& _targetIndices);
+
+	bool HasLineOfSight(const FIntPoint& _originIndex, const FIntPoint& _targetIndex, const FSpellCast& _cast) const;
+	TArray<FIntPoint> GetIndicesWithLineOfSight(const FIntPoint& _originIndex, const TArray<FIntPoint>& _indices, const FSpellCast& _cast) const;
 
 public:
 #pragma region Properties

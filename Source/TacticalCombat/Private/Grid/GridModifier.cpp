@@ -31,7 +31,9 @@ AGridModifier::AGridModifier()
 	
 	m_StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh Component"));
 	m_StaticMeshComponent->SetupAttachment(RootComponent);
-	m_StaticMeshComponent->SetCollisionResponseToChannel(GTC_GroundAndGridModifier, ECollisionResponse::ECR_Overlap);
+	m_StaticMeshComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	m_StaticMeshComponent->SetCollisionResponseToChannel(ECC_GroundAndGridModifier, ECollisionResponse::ECR_Overlap);
+	m_StaticMeshComponent->SetCollisionResponseToChannel(ECC_LineOfSight, ECollisionResponse::ECR_Block);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> meshObjectFinder(TEXT("/Game/Grids/GridShapes/Square/SM_Grid_Square"));
 	if (meshObjectFinder.Succeeded())

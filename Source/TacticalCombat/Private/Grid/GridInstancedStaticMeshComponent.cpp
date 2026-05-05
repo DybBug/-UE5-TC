@@ -5,6 +5,7 @@
 
 #include "Grid/Types/TileData.h"
 #include "Shared/SharedEnums.h"
+#include "Shared/SharedDefines.h"
 
 struct FTileStateInfo
 {

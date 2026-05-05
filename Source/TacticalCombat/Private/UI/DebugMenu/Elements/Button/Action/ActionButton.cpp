@@ -30,7 +30,7 @@ void UActionButton::NativeConstruct()
 	}
 	
 	Button->OnClicked.AddDynamic(this, &UActionButton::_OnButtonClicked);
-	m_PlayerActions->OnSelectedActionsChanged.AddUObject(this, &UActionButton::OnSelectedActionsChanged);
+	m_PlayerActions->BindSelectedActionsChanged(this, &UActionButton::OnSelectedActionsChanged);
 }
 
 void UActionButton::NativePreConstruct()

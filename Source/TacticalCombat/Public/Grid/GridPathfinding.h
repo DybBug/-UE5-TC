@@ -6,11 +6,10 @@
 #include "GameFramework/Actor.h"
 #include "Shared/SharedEnums.h"
 #include "Grid/Types/PathfindingNode.h"
+#include "Dispatcher/GridPathfindingDispatcher.h"
 #include "GridPathfinding.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnPathfindingNodeUpdated, const FIntPoint&);
-DECLARE_MULTICAST_DELEGATE(FOnPathfindingNodeCleared);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnPathfindingCompleted, const TArray<FIntPoint>&);
+
 
 class AGrid;
 
@@ -27,7 +26,7 @@ struct FPathFindingOptions
 };
 
 UCLASS()
-class TACTICALCOMBAT_API AGridPathfinding : public AActor
+class TACTICALCOMBAT_API AGridPathfinding : public AActor, public GridPathfindingDispatcher
 {
 	GENERATED_BODY()
 	
@@ -70,11 +69,6 @@ public:
 	FORCEINLINE void SetGrid(AGrid* const _pGrid) { m_Grid = _pGrid; }
 #pragma endregion
 
-#pragma region Events
-	FOnPathfindingNodeUpdated OnPathfindingNodeUpdated;
-	FOnPathfindingNodeCleared OnPathfindingNodeCleared;
-	FOnPathfindingCompleted OnPathfindingCompleted;
-#pragma endregion
 
 protected:
 #pragma region Properties

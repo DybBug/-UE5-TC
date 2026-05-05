@@ -6,6 +6,7 @@
 #include "VectorUtil.h"
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/UnitAnimInstance.h"
 #include "Components/TimelineComponent.h"
@@ -15,7 +16,7 @@
 #include "Shared/SharedDefines.h"
 #include "UI/DebugMenu/Elements/Button/UnitButton.h"
 
-AUnit* AUnit::Spawn(UWorld* _pWorld,  ETacticalUnitType _type, AGrid* _pGrid)
+AUnit* AUnit::Spawn(UWorld* const _pWorld,  ETacticalUnitType _type, AGrid* const _pGrid, const FIntPoint& _index)
 {
 	check(_pWorld);
 	AUnit* newUnit = _pWorld->SpawnActor<AUnit>(AUnit::StaticClass());
@@ -36,10 +37,17 @@ AUnit::AUnit()
 	m_SkeletalMeshComponent->SetRelativeRotation(FRotator(0, -90, 0));
 	m_SkeletalMeshComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldStatic);
 	m_SkeletalMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	m_SkeletalMeshComponent->SetCollisionResponseToChannel(GTC_Unit, ECollisionResponse::ECR_Block);
+	m_SkeletalMeshComponent->SetCollisionResponseToChannel(ECC_Unit, ECollisionResponse::ECR_Block);
 	m_SkeletalMeshComponent->SetupAttachment(RootComponent);
 
 	m_UnitMovementTimelineComponent = CreateDefaultSubobject<UTimelineComponent>(TEXT("Unit Movement Timeline Component"));
+
+	m_LineOfSightCollisionMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Line Of Sight Collision Mesh Component"));
+	m_LineOfSightCollisionMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	m_LineOfSightCollisionMeshComponent->SetCollisionResponseToChannel(ECC_LineOfSight, ECollisionResponse::ECR_Block);
+	m_LineOfSightCollisionMeshComponent->SetVisibility(false);
+	m_LineOfSightCollisionMeshComponent->SetAbsolute(false, true, true); // 회전과 스케일은 부모의 영향을 받지 않도록 설정 (위치만 부모의 영향을 받음)
+	m_LineOfSightCollisionMeshComponent->SetupAttachment(RootComponent);
 
 	static ConstructorHelpers::FObjectFinder<UCurveFloat> unitLocationCurve(TEXT("/Game/Resources/Units/Curves/AC_UnitLocation.AC_UnitLocation"));
 	if (unitLocationCurve.Succeeded())
@@ -93,7 +101,7 @@ void AUnit::BeginPlay()
 	m_UnitMovementTimelineComponent->SetTimelineFinishedFunc(finishCallback);
 }
 
-void AUnit::InitializeUnit(ETacticalUnitType _type, AGrid* _pGrid)
+void AUnit::InitializeUnit(ETacticalUnitType _type, AGrid* const _pGrid)
 {
 	m_Grid = _pGrid;
 	m_UnitType = _type;
@@ -106,6 +114,22 @@ void AUnit::InitializeUnit(ETacticalUnitType _type, AGrid* _pGrid)
 	m_UnitData = assetTableRow;
 	m_SkeletalMeshComponent->SetSkeletalMesh(assetTableRow.Assets.Mesh);
 	m_SkeletalMeshComponent->SetAnimInstanceClass(assetTableRow.Assets.AnimationBPClass);
+
+	if (m_Grid.IsValid())
+	{
+		// 스케일
+		const FVector& assetBoundBoxSize = m_UnitData.Assets.Mesh->GetBounds().GetBox().GetExtent();
+		const FVector& gridTileSize = m_Grid->GetTileSize();
+		const FVector& gridMeshSize = m_Grid->GetGridShapeData().MeshSize;
+		FVector adjustedCollisionMeshScale = gridTileSize / gridMeshSize;
+		adjustedCollisionMeshScale.Z = assetBoundBoxSize.Z / gridMeshSize.Z;
+		m_LineOfSightCollisionMeshComponent->SetRelativeScale3D(adjustedCollisionMeshScale);
+
+		// 위치
+		FVector adjustedCollisionRelativeLocation = m_LineOfSightCollisionMeshComponent->GetRelativeLocation();
+		adjustedCollisionRelativeLocation.Z = assetBoundBoxSize.Z;
+		m_LineOfSightCollisionMeshComponent->SetRelativeLocation(adjustedCollisionRelativeLocation);
+	}
 	
 	_SetAnimationState(EUnitAnimationState::Idle);
 }
@@ -123,20 +147,14 @@ void AUnit::FollowPathWithNotify(const TArray<FIntPoint>& _path)
 	if (_path.Num() <= 0)
 	{
 		_SetAnimationState(EUnitAnimationState::Idle);
-		if (OnUnitFinishedWalking.IsBound())
-		{
-			OnUnitFinishedWalking.Broadcast(this);
-		}
+		BroadcastUnitFinishedWalking(this);
 		return;
 	}
 
 	m_CurrentPathToFollow = _path;
 
 	// 걷기 시작 이벤트 호출
-	if (OnUnitStartedWalking.IsBound())
-	{
-		OnUnitStartedWalking.Broadcast(this);
-	}
+	BroadcastUnitStartedWalking(this);
 
 	// 걷기 시작
 	_SetAnimationState(EUnitAnimationState::Walk);
@@ -156,6 +174,18 @@ void AUnit::FollowPathWithNotify(const TArray<FIntPoint>& _path)
 	float playRate = m_UnitMovementTimelineComponent->GetTimelineLength() / m_MoveDurationPerTile;
 	m_UnitMovementTimelineComponent->SetPlayRate(playRate);
 	m_UnitMovementTimelineComponent->PlayFromStart();
+}
+
+void AUnit::SetGridIndex(const FIntPoint& _index) 
+{ 
+	m_Index = _index; 
+	if (m_Grid.IsValid()) {
+		m_LineOfSightCollisionMeshComponent->SetStaticMesh(m_Grid->GetGridShapeData().Mesh);
+
+		// 회전
+		FRotator adjustedCollisionRelativeRotation = m_Grid->GetTileRotationFromGridIndex(m_Index.X, m_Index.Y);
+		m_LineOfSightCollisionMeshComponent->SetWorldRotation(adjustedCollisionRelativeRotation);
+	}
 }
 
 void AUnit::SetIsHovered(bool _bIsHovered)
@@ -206,10 +236,7 @@ void AUnit::_HandleUnitJumpCurveUpdated(float _value)
 
 void AUnit::_HandleUnitMovementTimelineFinishedWithNotify()
 {
-	if (OnUnitResearchedNewTile.IsBound())
-	{
-		OnUnitResearchedNewTile.Broadcast(this, m_CurrentPathToFollow[0]);
-	}
+	BroadcastUnitResearchedNewTile(this, m_CurrentPathToFollow[0]);
 	m_CurrentPathToFollow.RemoveAt(0);
 	FollowPathWithNotify(m_CurrentPathToFollow);
 }

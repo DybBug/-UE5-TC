@@ -9,7 +9,7 @@
 void UFindPathToTargetAction::Initialize(APlayerActions* const _pPlayerActions)
 {
 	Super::Initialize(_pPlayerActions);
-	_pPlayerActions->OnSelectedTileChanged.AddUObject(this, &UFindPathToTargetAction::_HandleSelectedTileChanged);
+	_pPlayerActions->BindSelectedTileChanged(this, &UFindPathToTargetAction::_HandleSelectedTileChanged);
 }
 
 void UFindPathToTargetAction::Execute(const FIntPoint& _index)
@@ -19,9 +19,7 @@ void UFindPathToTargetAction::Execute(const FIntPoint& _index)
 	
 	AGrid* const pGrid =  m_PlayerActions->GetGrid();
 	pGrid->ClearStateFromTiles(ETileStateFlags::InPath);
-
-	pGrid->GetGridPathfinding()->OnPathfindingCompleted.RemoveAll(this);
-	pGrid->GetGridPathfinding()->OnPathfindingCompleted.AddUObject(this, &UFindPathToTargetAction::_HandlePathfindingCompleted);
+	pGrid->GetGridPathfinding()->BindPathfindingCompleted(this, &UFindPathToTargetAction::_HandlePathfindingCompleted);
 
 	FIntPoint start = m_PlayerActions->GetSelectedTileIndex();
 	FIntPoint target = _index;

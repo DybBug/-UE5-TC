@@ -101,10 +101,7 @@ inline void AAnimatedShape::_HandleTimelineFinished()
 	FTimerHandle hTimer;
 	GetWorld()->GetTimerManager().SetTimer(hTimer,  [this]() {
 		Destroy();
-		if (OnAnimatedShapeFinished.IsBound())
-		{
-			OnAnimatedShapeFinished.Broadcast();
-		}
+		BroadcastAnimatedShapeFinished();
 	}, 0.5f, false);
 }
 

@@ -4,14 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "../Dispatcher/SpellDispatcher.h"
 #include "SpellAnimation.generated.h"
 
 class AGrid;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnSpellAnimationFinished, ASpellAnimation const*);
 
 UCLASS()
-class TACTICALCOMBAT_API ASpellAnimation : public AActor
+class TACTICALCOMBAT_API ASpellAnimation : public AActor, public SpellDispatcher
 {
 	GENERATED_BODY()
 
@@ -24,9 +24,6 @@ protected:
 
 public:
 	void PostSpawnInitialize(AGrid* const _pGrid, const FIntPoint& _originIndex, const TArray<FIntPoint>& _targetIndices);
-
-public:
-	FOnSpellAnimationFinished OnSpellAnimationFinished;
 
 public:
 	void PlaySpellAnimation();

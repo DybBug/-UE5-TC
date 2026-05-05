@@ -21,16 +21,20 @@ AGridVisual::AGridVisual()
 	m_GridInstancedStaticMeshComponent = CreateDefaultSubobject<UGridInstancedStaticMeshComponent>(TEXT("GridInstancedStaticMeshComponent"));
 	m_GridInstancedStaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	m_GridInstancedStaticMeshComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldStatic);
-	m_GridInstancedStaticMeshComponent->SetCollisionResponseToChannel(GTC_Grid, ECollisionResponse::ECR_Block);
+	m_GridInstancedStaticMeshComponent->SetCollisionResponseToChannel(ECC_Grid, ECollisionResponse::ECR_Block);
+	m_GridInstancedStaticMeshComponent->SetCollisionResponseToChannel(ECC_LineOfSight, ECollisionResponse::ECR_Block);
+	m_GridInstancedStaticMeshComponent->SetCollisionResponseToChannel(ECC_GroundAndGridModifier, ECollisionResponse::ECR_Block);
 	m_GridInstancedStaticMeshComponent->NumCustomDataFloats = 4;
-	RootComponent = m_GridInstancedStaticMeshComponent;
+	m_GridInstancedStaticMeshComponent->SetupAttachment(RootComponent);
 
 	m_TacticalGridInstancedStaticMeshComponent = CreateDefaultSubobject<UGridInstancedStaticMeshComponent>(TEXT("TacticalGridInstancedStaticMeshComponent"));
 	m_TacticalGridInstancedStaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	m_TacticalGridInstancedStaticMeshComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldStatic);
-	m_TacticalGridInstancedStaticMeshComponent->SetCollisionResponseToChannel(GTC_Grid, ECollisionResponse::ECR_Block);
+	m_TacticalGridInstancedStaticMeshComponent->SetCollisionResponseToChannel(ECC_Grid, ECollisionResponse::ECR_Block);
+	m_TacticalGridInstancedStaticMeshComponent->SetCollisionResponseToChannel(ECC_LineOfSight, ECollisionResponse::ECR_Block);
+	m_TacticalGridInstancedStaticMeshComponent->SetCollisionResponseToChannel(ECC_GroundAndGridModifier, ECollisionResponse::ECR_Block);
 	m_TacticalGridInstancedStaticMeshComponent->NumCustomDataFloats = 4;
-	RootComponent = m_TacticalGridInstancedStaticMeshComponent;
+	m_TacticalGridInstancedStaticMeshComponent->SetupAttachment(RootComponent);
 	
 	SetActorLocation(FVector::ZeroVector);
 }

@@ -16,6 +16,7 @@ namespace Grid
 namespace Unit
 {
 	inline constexpr float INVALID_UNIT_LOCATION_VALUE = -99999.0f;
+	inline constexpr float DEFAULT_UNIT_HEIGHT = 150.0f;
 }
 
 namespace Tile

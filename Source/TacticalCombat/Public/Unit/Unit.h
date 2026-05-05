@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Table/Rows/UnitTableRow.h"
+#include "Dispatcher/UnitDispatcher.h"
 #include "Unit.generated.h"
 
 enum class ETacticalUnitType : uint8;
@@ -13,20 +14,19 @@ class UTimelineComponent;
 class USceneComponent;
 class USkeletalMeshComponent;
 class USkeletalMesh;
+class UStaticMeshComponent;
 class UAnimInstance;
 class AGrid;
 
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnUnitResearchedNewTile, AUnit* const, const FIntPoint&);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnUnitStartedWalking, AUnit* const);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnUnitFinishedWalking, AUnit* const);
+
 
 UCLASS()
-class TACTICALCOMBAT_API AUnit : public AActor
+class TACTICALCOMBAT_API AUnit : public AActor, public UnitDispatcher
 {
 	GENERATED_BODY()
 
 public:
-	static AUnit* Spawn(UWorld* _pWorld, ETacticalUnitType _type, AGrid* _pGrid);
+	static AUnit* Spawn(UWorld* const _pWorld, ETacticalUnitType _type, AGrid* const _pGrid, const FIntPoint& _index);
 	
 public:	
 	// Sets default values for this actor's properties
@@ -38,14 +38,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-#pragma region Events
-	FOnUnitResearchedNewTile OnUnitResearchedNewTile;
-	FOnUnitStartedWalking OnUnitStartedWalking;
-	FOnUnitFinishedWalking OnUnitFinishedWalking;
-#pragma endregion 
-
-public:
-	void InitializeUnit(ETacticalUnitType _type, AGrid* _pGrid);
+	void InitializeUnit(ETacticalUnitType _type, AGrid* const _pGrid);
 	void UpdateVisual();
 
 	void FollowPathWithNotify(const TArray<FIntPoint>& _path);
@@ -56,7 +49,7 @@ public:
 
 	FORCEINLINE void SetUnitType(ETacticalUnitType _type) { m_UnitType = _type; }
 	FORCEINLINE void SetMoveDurationPerTile(float _value) { m_MoveDurationPerTile = _value; }
-	FORCEINLINE void SetIndex(const FIntPoint& _index) { m_Index = _index; }
+	FORCEINLINE void SetGridIndex(const FIntPoint& _index);
 	FORCEINLINE void SetIsHovered(bool _bIsHovered);
 	FORCEINLINE void SetIsSelected(bool _bIsSelected);
 protected:
@@ -87,6 +80,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Component", Meta = (DisplayName = "Unit Movement Timeline Component"))
 	TObjectPtr<UTimelineComponent> m_UnitMovementTimelineComponent;
+
+	UPROPERTY(VisibleAnywhere, Category = "Component", Meta = (DisplayName = "Line Of Sight Collision Mesh Component"))
+	TObjectPtr<UStaticMeshComponent> m_LineOfSightCollisionMeshComponent;
 #pragma endregion
 
 #pragma region Internals

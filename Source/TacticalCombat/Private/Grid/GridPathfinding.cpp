@@ -113,10 +113,7 @@ TArray<FIntPoint> AGridPathfinding::FindPathWithNotify(const FIntPoint& _start, 
 			if (AnalyseNextDiscoveredNodeWithNotify())
 			{
 				path = GeneratePath();
-				if (OnPathfindingCompleted.IsBound())
-				{
-					OnPathfindingCompleted.Broadcast(path);
-				}
+				BroadcastPathfindingCompleted(path);
 				return path;
 			}
 		}				
@@ -127,10 +124,7 @@ TArray<FIntPoint> AGridPathfinding::FindPathWithNotify(const FIntPoint& _start, 
 		path = m_AnalysedNodeIndices;
 	}
 	
-	if (OnPathfindingCompleted.IsBound())
-	{
-		OnPathfindingCompleted.Broadcast(path);
-	}
+	BroadcastPathfindingCompleted(path);
 	return path;
 }
 
@@ -157,10 +151,8 @@ void AGridPathfinding::DiscoverNodeWithNotify(const FPathfindingNode& _node)
 {
 	m_PathfindingNodesByIndex.Add(_node.Index, _node);
 	InsertNodeInDiscoveredArray(_node);
-	if (OnPathfindingNodeUpdated.IsBound())
-	{
-		OnPathfindingNodeUpdated.Broadcast(_node.Index);
-	}
+
+	BroadcastPathfindingNodeUpdated(_node.Index);
 }
 
 int32 AGridPathfinding::GetMinimumCostBetweenTwoNodes(const FIntPoint& _index1, const FIntPoint& _index2, bool _bIsDiagonalIncluded)
@@ -246,10 +238,7 @@ bool AGridPathfinding::AnalyseNextDiscoveredNodeWithNotify()
 {
 	m_CurrentDiscoveredNode = PullCheapestNodeOutOfDiscoveredList();
 
-	if (OnPathfindingNodeUpdated.IsBound())
-	{
-		OnPathfindingNodeUpdated.Broadcast(m_CurrentDiscoveredNode.Index);
-	}
+	BroadcastPathfindingNodeUpdated(m_CurrentDiscoveredNode.Index);
 	
 	m_CurrentNeighborNodes = GetValidTileNeighborNodes(m_CurrentDiscoveredNode.Index, m_PathFindingOptions.bIsDiagonalIncluded, m_PathFindingOptions.ValidTileTypeMask);
 
@@ -383,10 +372,7 @@ void AGridPathfinding::ClearGeneratedDataWithNotify()
 	m_DiscoveredNodeIndices.Empty();
 	m_AnalysedNodeIndices.Empty();
 	
-	if (OnPathfindingNodeCleared.IsBound())
-	{
-		OnPathfindingNodeCleared.Broadcast();
-	}
+	BroadcastPathfindingNodeCleared();
 }
 
 bool AGridPathfinding::IsDiagonal(const FIntPoint& _index1, const FIntPoint& _index2)
@@ -404,10 +390,7 @@ void AGridPathfinding::FindPathWithDelayWithNotify()
 		if (AnalyseNextDiscoveredNodeWithNotify())
 		{
 			TArray<FIntPoint> path = GeneratePath();
-			if (OnPathfindingCompleted.IsBound())
-			{
-				OnPathfindingCompleted.Broadcast(path);
-			}
+			BroadcastPathfindingCompleted(path);
 			return;
 		}
 
@@ -431,11 +414,7 @@ void AGridPathfinding::FindPathWithDelayWithNotify()
 		return;
 	}
 	
-	if (OnPathfindingCompleted.IsBound())
-	{
-		TArray<FIntPoint> path;
-		OnPathfindingCompleted.Broadcast(path);
-	}
+	BroadcastPathfindingCompleted(TArray<FIntPoint>());
 }
 
 TArray<FIntPoint> AGridPathfinding::_GetNeighborIndicesForSquare(const FIntPoint& _index, bool _bIsDiagonalIncluded)

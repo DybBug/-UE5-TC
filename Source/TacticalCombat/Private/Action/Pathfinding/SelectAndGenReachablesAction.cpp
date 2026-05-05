@@ -22,20 +22,15 @@ void USelectAndGenReachablesAction::GenerateReachable()
 	
 	AGrid* const pGrid =  m_PlayerActions->GetGrid();
 	pGrid->ClearStateFromTiles(ETileStateFlags::Reachable);
-
-	pGrid->GetReachablesPathfinding()->OnPathfindingCompleted.RemoveAll(this);
-	pGrid->GetReachablesPathfinding()->OnPathfindingCompleted.AddUObject(this, &USelectAndGenReachablesAction::_HandlePathfindingCompleted);
+	pGrid->GetReachablesPathfinding()->BindPathfindingCompleted(this, &USelectAndGenReachablesAction::_HandlePathfindingCompleted);
 	
 	FIntPoint start;
 	FIntPoint target;
 	FPathFindingOptions options;
 	if (AUnit* pUnit = m_PlayerActions->GetSelectedUnit())
 	{
-		pUnit->OnUnitStartedWalking.RemoveAll(this);
-		pUnit->OnUnitStartedWalking.AddUObject(this, &USelectAndGenReachablesAction::_HandleUnitStartedWalking);
-		
-		pUnit->OnUnitFinishedWalking.RemoveAll(this);
-		pUnit->OnUnitFinishedWalking.AddUObject(this, &USelectAndGenReachablesAction::_HandleUnitFinishedWalking);
+		pUnit->BindUnitStartedWalking(this, &USelectAndGenReachablesAction::_HandleUnitStartedWalking);
+		pUnit->BindUnitFinishedWalking(this, &USelectAndGenReachablesAction::_HandleUnitFinishedWalking);
 		
 		start = pUnit->GetIndex();
 		target = FIntPoint(INVALID_POINT_VALUE);

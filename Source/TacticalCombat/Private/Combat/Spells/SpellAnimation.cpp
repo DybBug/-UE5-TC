@@ -53,7 +53,7 @@ void ASpellAnimation::PlaySpellAnimation()
 		// NOTE: 이벤트를 여러번 받을 필요 없이 한번만 받음
 		if (i == 0)
 		{
-			pSpawnedAnimatedShape->OnAnimatedShapeFinished.AddUObject(this, &ASpellAnimation::HandleAnimatedShapeFinished);
+			pSpawnedAnimatedShape->BindAnimatedShapeFinished(this, &ASpellAnimation::HandleAnimatedShapeFinished);
 		}
 	}
 }
@@ -65,10 +65,7 @@ FTransform ASpellAnimation::_GetTileTransform(const FIntPoint& _index)
 
 void ASpellAnimation::HandleAnimatedShapeFinished()
 {
-	if (OnSpellAnimationFinished.IsBound())
-	{
-		OnSpellAnimationFinished.Broadcast(this);
-	}
+	BroadcastSpellAnimationFinished(this);
 	Destroy();
 }
 

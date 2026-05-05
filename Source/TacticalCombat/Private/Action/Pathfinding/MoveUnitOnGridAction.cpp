@@ -17,11 +17,9 @@ void UMoveUnitOnGridAction::Execute(const FIntPoint& _index)
 	m_CurrentUnit = m_PlayerActions->GetSelectedUnit();
     if (!m_CurrentUnit.IsValid()) return;
 
-	m_CurrentUnit->OnUnitFinishedWalking.RemoveAll(this);
-	m_CurrentUnit->OnUnitFinishedWalking.AddUObject(this, &UMoveUnitOnGridAction::_HandleUnitFinishedWalking);
+	m_CurrentUnit->BindUnitFinishedWalking(this, &UMoveUnitOnGridAction::_HandleUnitFinishedWalking);
 
-	pGrid->GetGridPathfinding()->OnPathfindingCompleted.RemoveAll(this);
-	pGrid->GetGridPathfinding()->OnPathfindingCompleted.AddUObject(this, &UMoveUnitOnGridAction::_HandlePathfindingCompleted);
+	pGrid->GetGridPathfinding()->BindPathfindingCompleted(this, &UMoveUnitOnGridAction::_HandlePathfindingCompleted);
 
 	FIntPoint start = m_PlayerActions->GetSelectedTileIndex();
 	FIntPoint target = _index;

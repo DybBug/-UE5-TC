@@ -1,5 +1,6 @@
 #pragma once
 
-#define GTC_GroundAndGridModifier ECollisionChannel::ECC_GameTraceChannel1
-#define GTC_Grid ECollisionChannel::ECC_GameTraceChannel2
-#define GTC_Unit ECollisionChannel::ECC_GameTraceChannel3
+#define ECC_GroundAndGridModifier	ECollisionChannel::ECC_GameTraceChannel1
+#define ECC_Grid					ECollisionChannel::ECC_GameTraceChannel2
+#define ECC_Unit					ECollisionChannel::ECC_GameTraceChannel3
+#define ECC_LineOfSight				ECollisionChannel::ECC_GameTraceChannel4

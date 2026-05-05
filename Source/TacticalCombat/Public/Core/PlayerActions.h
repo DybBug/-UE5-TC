@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Dispatcher/PlayerActionDispatcher.h"
 #include "PlayerActions.generated.h"
 
 class UAbstractAction;
@@ -11,11 +12,8 @@ class AGrid;
 class AUnit;
 class ACombatSystem;
 
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSelectedActionsChanged, const UAbstractAction* const, const UAbstractAction* const);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnSelectedTileChanged, const FIntPoint&);
-
 UCLASS()
-class TACTICALCOMBAT_API APlayerActions : public AActor
+class TACTICALCOMBAT_API APlayerActions : public AActor, public PlayerActionDispatcher
 {
 	GENERATED_BODY()
 	
@@ -33,11 +31,6 @@ public:
 
 	void SetSelectedActionWithNotify(const TSubclassOf<UAbstractAction>& _leftClickActionClass, const TSubclassOf<UAbstractAction>& _rightClickActionClass);
 	void SelectTileAndUnit(const FIntPoint& _index, bool _isForce = false);
-
-#pragma region Events
-	FOnSelectedActionsChanged OnSelectedActionsChanged;
-	FOnSelectedTileChanged OnSelectedTileChanged;
-#pragma endregion
 
 #pragma region Getter
 	FORCEINLINE const FIntPoint& GetHoveredTileIndex() const { return m_HoveredTileIndex; }

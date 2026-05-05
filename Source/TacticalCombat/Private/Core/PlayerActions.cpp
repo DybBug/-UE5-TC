@@ -45,11 +45,11 @@ void APlayerActions::BeginPlay()
 	}
 	
 	m_Grid = Cast<AGrid>(UGameplayStatics::GetActorOfClass(GetWorld(), AGrid::StaticClass()));
-	m_Grid->OnGridGenerated.AddUObject(this, &APlayerActions::_HandleGridGenerated);
-	m_Grid->OnTileDataUpdated.AddUObject(this, &APlayerActions::_HandleTileDataUpdated);
+	m_Grid->BindGridCreated(this, &APlayerActions::_HandleGridGenerated);
+	m_Grid->BindTileDataChanged(this, &APlayerActions::_HandleTileDataUpdated);
 	
 	m_CombatSystem = Cast<ACombatSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), ACombatSystem::StaticClass()));
-	m_CombatSystem->OnUnitGridIndexChanged.AddUObject(this, &APlayerActions::_HandleUnitGridIndexChanged);
+	m_CombatSystem->BindUnitGridIndexChanged(this, &APlayerActions::_HandleUnitGridIndexChanged);
 	
 	UGameplayStatics::GetPlayerController(GetWorld(), 0)->InputEnabled();
 }
@@ -86,10 +86,7 @@ void APlayerActions::SetSelectedActionWithNotify(const TSubclassOf<UAbstractActi
 		m_RightClickSelectAction->Initialize(this);
 	}
 
-	if (OnSelectedActionsChanged.IsBound())
-	{
-		OnSelectedActionsChanged.Broadcast(m_LeftClickSelectAction, m_RightClickSelectAction);
-	}
+	BroadcastSelectedActionsChanged(m_LeftClickSelectAction, m_RightClickSelectAction);
 }
 
 void APlayerActions::SelectTileAndUnit(const FIntPoint& _index, bool _isForce)
@@ -101,19 +98,13 @@ void APlayerActions::SelectTileAndUnit(const FIntPoint& _index, bool _isForce)
 		
 		SetSelectedTileIndex(_index);
 		m_Grid->AddStateToTileWithNotify(_index, ETileStateFlags::Selected);
-		if (OnSelectedTileChanged.IsBound())
-		{
-			OnSelectedTileChanged.Broadcast(GetSelectedTileIndex());
-		}
+		BroadcastSelectedTileChanged(GetSelectedTileIndex());
 	}
 	else
 	{
 		m_Grid->RemoveStateFromTileWithNotify(m_SelectedTileIndex, ETileStateFlags::Selected);
 		SetSelectedTileIndex(FIntPoint(INVALID_POINT_VALUE));
-		if (OnSelectedTileChanged.IsBound())
-		{
-			OnSelectedTileChanged.Broadcast(GetSelectedTileIndex());
-		}
+		BroadcastSelectedTileChanged(GetSelectedTileIndex());
 	}
 	
 
@@ -122,9 +113,13 @@ void APlayerActions::SelectTileAndUnit(const FIntPoint& _index, bool _isForce)
 	if (_isForce || pSelectedTileData)
 	{
 		if (!pSelectedTileData)
-		{
-			m_SelectedUnit->SetIsSelected(false);
-			m_SelectedUnit = nullptr;
+		{			
+			if (m_SelectedUnit.IsValid())
+			{
+				m_SelectedUnit->SetIsSelected(false);
+				m_SelectedUnit = nullptr;
+			}
+
 			return;
 		}
 		
@@ -191,7 +186,7 @@ AUnit* APlayerActions::_FindUnitUnderCursor(uint8 _playerIndex)
 	if (APlayerController* pPlayerController = UGameplayStatics::GetPlayerController(GetWorld(), _playerIndex))
 	{
 		FHitResult hitResult;
-		bool isHit = pPlayerController->GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(GTC_Unit), false, hitResult);
+		bool isHit = pPlayerController->GetHitResultUnderCursorByChannel(UEngineTypes::ConvertToTraceType(ECC_Unit), false, hitResult);
 		if (isHit)
 		{
 			return Cast<AUnit>(hitResult.GetActor());

@@ -30,7 +30,7 @@ void UAddRemoveUnitAction::Execute(const FIntPoint& _index)
 					}
 				}
 			
-				AUnit* pSpawnedUnit = AUnit::Spawn(GetWorld(), m_UnitType, m_PlayerActions->GetGrid());
+				AUnit* pSpawnedUnit = AUnit::Spawn(GetWorld(), m_UnitType, m_PlayerActions->GetGrid(), _index);
 				m_PlayerActions->GetCombatSystem()->AddUnitInCombat(pSpawnedUnit, _index);
 			}
 		}

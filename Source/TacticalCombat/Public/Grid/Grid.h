@@ -8,11 +8,10 @@
 #include "GameFramework/Actor.h"
 #include "Table/Rows/GridShapeTableRow.h"
 #include "Grid/Types/TileData.h"
+#include "Dispatcher/GridDispatcher.h"
 #include "Grid.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnTileDataUpdated, const FIntPoint&);
-DECLARE_MULTICAST_DELEGATE(FOnGridDestroyed);
-DECLARE_MULTICAST_DELEGATE(FOnGridGenerated);
+
 
 class AGridVisual;
 class AGridPathfinding;
@@ -21,7 +20,7 @@ enum class ETileType : uint8;
 enum class EGridShape : uint8;
 
 UCLASS()
-class TACTICALCOMBAT_API AGrid : public AActor
+class TACTICALCOMBAT_API AGrid : public AActor, public GridDispatcher
 {
 	GENERATED_BODY()
 
@@ -39,12 +38,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	
-public:
-	FOnTileDataUpdated OnTileDataUpdated;
-	FOnGridDestroyed OnGridDestroyed;
-	FOnGridGenerated OnGridGenerated;
-	FOnTileDataUpdated OnTileStateUpdated;
 
 public:	
 	UFUNCTION()
